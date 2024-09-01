@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ascending Empires</title>
+    <link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Lexend', sans-serif;
+            background-color: rgb(8, 8, 8);
+            background-image: url('background.jpg');
+            color: rgb(226, 226, 226);
+            background-color: rgba(0, 0, 0, 0.411);
+            backdrop-filter: blur(20px);
+        }
+        header {
+            position: static;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+
+        }
+
+        .header-text {
+            font-size: 120px;
+            font-family: 'Saira', bold;
+            font-weight: bold;
+            color: rgb(236, 236, 236);
+            text-align: center;
+
+        }
+        .content {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            padding-top: 50px;
+        }
+        .content-item {
+            display: flex;
+            align-items: center;
+            margin: 20px;
+            width: 80%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            backdrop-filter: blur(10px); /* Frosted glass effect */
+        }
+        .content-item img {
+            border-radius: 15px 0 0 15px;
+            width: 200px; /* Adjust as needed */
+            height: 200px; /* Adjust as needed */
+            object-fit: cover;
+        }
+        .text-box {
+            padding: 20px;
+            width: 100%;
+        }
+        .description {
+            font-size: 18px;
+            text-align: center;
+            padding: 15px;
+            font-family: 'Josefin Sans', bold;
+        }
+        .description-header {
+                font-size: 30px;
+                text-align: center;
+                position: relative;
+                padding-bottom: 10px;
+                padding-top: 5px;
+                font-family: 'Josefin Sans', bold;
+                font-weight: bold;
+            }
+        @media (max-width: 768px) {
+            .header-text {
+                font-size: 60px;
+                
+                
+            }
+            .content-item {
+                flex-direction: column;
+            }
+            .content-item img {
+                width: 100%;
+                height: auto;
+                border-radius: 15px 15px 0 0;
+            }
+            .description {
+                font-size: 16px;
+            }
+        }
+        @media (max-width: 480px) {
+            .header-text {
+                font-size: 40px;
+            }
+            .description {
+                font-size: 20px;
+            }
+
+        }
+    </style>
+</head>
+<body>
+    <header id="header">
+        <div class="header-text">ASCENDING EMPIRES</div>
+    </header>
+    <div class="content">
+        <div class="content-item">
+            <img src="verticality.png" alt="Description 1">
+            <div class="text-box">
+                <div class="description-header">Verticality</div>
+                <div class="description">now you can not only fight on a horizontal plane anymore, but wherever you want! this encourages building blockades to protect planets</div>
+            </div>
+        </div>
+        <div class="content-item">
+            <img src="ascending_empires.png" alt="Description 2">
+            <div class="text-box">
+                <div class="description-header">Trading Routes</div>
+                <div class="description">asteroid mines are gone! now you have to set a start and end point for a trading ship to gain money, but protect them! if the enemy captures them, your money is gone!</div>
+            </div>
+        </div>
+        <div class="content-item">
+            <img src="ascending_empires.png" alt="Description 3">
+            <div class="text-box">
+                <div class="description-header">Mod Based</div>
+                <div class="description">now you don't have to play only one mod! every player can play their own FACTION mod</div>
+            </div>
+        </div>
+        <!-- Add more content items as needed -->
+    </div>
+    <script>
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            const scrollY = window.scrollY;
+            header.style.transform = 'translateY(' + scrollY * 0.5 + 'px)';
+        });
+    </script>
+</body>
+</html>

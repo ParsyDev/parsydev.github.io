@@ -1,7 +1,171 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="icon.png">
+  <title>Parcyval Studios</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-image: url('backgrounda.jpg');
+      background-color: #000000;
+      background-size: cover;
+      background-position: center;
+      font-family: Arial, sans-serif;
+      position: relative;
+      backdrop-filter: blur(10px);
+
+    }
+
+    /* Dark tint overlay */
+    body::before {
+    --line: rgb(119, 119, 119); /* Change the color to white */
+    --size: 60px;
+    content: "";
+    height: 100%;
+    width: 100%; /* WE NEED TO REMOVE THE SCROLLBAR */
+    position: fixed;
+    background:
+        linear-gradient(90deg, var(--line) 1px, transparent 1px var(--size)) 0 -5vmin / var(--size) var(--size),
+        linear-gradient(var(--line) 2px, transparent 2px var(--size)) 0 -5vmin / var(--size) var(--size);
+    mask: linear-gradient(-15deg, transparent 65%, white);
+    top: 0;
+    z-index: -1;
+}
+
+    .container {
+      display: flex;
+      justify-content: space-around;
+      row-gap: 60px;
+      align-items: center;
+      height: 100vh;
+      flex-wrap: wrap; /* Allows wrapping items to next line */
+    }
+    .box {
+    position: relative;
+    width: 77%;
+    max-width: 450px; /* Adjust maximum width as needed */
+    height: auto; /* Adjust height as needed */
+    max-height: 800px; /* Set maximum height */
+    overflow: hidden;
+    border-radius: 11px;
+    transition: transform 0.3s ease; /* Smooth transition for transform property */
+    margin: 25px; /* Add margin for spacing */
+    flex: 1 1 calc(33.333% - 40px); /* 3 columns layout with spacing */
+    
+    /* Outline styles */
+    outline: none; /* Remove default outline */
+    box-shadow: 0 0 100px 5px rgba(255, 255, 255, 0.185); /* Glow effect using box-shadow */
+}
+
+
+    .box:hover {
+      transform: scale(1.1); /* Scale up to 110% on hover */
+      /*box-shadow: 0 0 85px 8px rgba(255, 255, 255, 0.23); /* Increased glow on hover */
+    }
+
+    .box img {
+      width: 100%;
+      height: auto;
+      display: block;
+    } 
+
+    .blurry-background {
+      position: bottom;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%; /* Adjust height as needed */
+      padding: 50px; /* Adjust padding as needed */
+      background-color: rgba(255, 255, 255, 0.85); /* Adjust opacity as needed */
+      backdrop-filter: blur(10px); /* Adjust blur amount */
+      box-sizing: border-box; /* Ensure padding is included in width calculation */
+      margin: 0; /* Remove default margin */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .blurry-background h2 {
+      margin: 0;
+      text-align: center;
+      font-size: 37px; /* Adjust font size */
+      font-style: bold;
+      color: #333;
+    }
+
+    .blurry-background p {
+      margin: 10px 0 0; /* Adjust margin as needed */
+      font-size: 18px; /* Adjust font size */
+      color: #666;
+      text-align: center; /* Center align text */
+    }
+
+    footer {
+      background-color: #1f1f1f;
+      color: #fff;
+      padding: 100px;
+      bottom: 0px;
+      text-align: center;
+      left: 1px; right: 1px;
+      overflow: hidden;
+      background: linear-gradient(transparent, rgb(0, 0, 0));
+    }
+
+
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column; /* Stack items vertically on smaller screens */
+        height: auto; /* Adjust height */
+      }
+      
+      .box {
+        max-width: 90%; /* Adjust max-width for smaller screens */
+      }
+    }
+  </style>
+</head>
 <body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+
+<div class="container">
+  <div class="box">
+    <a href="ascending_empires.html" style="text-decoration:none;">
+      <img src="ascending_empires.png" alt="Background Image">
+      <div class="blurry-background">
+        <h2>Ascending Empires</h2>
+        <p>An RTS inspired by "Star Wars™ Empire at War" with new features and improved graphics</p>
+      </div>
+    </a>
+  </div>
+  <div class="box">
+    <a href="https://www.example.com" style="text-decoration:none;">
+      <img src="friedbert.png" alt="Background Image">
+      <div class="blurry-background">
+        <h2>Friedbert</h2>
+        <p>Singleplayer story game about a toaster army taking over the world. yes. really.</p>
+      </div>
+    </a>
+  </div>
+  <div class="box">
+    <a href="https://www.example.com" style="text-decoration:none;">
+      <img src="SOON.png" alt="Background Image">
+      <div class="blurry-background">
+        <h2>Serry</h2>
+        <p>Movement shooter with hundreds of different weapons, abilities and items</p>
+      </div>
+    </a>
+  </div>
+</div>
+
+<footer>
+  <a href="https://sites.google.com/view/parcyval-studios/contact-us" style="text-decoration:none; color: inherit;">
+    <h2>CONTACT US</h2>
+    <p>overhaul soon</p>
+  </a>
+</footer>
 </body>
 </html>
