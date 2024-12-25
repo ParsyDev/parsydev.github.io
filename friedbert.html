@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ascending Empires</title>
+    <title>Friedbert</title>
     <link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
     <style>
@@ -11,10 +11,10 @@
             margin: 0;
             font-family: 'Lexend', sans-serif;
             background-color: rgb(8, 8, 8);
-            background-image: url('friedbert_bg.jpg');
+            background-image: url('1_fb.png');
             color: rgb(226, 226, 226);
             background-color: rgba(0, 0, 0, 0.411);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(50px);
         }
         header {
             position: static;
@@ -43,80 +43,40 @@
             padding-top: 50px;
         }
 
-        .content-item, .link-item {
-            display: flex;
-            align-items: center;
-            margin: 20px;
+        .content-item {
+            position: relative;
             width: 80%;
             max-width: 1000px;
-            background: rgba(255, 255, 255, 0.11);
-            border-radius: 15px;
-            overflow: hidden;
-            backdrop-filter: blur(10px); /* Frosted glass effect */
+            margin: 20px 0;
         }
 
-        .content-item img, .link-item img {
-            border-radius: 15px 0 0 15px;
-            width: 200px;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .text-box {
-            padding: 20px;
+        .content-item img {
             width: 100%;
+            height: auto;
+            border-radius: 15px;
         }
 
-        .description {
-            font-size: 18px;
-            text-align: center;
-            padding: 15px;
-            font-family: 'Josefin Sans', bold;
+        .work-in-progress {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 0, 0, 0.7);
+            color: white;
+            padding: 8px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: 'Josefin Sans', sans-serif;
+            font-weight: bold;
             text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.822); /* Adds a subtle shadow */
-        }
-        
-        .description-header {
-            font-size: 30px;
-            text-align: center;
-            position: relative;
-            padding-bottom: 10px;
-            padding-top: 5px;
-            font-family: 'Josefin Sans', bold;
-            font-weight: bold;
-            text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.582); /* Adds a subtle shadow */
-        }
-
-        .link-item {
-            background: rgba(114, 137, 218, 0.8); /* Discord color tint */
-            cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
-        }
-
-        .link-item:hover {
-            transform: scale(1.02);
-            background: rgba(114, 137, 218, 1);
-        }
-
-        .link-item a {
-            color: inherit;
-            text-decoration: none;
-            font-weight: bold;
         }
 
         @media (max-width: 768px) {
             .header-text {
                 font-size: 60px;
             }
-            .content-item, .link-item {
-                flex-direction: column;
-            }
-            .content-item img, .link-item img {
+            .content-item {
                 width: 100%;
-                height: auto;
-                border-radius: 15px 15px 0 0;
-            }
-            .description {
-                font-size: 16px;
             }
         }
 
@@ -124,63 +84,25 @@
             .header-text {
                 font-size: 40px;
             }
-            .description {
-                font-size: 20px;
-            }
         }
     </style>
 </head>
 <body>
     <header id="header">
-        <div class="header-text">ASCENDING EMPIRES</div>
+        <div class="header-text">FRIEDBERT</div>
     </header>
     <div class="content">
         <div class="content-item">
-            <img src="verticality.png" alt="Description 1">
-            <div class="text-box">
-                <div class="description-header">Verticality</div>
-                <div class="description">you can not only fight on a horizontal plane anymore, but wherever you want! this encourages building blockades to protect planets</div>
-            </div>
+            <div class="work-in-progress">WORK IN PROGRESS</div>
+            <img src="wip_fb.png" alt="WIP Image">
         </div>
         <div class="content-item">
-            <img src="trading.png" alt="Description 2">
-            <div class="text-box">
-                <div class="description-header">Inventory System</div>
-                <div class="description">every ship, planet and station has an inventory and can carry a certain amount of items/troops/ships. you can dock onto other ships to transfer item or to board and capture them!</div>
-            </div>
+            <div class="work-in-progress">WORK IN PROGRESS</div>
+            <img src="1_fb.png" alt="Image 1">
         </div>
-        <div class="content-item">
-            <img src="collision.png" alt="Description 2">
-            <div class="text-box">
-                <div class="description-header">Collisions + Physics</div>
-                <div class="description">ships can collide, and push/ram each other, which brings new strategic depth to the game</div>
-            </div>
-        </div>
-
-        <div class="content-item">
-            <img src="mod_icon.png" alt="Description 3">
-            <div class="text-box">
-                <div class="description-header">Mod Based</div>
-                <div class="description">you don't have to play only one mod! every player can play their own FACTION mod, which is synchronized in the lobby!</div>
-            </div>
-        </div>
-        <div class="link-item" onclick="window.location.href='https://discord.gg/example';">
-            <img src="discord.png" alt="Discord Server">
-            <div class="text-box">
-                <div class="description-header">Discord Server</div>
-                <div class="description">
-                    progress showcase, votings for features and playtests. you can support us (with either donations or volunteer help) or chat with the community, and if you are really special, create mods!
-                    <a href="https://discord.gg/nfBdy8ZWPu">Click here to join!</a>
-                </div>
-            </div>
+        <div>
+            <iframe src="https://store.steampowered.com/widget/2791410/" width="650" height="380" frameborder="0" scrolling="no"></iframe>
         </div>
     </div>
-    <script>
-        window.addEventListener('scroll', function() {
-            const header = document.getElementById('header');
-            const scrollY = window.scrollY;
-            header.style.transform = 'translateY(' + scrollY * 0.5 + 'px)';
-        });
-    </script>
 </body>
 </html>
