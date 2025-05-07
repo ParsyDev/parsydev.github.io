@@ -37,14 +37,15 @@
     z-index: -1;
 }
 
-    .container {
-      display: flex;
-      justify-content: space-around;
-      row-gap: 60px;
-      align-items: center;
-      height: 100vh;
-      flex-wrap: wrap; /* Allows wrapping items to next line */
-    }
+.container {
+  display: flex;
+  justify-content: space-around;
+  row-gap: 60px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 60px 20px; /* Add spacing */
+}
+
     .box {
     position: relative;
     width: 77%;
@@ -109,15 +110,59 @@
 
     footer {
       background-color: #1f1f1f;
-      color: #fff;
-      padding: 100px;
-      bottom: 0px;
-      text-align: center;
-      left: 1px; right: 1px;
-      overflow: hidden;
       background: linear-gradient(transparent, rgb(0, 0, 0));
+      color: #fff;
+      padding: 60px 20px;
+      text-align: center;
     }
-
+  
+    .footer-buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+  
+    .footer-buttons a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #636363;
+      color: white;
+      font-family: 'Saira', sans-serif;
+      font-weight: bold;
+      padding: 12px 20px;
+      border-radius: 20px;
+      text-decoration: none;
+      width: 100%;
+      max-width: 190px;
+      max-height: 22px;
+      transition: background-color 0.3s ease;
+    }
+  
+    .footer-buttons a:hover {
+      background-color: #4c4c4c;
+    }
+  
+    .footer-buttons a img {
+      width: 30px;
+      height: 30px;
+      margin-right: 10px;
+    }
+  
+    @media (max-width: 480px) {
+      .footer-buttons a {
+        font-size: 14px;
+        padding: 10px;
+      }
+  
+      .footer-buttons a img {
+        width: 25px;
+        height: 25px;
+        margin-right: 8px;
+      }
+    }
 
 
     @media (max-width: 768px) {
@@ -154,98 +199,34 @@
     </a>
   </div>
   <div class="box">
-    <a href="https://www.example.com" style="text-decoration:none;">
-      <img src="SOON.png" alt="Background Image">
+    <a href="https://parsyxd.itch.io/type" style="text-decoration:none;">
+      <img src="type.png" alt="Background Image">
       <div class="blurry-background">
-        <h2>Serry</h2>
-        <p>Movement shooter with hundreds of different weapons, abilities and items</p>
+        <h2>TYPE</h2>
+        <p>A Typing Game where the player has to defend themselves by typing the name of the approaching threats</p>
       </div>
     </a>
   </div>
+
+  
 </div>
 <footer>
-  <footer>
-      <h2>CONTACT</h2>
+  <h2 style="font-family: 'Saira'; font-weight: bold;">CONTACT</h2>
+  <div class="footer-buttons">
+    <a href="mailto:parsyprivat@gmail.com" target="_blank">
+      EMAIL
     </a>
-    <a href="mailto:parsyprivat@gmail.com" target="_blank" style="
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #ffffff;
-    color: #636363;
-    font-family: 'Saira';
-    font-weight: bold;
-    padding: 10px 20px;
-    border-radius: 20px;
-    text-decoration: none;
-    margin-top: 10px;
-    border: none;
-    width: 200px;
-    height: 25px;
-  ">
-    EMAIL
-  </a>
-  <br>
-    <a href="https://discord.gg/v5SDHbvaUS" target="_blank" style="
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #636363;
-      color: white;
-      font-family: 'Saira';
-      font-weight: bold;
-      padding: 10px 20px;
-      border-radius: 20px;
-      text-decoration: none;
-      margin-top: 10px;
-      border: none;
-      width: 200px;
-      height: 25px;
-    ">
-      <img src="discord.png" alt="Patreon" style="width: 33px; height: 33px; margin-right: 8px;">
+    <a href="https://discord.gg/v5SDHbvaUS" target="_blank">
+      <img src="discord.png" alt="Discord" />
       DISCORD
     </a>
-    <br>
-    <a href="https://store.steampowered.com/developer/Parcyval" target="_blank" style="
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #636363;
-      color: white;
-      font-family: 'Saira';
-      font-weight: bold;
-      padding: 10px 20px;
-      border-radius: 20px;
-      text-decoration: none;
-      margin-top: 10px;
-      border: none;
-      width: 200px;
-      height: 25px;
-    ">
-      <img src="steam.png" alt="Patreon" style="width: 33px; height: 33px; margin-right: 8px;">
+    <a href="https://store.steampowered.com/developer/Parcyval" target="_blank">
+      <img src="steam.png" alt="Steam" />
       STEAM
     </a>
-    <br>
-    <a href="https://www.patreon.com/c/Parcyval" target="_blank" style="
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #636363;
-      color: white;
-      font-family: 'Saira';
-      font-weight: bold;
-      padding: 10px 20px;
-      border-radius: 20px;
-      text-decoration: none;
-      margin-top: 10px;
-      border: none;
-      width: 200px;
-      height: 25px;
-    ">
-      <img src="patreon.png" alt="Patreon" style="width: 30px; height: 30px; margin-right: 8px;">
+    <a href="https://www.patreon.com/c/Parcyval" target="_blank">
+      <img src="patreon.png" alt="Patreon" />
       PATREON
     </a>
-
-
-  </footer>
-  
+  </div>
+</footer>
