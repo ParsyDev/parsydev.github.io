@@ -175,6 +175,25 @@
         max-width: 90%; /* Adjust max-width for smaller screens */
       }
     }
+    #latest-video-container {
+  max-width: 800px; /* or 90% */
+  margin: 0 auto;
+}
+#latest-video iframe {
+  width: 100% !important;  /* full width inside container */
+  height: 450px;           /* or any fixed height */
+  border-radius: 12px;
+}
+#latest-video-container h2 {
+  font-size: 36px; /* adjust as needed */
+  font-family: 'Saira', sans-serif;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 20px; /* optional spacing */
+  text-align: center;
+}
+
+    
   </style>
 </head>
 <body>
@@ -207,9 +226,69 @@
       </div>
     </a>
   </div>
+</div> <!-- CLOSE container here -->
 
-  
+<!-- Move latest video container OUTSIDE of .container -->
+<div id="latest-video-container" style="padding: 60px 20px; text-align: center; width: 100%; max-width: 800px; margin: 0 auto;">
+  <h2 style="font-family:'Saira'; font-weight:bold; color:white;">Latest Devlog</h2>
+  <div id="latest-video" style="margin-top: 20px;"></div>
 </div>
+
+<script>
+  async function loadLatestFullVideo() {
+    const key = "AIzaSyDEI2dlqzHG4HyuwCDIHCqIKezUO4ksjhM";         // ← replace
+    const channel = "UCndWwQL8AaXQfDwOh2mSpvg";  // ← replace
+    const searchUrl = `https://youtube.googleapis.com/youtube/v3/search?` +
+      `key=${key}&channelId=${channel}&part=id&order=date&type=video&maxResults=5`;
+
+    try {
+      const searchRes = await fetch(searchUrl);
+      const searchJson = await searchRes.json();
+      const ids = searchJson.items.map(v => v.id.videoId).join(',');
+
+      const detailsUrl = `https://youtube.googleapis.com/youtube/v3/videos?` +
+        `key=${key}&id=${ids}&part=contentDetails`;
+
+      const detailsRes = await fetch(detailsUrl);
+      const detailsJson = await detailsRes.json();
+
+      const fullVideo = detailsJson.items.find(v => {
+        const dur = v.contentDetails.duration;
+        const sec = parseISODuration(dur);
+        return sec >= 65;
+      });
+
+      if (!fullVideo) {
+        document.getElementById("latest-video").innerHTML =
+          "<p style='color:white;'>no new videos found.</p>";
+        return;
+      }
+  document.getElementById("latest-video").innerHTML = `
+    <iframe width="560" height="315"
+      src="https://www.youtube.com/embed/${fullVideo.id}"
+      frameborder="0" allowfullscreen
+      style="max-width:100%; border-radius:12px; box-shadow: 0 0 155px 1px rgba(255, 255, 255, 0.200);">
+    </iframe>`;
+
+    } catch (e) {
+      console.error(e);
+      document.getElementById("latest-video").innerHTML =
+        "<p style='color:red;'>rrror loading video.</p>";
+    }
+  }
+
+  // Converts ISO8601 duration (e.g. PT3M20S) to seconds
+  function parseISODuration(iso) {
+    const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    const h = parseInt(match[1]||0);
+    const m = parseInt(match[2]||0);
+    const s = parseInt(match[3]||0);
+    return h*3600 + m*60 + s;
+  }
+
+  loadLatestFullVideo();
+</script>
+
 <footer>
   <h2 style="font-family: 'Saira'; font-weight: bold;">CONTACT</h2>
   <div class="footer-buttons">
