@@ -204,7 +204,7 @@
       <img src="descending_empires.png" alt="Background Image">
       <div class="blurry-background">
         <h2>Descending Empires</h2>
-        <p>A multiplayer space RTS blending in depth mechanics with fast paced skirmish matches. control and manage an empire together with your team in large-scale online battles</p>
+        <p>A multiplayer RTS blending in depth mechanics with fast paced skirmish matches. manage an empire together with your team in large-scale online battles</p>
       </div>
     </a>
   </div>
@@ -217,16 +217,16 @@
       </div>
     </a>
   </div>
-  <div class="box">
-    <a href="https://parsyxd.itch.io/type" style="text-decoration:none;">
-      <img src="type.png" alt="Background Image">
-      <div class="blurry-background">
-        <h2>TYPE</h2>
-        <p>A Typing Game where the player has to defend themselves by typing the name of the approaching threats</p>
-      </div>
-    </a>
-  </div>
-</div> <!-- CLOSE container here -->
+<div class="box">
+  <a href="https://parsyxd.itch.io/type" id="type-link" style="text-decoration:none;">
+    <img src="type.png" alt="Background Image">
+    <div class="blurry-background">
+      <h2>TYPE</h2>
+      <p>A Typing Game where the player has to defend themselves by typing the name of the approaching threats</p>
+    </div>
+  </a>
+</div>
+
 
 <!-- Move latest video container OUTSIDE of .container -->
 <div id="latest-video-container" style="padding: 60px 20px; text-align: center; width: 100%; max-width: 800px; margin: 0 auto;">
@@ -287,6 +287,14 @@
   }
 
   loadLatestFullVideo();
+</script>
+<script>
+  // Custom right-click for TYPE link
+  const typeLink = document.getElementById('type-link');
+  typeLink.addEventListener('contextmenu', function(e) {
+    e.preventDefault(); // Stop normal context menu
+    window.open('type_pp.html', '_blank'); // Open your Privacy Policy in new tab
+  });
 </script>
 
 <footer>
