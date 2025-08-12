@@ -189,15 +189,17 @@ fetch('roadmap.txt')
     const milestonesEl = document.getElementById('milestones');
     const data = [];
     lines.forEach((line, i) => {
-      const [title, when, mini, big] = line.split('|').map(s => s.trim());
+      const [icon, title, when, miniDesc, bigDesc] = line.split('|').map(s => s.trim());
       data.push({ id: i, title, when, mini, big });
       const el = document.createElement('article');
       el.className = 'milestone';
       el.dataset.id = i;
       el.innerHTML = `
+        <div class="logo"><img src="${icon}" alt="${title} logo"></div>
         <div class="title">${title}</div>
         <div class="when">${when}</div>
-        <div class="desc">${mini}</div>
+        <div class="desc">${miniDesc}</div>
+
         ${when.toLowerCase().includes('finished') ? '<div class="badge">Finished</div>' : ''}
       `;
       milestonesEl.appendChild(el);
