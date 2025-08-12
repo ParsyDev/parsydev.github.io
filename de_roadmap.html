@@ -351,27 +351,29 @@
       milestonesContainer.innerHTML = `<div class="error">${message}</div>`;
     }
 
-    // Function to load roadmap data from file
-    async function loadRoadmapData() {
-      try {
-        const response = await fetch('roadmap_data.txt');
-        if (!response.ok) {
-          throw new Error(`Failed to load roadmap data: ${response.status} ${response.statusText}`);
-        }
-        
-        const text = await response.text();
-        const milestones = parseRoadmapData(text);
-        
-        if (milestones.length === 0) {
-          throw new Error('No valid milestone data found in file');
-        }
-        
-        renderMilestones(milestones);
-      } catch (error) {
-        console.error('Error loading roadmap data:', error);
-        showError(`Error loading roadmap: ${error.message}<br><br>Make sure 'roadmap_data.txt' exists and is properly formatted.`);
-      }
+// Function to load roadmap data from file
+async function loadRoadmapData() {
+  try {
+    // Add cache-busting parameter to prevent browser caching
+    const cacheBuster = new Date().getTime();
+    const response = await fetch(`roadmap_data.txt?v=${cacheBuster}`);
+    if (!response.ok) {
+      throw new Error(`Failed to load roadmap data: ${response.status} ${response.statusText}`);
     }
+    
+    const text = await response.text();
+    const milestones = parseRoadmapData(text);
+    
+    if (milestones.length === 0) {
+      throw new Error('No valid milestone data found in file');
+    }
+    
+    renderMilestones(milestones);
+  } catch (error) {
+    console.error('Error loading roadmap data:', error);
+    showError(`Error loading roadmap: ${error.message}<br><br>Make sure 'roadmap_data.txt' exists and is properly formatted.`);
+  }
+}
 
     // Modal functions
     function openModal(id) {
