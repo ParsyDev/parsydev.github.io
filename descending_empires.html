@@ -3,38 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ascending Empires</title>
-    <link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+    <title>Descending Empires</title>
+    <link href="https://fonts.googleapis.com/css2?family=Saira:wght@700&family=Josefin+Sans:wght@700&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
-            font-family: 'Lexend', sans-serif;
-            background-color: rgb(8, 8, 8);
-            background-image: url('background.jpg');
+            font-family: 'Josefin Sans', sans-serif;
+            background: url('background.jpg') center/cover no-repeat fixed;
             color: rgb(226, 226, 226);
-            background-color: rgba(0, 0, 0, 0.411);
             backdrop-filter: blur(20px);
         }
+
         header {
-            position: static;
-            width: 100%;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            text-align: center;
         }
 
         .header-text {
             font-size: 120px;
-            font-family: 'Saira', bold;
+            font-family: 'Saira', sans-serif;
             font-weight: bold;
-            color: rgb(236, 236, 236);
-            text-align: center;
-            text-shadow: 2px 2px 40px rgba(0, 0, 0, 0.555); /* Adds a subtle shadow */
+            text-shadow: 2px 2px 40px rgba(0, 0, 0, 0.6);
         }
 
-        .content {
+        /* Capsule Section */
+        .capsule-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 50px 20px;
+        }
+
+        .capsule {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 20px;
+            width: 200px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            backdrop-filter: blur(15px);
+        }
+
+        .capsule:hover {
+            transform: translateY(-5px) scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .capsule img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .capsule-text {
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
+        }
+
+            .content {
             position: relative;
             display: flex;
             flex-direction: column;
@@ -43,79 +76,15 @@
             padding-top: 50px;
         }
 
-        .content-item, .link-item {
-            display: flex;
-            align-items: center;
-            margin: 20px;
-            width: 80%;
-            max-width: 1000px;
-            background: rgba(255, 255, 255, 0.11);
-            border-radius: 15px;
-            overflow: hidden;
-            backdrop-filter: blur(15px); /* Frosted glass effect */
-        }
-
-        .content-item img, .link-item img {
-            border-radius: 15px 0 0 15px;
-            width: 200px;
-            height: 200px;
-            object-fit: cover;
-        }
-        .text-box {
-            padding: 20px 40px; /* Adjust the second value for horizontal padding */
-            width: 100%;
-        }
-        
-        .description {
-            font-size: 18px;
-            text-align: center;
-            padding: 15px 70px; /* Adds horizontal padding */
-            font-family: 'Josefin Sans', bold;
-            text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5); /* Adds a subtle shadow */
-        }
-        
-        
-        .description-header {
-            font-size: 31px;
-            text-align: center;
-            position: relative;
-            padding-bottom: 10px;
-            padding-top: 5px;
-            font-family: 'Josefin Sans', bold;
-            font-weight: bold;
-            text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.25); /* Adds a subtle shadow */
-        }
-
-        .link-item {
-            background: rgba(114, 137, 218, 0.8); /* Discord color tint */
-            cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
-        }
-
-        .link-item:hover {
-            transform: scale(1.02);
-            background: rgba(114, 137, 218, 1);
-        }
-
-        .link-item a {
-            color: inherit;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
+        /* Responsive */
         @media (max-width: 768px) {
             .header-text {
                 font-size: 60px;
             }
-            .content-item, .link-item {
-                flex-direction: column;
+            .capsule {
+                width: 150px;
             }
-            .content-item img, .link-item img {
-                width: 100%;
-                height: auto;
-                border-radius: 15px 15px 0 0;
-            }
-            .description {
+            .capsule-text {
                 font-size: 16px;
             }
         }
@@ -124,74 +93,50 @@
             .header-text {
                 font-size: 40px;
             }
-            .description {
-                font-size: 20px;
+            .capsule {
+                width: 130px;
+                padding: 15px;
             }
         }
     </style>
 </head>
 <body>
+
+    <!-- Header -->
     <header id="header">
         <div class="header-text">DESCENDING EMPIRES</div>
     </header>
-    <div class="content">
+    
+        <!-- Capsules -->
+    <div class="capsule-container">
+        <div class="capsule" onclick="window.location.href='de_mechanics.html';">
+            <img src="mechanics.png" alt="Logo">
+            <div class="capsule-text">Mechanics</div>
+        </div>
+        <div class="capsule" onclick="window.location.href='https://example2.com';">
+            <img src="earth_corp-bw.png" alt="Logo">
+            <div class="capsule-text">Factions</div>
+        </div>
+        <div class="capsule" onclick="window.location.href='https://example3.com';">
+            <img src="mod_icon.png" alt="Mod Logo">
+            <div class="capsule-text">Modding</div>
+        </div>
+        <div class="capsule" onclick="window.location.href='de_roadmap.html';">
+            <img src="roadmap.png" alt="Logo">
+            <div class="capsule-text">Roadmap</div>
+        </div>
+    </div>
+<div class="content">
         <iframe src="https://store.steampowered.com/widget/2791410/" style="width: 100%; max-width: 1000px; height: 190px; border: none; margin: 0;" frameborder="0" scrolling="no" title="Steam Game Widget"></iframe>
-        <div class="content-item">
-            <img src="verticality.png" alt="Description 1">
-            <div class="text-box">
-                <div class="description-header">Verticality</div>
-                <div class="description">you can not only fight on a horizontal plane anymore, but wherever you want! this encourages building blockades to protect planets</div>
-            </div>
-        </div>
-        <div class="content-item">
-            <img src="trading.png" alt="Description 2">
-            <div class="text-box">
-                <div class="description-header">Inventory / Docking System</div>
-                <div class="description">every ship, planet and station has an inventory and can carry a certain amount of items/troops/ships. you can dock onto other ships to transfer item or to board and capture them!</div>
-            </div>
-        </div>
-        <div class="content-item">
-            <img src="collision.png" alt="Description 2">
-            <div class="text-box">
-                <div class="description-header">Collisions + Physics</div>
-                <div class="description">ships can collide, and push/ram each other, which brings new strategic depth to the game</div>
-            </div>
-        </div>
-
-        <div class="content-item">
-            <img src="mod_icon.png" alt="Description 3">
-            <div class="text-box">
-                <div class="description-header">Mod Based</div>
-                <div class="description">you don't have to play only one mod! every player can play their own FACTION mod, which is synchronized in the lobby!</div>
-            </div>
-        </div>
-        <div class="content-item">
-            <img src="rank.png" alt="Description 3">
-            <div class="text-box">
-                <div class="description-header">Ranks</div>
-                <div class="description">players can increase their ranks by playing, winning rounds AND executing orders from higher ranking players. higher ranking players can give orders and lock capital ships to only be controlled by them (all other units are controlled by your whole team)</div>
-            </div>
-        </div>
-        <div class="link-item" onclick="window.location.href='https://discord.gg/nfBdy8ZWPu';">
-            <img src="discord.png" alt="Discord Server">
-            <div class="text-box">
-                <div class="description-header">Discord Server</div>
-                <div class="description">
-                    progress showcase, votings for features and playtests. you can support us (with either donations or volunteer help) or chat with the community, and if you are really special, create mods!
-                </div>
-            </div>
-        </div>
-        <br>
-
-
-<img src="roadmap.png" alt="Roadmap" style="width: 100%; max-width: 1000px; margin: 0; border-radius: 15px;">
-
-    <script>    
+    </div>
+    <!-- Parallax Scroll Effect -->
+    <script>
         window.addEventListener('scroll', function() {
             const header = document.getElementById('header');
             const scrollY = window.scrollY;
             header.style.transform = 'translateY(' + scrollY * 0.5 + 'px)';
         });
     </script>
+
 </body>
 </html>

@@ -1,0 +1,2 @@
+Energy System|Finished|Ship energy system with sliders|You can manage your ship's energy with 3 sliders: shield, engine, and weapon power.
+Inventory & Docking|Finished|Docking, transfer and boarding mechanics|Every ship, planet, and station has inventory capacity. Dock to transfer resources, crew, or to board & capture vessels.
