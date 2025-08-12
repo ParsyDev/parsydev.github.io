@@ -189,21 +189,20 @@ fetch('roadmap.txt')
     const milestonesEl = document.getElementById('milestones');
     const data = [];
     lines.forEach((line, i) => {
-      const [icon, title, when, miniDesc, bigDesc] = line.split('|').map(s => s.trim());
-      data.push({ id: i, title, when, mini, big });
-      const el = document.createElement('article');
-      el.className = 'milestone';
-      el.dataset.id = i;
-      el.innerHTML = `
-        <div class="logo"><img src="${icon}" alt="${title} logo"></div>
-        <div class="title">${title}</div>
-        <div class="when">${when}</div>
-        <div class="desc">${miniDesc}</div>
-
-        ${when.toLowerCase().includes('finished') ? '<div class="badge">Finished</div>' : ''}
-      `;
-      milestonesEl.appendChild(el);
-    });
+  const [icon, title, when, miniDesc, bigDesc] = line.split('|').map(s => s.trim());
+  data.push({ id: i, title, when, miniDesc, bigDesc });
+  const el = document.createElement('article');
+  el.className = 'milestone';
+  el.dataset.id = i;
+  el.innerHTML = `
+    <div class="logo"><img src="${icon}" alt="${title} logo" style="max-width:40px;max-height:40px;"></div>
+    <div class="title">${title}</div>
+    <div class="when">${when}</div>
+    <div class="desc">${miniDesc}</div>
+    ${when.toLowerCase().includes('finished') ? '<div class="badge">Finished</div>' : ''}
+  `;
+  milestonesEl.appendChild(el);
+});
 
     const modal = document.getElementById('modal');
     const modalContent = document.getElementById('modal-content');
@@ -216,7 +215,8 @@ fetch('roadmap.txt')
       modalContent.innerHTML = `
         <h3>${m.title}</h3>
         <div style="font-size:13px;opacity:.9;margin-bottom:12px">${m.when}</div>
-        <p style="font-size:14px;line-height:1.5">${m.big}</p>
+        <p style="font-size:14px;line-height:1.5">${m.bigDesc}</p>
+
       `;
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
