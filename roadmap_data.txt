@@ -1,5 +1,14 @@
 energy_icon.png|Energy System|Finished|Ship energy system with sliders|You can manage your ship's energy with 3 sliders: shield, engine, and weapon power.
 trading.png|Inventory & Docking|Finished|Docking, transfer and boarding mechanics|Every ship, planet, and station has inventory capacity. Dock to transfer resources, crew, or to board & capture vessels.
-collision.png|Collisions & Physics|WIP|Physics-driven collisions|Physics-based collisions allow ramming, pushes and environmental interactions. Introduces new emergent tactical behaviors.
+collision.png|Collisions & Physics|Finished|Physics-driven collisions|Physics-based collisions allow ramming, pushes and environmental interactions. Introduces new emergent tactical behaviors.
 mod_icon.png|Mod Support|WIP|Full mod synchronization|Players can run and share faction mods synchronized in lobbies. Mod tools and example templates included.
-salvaging.png|Salvaging|Planned|salvage destroyed ships|salvage destroyed ships for scrap parts with salvaging ships, and sell those.
+controls.png|Ship Control|Finished|Controz Ships|instead of a top down view, press a button to directly control the ship / move / shoot!
+salvaging.png|Salvaging Wrecks|Planned|salvage destroyed ships|salvage destroyed ships for scrap parts with salvaging ships, and sell those.
+trading.png|Trading System|Planned|Trading Stations|dock onto trading stations on the map to buy and sell goods with a specific price based on the location
+drawing.png|Strategic Map|Planned|Draw / Give Orders on Strategic Map|a hologram of the whole map / galaxy on which all players can draw plans on for others to see!
+research.png|Research Tree|Planned|Research New Tech Instead of Tier Upgrades|instead of the current system, research stuff in a tech tree!
+hangar.png|Ship Hangars|Planned|Manual Fighter Deploy / Land in Ships|you can land in a ships hangar with your smaller ships, and manually deploy starfighters
+analytics.png|Analytics Window|Planned|Analytics Window for Ships Stats and Planet Finance|Analytics Window for Ships Stats and Planet Finance
+destruction.png|Dynamic Destruction|Planned|Ships get a Dynamic Damage System|Ships get a Dynamic Damage System like molten metal impact and parts falling off
+escape_pods.png|Escape Pods|Planned|Deploy Escape Pods to save Crew|Deploy Escape Pods to save Crew
+campaign.png|Campaign|Funding|Campaign|Campaign

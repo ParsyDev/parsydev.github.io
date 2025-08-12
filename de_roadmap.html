@@ -190,6 +190,7 @@
     .badge.finished{ background: var(--accent); }
     .badge.wip{ background: #58c79a; }
     .badge.planned{ background: #ffa726; }
+    .badge.funding{ background: #ff5100; }
 
     /* Modal for expanded milestone */
     .modal {
@@ -286,8 +287,10 @@
         return { class: 'finished', text: 'Finished' };
       } else if (statusLower === 'wip' || statusLower.includes('wip')) {
         return { class: 'wip', text: 'Beta' };
-      } else {
+      } else if (statusLower === 'planned' || statusLower.includes('planned')) {
         return { class: 'planned', text: 'Planned' };
+        } else if (statusLower.includes('funding')) {
+        return { class: 'funding', text: 'Need Funding' };
       }
     }
 
