@@ -2,7 +2,7 @@ energy_icon.png|Energy System|Finished|Ship energy system with sliders|You can m
 trading.png|Inventory & Docking|Finished|Docking, transfer and boarding mechanics|Every ship, planet, and station has inventory capacity. Dock to transfer resources, crew, or to board & capture vessels.
 collision.png|Collisions & Physics|Finished|Physics-driven collisions|Physics-based collisions allow ramming, pushes and environmental interactions. Introduces new emergent tactical behaviors.
 mod_icon.png|Mod Support|WIP|Full mod synchronization|Players can run and share faction mods synchronized in lobbies. Mod tools and example templates included.
-none.png|Ship Control|Finished|Controz Ships|instead of a top down view, press a button to directly control the ship / move / shoot!
+none.png|Ship Control|Finished|Control Ships|instead of a top down view, press a button to directly control the ship / move / shoot!
 none.png|Salvaging Wrecks|Planned|salvage destroyed ships|salvage destroyed ships for scrap parts with salvaging ships, and sell those.
 trading.png|Trading System|Planned|Trading Stations|dock onto trading stations on the map to buy and sell goods with a specific price based on the location
 none.png|Strategic Map|Planned|Draw / Give Orders on Strategic Map|a hologram of the whole map / galaxy on which all players can draw plans on for others to see!
