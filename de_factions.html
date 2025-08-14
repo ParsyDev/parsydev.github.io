@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Descending Empires - Factions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Saira:wght@700&family=Josefin+Sans:wght@700&display=swap" rel="stylesheet">
+  <style>
+body {
+  margin: 0;
+  font-family: 'Josefin Sans', sans-serif;
+  background: black; /* set background to black */
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+  
+  .carousel-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+
+  /* Backgrounds */
+  .faction-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1s ease;
+    filter: blur(15px); /* Added blur */
+
+    /* fade out edges */
+    -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 80%, rgba(0,0,0,0) 100%);
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: cover;
+    mask-image: radial-gradient(circle, rgba(0,0,0,1) 80%, rgba(0,0,0,0) 100%);
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: cover;
+  }
+
+  .faction-bg.active {
+    opacity: 1;
+  }
+
+  /* Logo */
+  .faction-logo {
+    position: relative;
+    z-index: 2;
+    max-width: 400px;
+    width: 50%;
+    height: auto;
+    transition: opacity 0.5s ease;
+  }
+
+  /* Name */
+  .faction-name {
+    position: relative;
+    z-index: 2;
+    margin-top: 20px;
+    color: rgb(255, 255, 255);
+    font-size: 32px;
+    font-family: 'Saira', sans-serif;
+    font-weight: bold;
+    text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.3);
+    transition: opacity 0.5s ease;
+  }
+
+  /* Description */
+  .faction-desc {
+    position: relative;
+    color: rgb(255, 255, 255);
+    z-index: 2;
+    margin-top: 10px;
+    font-size: 18px;
+    max-width: 700px;
+    line-height: 1.4;
+    text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.3);
+    transition: opacity 0.5s ease;
+    text-align: left;
+  }
+
+  /* Arrows */
+  .nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: white;
+    font-size: 60px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 3;
+    transition: color 0.3s;
+  }
+
+  .nav-button:hover {
+    color: #aaa;
+  }
+
+  .nav-left {
+    left: 40px;
+  }
+
+  .nav-right {
+    right: 40px;
+  }
+</style>
+
+</head>
+<body>
+  <div class="carousel-container">
+    <!-- Backgrounds dynamically injected -->
+
+    <!-- Logo -->
+    <img class="faction-logo" id="faction-logo" alt="Faction Logo">
+
+    <!-- Name -->
+    <div class="faction-name" id="faction-name"></div>
+
+    <!-- Description -->
+    <div class="faction-desc" id="faction-desc"></div>
+
+    <!-- Navigation -->
+    <button class="nav-button nav-left" onclick="prevFaction()">&#10094;</button>
+    <button class="nav-button nav-right" onclick="nextFaction()">&#10095;</button>
+  </div>
+
+  <script>
+    // All factions defined here
+    const factions = [
+      {
+        name: "Earth Corp.",
+        logo: "earth_corp_logo.png",
+        bg: "earth_bg.png",
+        desc: "The Earth Corp. was founded to protect the human home planet and defend it from the threats of the galaxy. In reality, it was established by the largest corporations to claim as much territory as possible in the galaxy and mine valuable resources.Their ships lack the technology of other factions, but the overpopulated Earth and its colonies on the Moon and neighboring Mars, with their mining facilities, make ground troops very cheap."
+      },
+            {
+        name: "Pegasus",
+        logo: "pegasus.png",
+        bg: "background2.png",
+        desc: `A human high-tech military faction, founded by the descendants of survivors from the intergalactic exploration project of Kepler-452b.
+
+        - Their focus is on strong defensive ships with high firepower.
+        - Ships are expensive and production is slow due to limited manpower.
+        - Ground troops are costly.
+        - This faction can also be hired as mercenaries or appear as an NPC faction to assist you.`
+
+      }
+    ];
+
+    let currentIndex = 0;
+
+    const logoElement = document.getElementById("faction-logo");
+    const nameElement = document.getElementById("faction-name");
+    const descElement = document.getElementById("faction-desc");
+
+    // create background elements dynamically
+    const container = document.querySelector(".carousel-container");
+    const bgElements = factions.map((faction, i) => {
+      const img = document.createElement("img");
+      img.src = faction.bg;
+      img.className = "faction-bg" + (i === 0 ? " active" : "");
+      container.insertBefore(img, logoElement);
+      return img;
+    });
+
+    function updateFaction() {
+  // update backgrounds
+  bgElements.forEach((bg, i) => bg.classList.toggle("active", i === currentIndex));
+
+  // fade logo, name, desc
+  logoElement.style.opacity = 0;
+  nameElement.style.opacity = 0;
+  descElement.style.opacity = 0;
+
+  setTimeout(() => {
+    // update logo and name
+    logoElement.src = factions[currentIndex].logo;
+    nameElement.textContent = factions[currentIndex].name;
+
+    // clear previous description
+    descElement.innerHTML = "";
+
+    // split description by newlines
+    const lines = factions[currentIndex].desc.split("\n").map(line => line.trim());
+
+    // create <ul> for lines starting with "-"
+    const ul = document.createElement("ul");
+    ul.style.listStyle = "disc";
+    ul.style.paddingLeft = "20px";
+
+    lines.forEach(line => {
+      if (line.startsWith("-")) {
+        const li = document.createElement("li");
+        li.textContent = line.slice(1).trim(); // remove the "-" from display
+        ul.appendChild(li);
+      } else {
+        // normal lines as paragraphs
+        if (line !== "") {
+          const p = document.createElement("p");
+          p.textContent = line;
+          descElement.appendChild(p);
+        }
+      }
+    });
+
+    // append the list if it has any items
+    if (ul.children.length > 0) {
+      descElement.appendChild(ul);
+    }
+
+    // fade back in
+    logoElement.style.opacity = 1;
+    nameElement.style.opacity = 1;
+    descElement.style.opacity = 1;
+  }, 300);
+}
+
+
+    function nextFaction() {
+      currentIndex = (currentIndex + 1) % factions.length;
+      updateFaction();
+    }
+
+    function prevFaction() {
+      currentIndex = (currentIndex - 1 + factions.length) % factions.length;
+      updateFaction();
+    }
+
+    // init
+    updateFaction();
+  </script>
+</body>
+</html>
