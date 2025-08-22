@@ -31,15 +31,29 @@
             font-weight: bold;
             color: rgb(236, 236, 236);
             text-align: center;
-            text-shadow: 2px 2px 40px rgba(0, 0, 0, 0.664); /* Adds a subtle shadow */
+            text-shadow: 2px 2px 40px rgba(0, 0, 0, 0.664);
         }
-            .normal-text {
-            font-size: 20px;
-            font-family: 'Saira', bold;
+
+.description-box {
+    max-width: 800px;
+    margin: 40px auto; /* <-- normal margin below header */
+    padding: 25px 35px;
+    background: rgba(20, 20, 20, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    text-align: center;
+    font-family: 'Saira', sans-serif;
+    font-size: 20px;
+    line-height: 1.6;
+}
+
+
+        .description-box span {
+            display: block;
+            margin-top: 15px;
             font-weight: bold;
-            color: rgb(236, 236, 236);
-            text-align: center;
-            text-shadow: 2px 2px 40px rgba(0, 0, 0, 0.664); /* Adds a subtle shadow */
+            color: rgb(255, 0, 0);
+
         }
 
         .content {
@@ -76,12 +90,16 @@
             font-size: 14px;
             font-family: 'Josefin Sans', sans-serif;
             font-weight: bold;
-            text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.822); /* Adds a subtle shadow */
+            text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.822);
         }
 
         @media (max-width: 768px) {
             .header-text {
                 font-size: 60px;
+            }
+            .description-box {
+                font-size: 16px;
+                padding: 20px;
             }
             .content-item {
                 width: 100%;
@@ -99,6 +117,14 @@
     <header id="header">
         <div class="header-text">FRIEDBERT</div>
     </header>
+
+    <div class="description-box">
+        a single-player game about toasters taking over the world. yes, really. 
+         a smooth and fun combat system motivates you to slice and punch your way through the toaster army.
+         soak your mind in the atmosphere of the underground facilities and solve fun and satisfying puzzles.
+        <span>WORK IN PROGRESS AND IN NEED OF A PUBLISHER</span>
+    </div>
+
     <div class="content">
         <div class="content-item">
             <img src="toasters.jpg" alt="WIP Image">
@@ -109,13 +135,13 @@
         <div class="content-item">
             <img src="2_fb.png" alt="WIP Image">
         </div>
-            <div class="content-item">
+        <div class="content-item">
             <div class="work-in-progress">WORK IN PROGRESS</div>
             <img src="wip_fb.png" alt="WIP Image">
         </div>
-        <div class="normal-text">
-            game is in early stages of development not more info available yet
-            </div>
+        <div class="content-item">
+        <div class="work-in-progress">WORK IN PROGRESS</div>
+        <img src="wip_fb2.png" alt="WIP Image">
         </div>
     </div>
 </body>
