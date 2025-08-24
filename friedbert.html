@@ -72,11 +72,20 @@
             margin: 20px 0;
         }
 
-        .content-item img {
+        .content-item img,
+        .content-item video {
             width: 100%;
             height: auto;
             border-radius: 15px;
+            display: block;
         }
+
+        .yt-video {
+        width: 100%;
+        aspect-ratio: 16 / 9; /* keeps it responsive */
+        border-radius: 15px;
+        display: block;
+    }
 
         .work-in-progress {
             position: absolute;
@@ -125,24 +134,39 @@
         <span>WORK IN PROGRESS AND IN NEED OF A PUBLISHER</span>
     </div>
 
-    <div class="content">
-        <div class="content-item">
-            <img src="toasters.jpg" alt="WIP Image">
-        </div>
-        <div class="content-item">
-            <img src="1_fb.png" alt="Image 1">
-        </div>
-        <div class="content-item">
-            <img src="2_fb.png" alt="WIP Image">
-        </div>
-        <div class="content-item">
-            <div class="work-in-progress">WORK IN PROGRESS</div>
-            <img src="wip_fb.png" alt="WIP Image">
-        </div>
-        <div class="content-item">
+<div class="content">
+    <div class="content-item">
+        <img src="toasters.jpg" alt="WIP Image">
+    </div>
+
+    <div class="content-item">
+        <iframe 
+            class="yt-video"
+            src="https://www.youtube.com/embed/Lq1xeP3XCjw" 
+            title="YouTube video player" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <div class="content-item">
+        <img src="1_fb.png" alt="Image 1">
+    </div>
+
+    <div class="content-item">
+        <img src="2_fb.png" alt="WIP Image">
+    </div>
+
+    <div class="content-item">
+        <div class="work-in-progress">WORK IN PROGRESS</div>
+        <img src="wip_fb.png" alt="WIP Image">
+    </div>
+
+    <div class="content-item">
         <div class="work-in-progress">WORK IN PROGRESS</div>
         <img src="wip_fb2.png" alt="WIP Image">
-        </div>
     </div>
+</div>
 </body>
 </html>
