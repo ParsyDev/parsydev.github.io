@@ -18,7 +18,7 @@
       font-family: 'Saira', bold;
       position: relative;
       backdrop-filter: blur(10px);
-
+      overflow-x: hidden; /* Prevent horizontal scrollbar */
     }
 
     /* Dark tint overlay */
@@ -108,22 +108,48 @@
       text-align: center; /* Center align text */
     }
 
-    footer {
-      background-color: #1f1f1f;
-      background: linear-gradient(transparent, rgb(0, 0, 0));
-      color: #fff;
-      padding: 60px 20px;
-      text-align: center;
-    }
-  
-    .footer-buttons {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      margin-top: 20px;
-    }
-  
+.info-box {
+  width: 100%;                /* ensures it never exceeds parent/container */
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  border: 1px solid white;
+  border-radius: 10px;
+  background-color: rgba(0,0,0,0.6);
+  color: white;
+  font-family: 'Saira', sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(255,255,255,0.2);
+  backdrop-filter: blur(6px);
+  box-sizing: border-box;      /* include padding & border in width */
+}
+
+
+.info-box h2 {
+  font-size: 32px;
+    margin-top: 0;   
+  font-weight: bold;
+}
+
+footer {
+  width: 100%;                  /* full width across screen */
+  background: linear-gradient(transparent, #000);
+  color: #fff;
+  padding: 60px 20px;
+  text-align: center;
+  position: relative;           /* stay in normal flow */
+  clear: both;                  /* prevent flex push issues */
+}
+.footer-buttons {
+  display: flex;
+  flex-direction: column;       /* keep vertical list */
+  align-items: center;          /* center items horizontally */
+  gap: 10px;
+  margin-top: 20px;
+}
+
     .footer-buttons a {
       display: inline-flex;
       align-items: center;
@@ -139,6 +165,7 @@
       max-width: 190px;
       max-height: 22px;
       transition: background-color 0.3s ease;
+      position: relative;
     }
   
     .footer-buttons a:hover {
@@ -149,6 +176,73 @@
       width: 30px;
       height: 30px;
       margin-right: 10px;
+    }
+
+    /* YouTube button hover video styles */
+    .youtube-btn {
+      position: relative;
+    }
+
+    /* Red notification dot */
+    .youtube-btn::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: -15px;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 8px;
+      background-color: #ff4444;
+      border-radius: 50%;
+      z-index: 10;
+      box-shadow: 0 0 6px rgba(255, 68, 68, 0.6);
+    }
+
+    .hover-video-container {
+      position: absolute;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 400px;
+      max-width: 90vw;
+      background: rgba(0, 0, 0, 0.95);
+      border-radius: 12px;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .youtube-btn:hover .hover-video-container {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .hover-video-container h3 {
+      color: white;
+      font-family: 'Saira', sans-serif;
+      font-weight: bold;
+      margin: 0 0 15px 0;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .hover-video-container iframe {
+      width: 100%;
+      height: 225px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    .hover-video-loading {
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-family: 'Saira', sans-serif;
     }
   
     @media (max-width: 480px) {
@@ -161,6 +255,14 @@
         width: 25px;
         height: 25px;
         margin-right: 8px;
+      }
+
+      .hover-video-container {
+        width: 300px;
+      }
+
+      .hover-video-container iframe {
+        height: 180px;
       }
     }
 
@@ -175,23 +277,7 @@
         max-width: 90%; /* Adjust max-width for smaller screens */
       }
     }
-    #latest-video-container {
-  max-width: 800px; /* or 90% */
-  margin: 0 auto;
-}
-#latest-video iframe {
-  width: 100% !important;  /* full width inside container */
-  height: 450px;           /* or any fixed height */
-  border-radius: 12px;
-}
-#latest-video-container h2 {
-  font-size: 36px; /* adjust as needed */
-  font-family: 'Saira', sans-serif;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 20px; /* optional spacing */
-  text-align: center;
-}
+
 
     
   </style>
@@ -213,7 +299,7 @@
       <img src="friedbert.png" alt="Background Image">
       <div class="blurry-background">
         <h2>Friedbert</h2>
-        <p>Singleplayer story game about a toaster army taking over the world. yes. really.</p>
+        <p>Singleplayer mystery slasher - story game about a toaster army taking over the world. yes. really.</p>
       </div>
     </a>
   </div>
@@ -226,15 +312,21 @@
     </div>
   </a>
 </div>
-
-
-<!-- Move latest video container OUTSIDE of .container -->
-<div id="latest-video-container" style="padding: 60px 20px; text-align: center; width: 100%; max-width: 800px; margin: 0 auto;">
-  <h2 style="font-family:'Saira'; font-weight:bold; color:white;">Latest Devlog</h2>
-  <div id="latest-video" style="margin-top: 20px;"></div>
 </div>
 
+<div class="info-box">
+  <h2>About Us</h2>
+  <p>
+      Parcyval Studios is an indie game studio with the aim to shape our games to the exact state in which players say "that is exactly what i always wanted to play, why did nobody make this earlier?" and tickle all the itches players all around the world ever had. it's a hard task, but we have fun along the way. and pump out some side projects!
+  </p>
+</div>
+
+
+
+
 <script>
+  let latestVideoId = null;
+
   async function loadLatestFullVideo() {
     const key = "AIzaSyDEI2dlqzHG4HyuwCDIHCqIKezUO4ksjhM";         // ← replace
     const channel = "UCndWwQL8AaXQfDwOh2mSpvg";  // ← replace
@@ -259,21 +351,32 @@
       });
 
       if (!fullVideo) {
-        document.getElementById("latest-video").innerHTML =
-          "<p style='color:white;'>no new videos found.</p>";
+        console.log("no new videos found.");
         return;
       }
-  document.getElementById("latest-video").innerHTML = `
-    <iframe width="560" height="315"
-      src="https://www.youtube.com/embed/${fullVideo.id}"
-      frameborder="0" allowfullscreen
-      style="max-width:100%; border-radius:12px; box-shadow: 0 0 145px 1px rgba(255, 255, 255, 0.175);">
-    </iframe>`;
+
+      // Store the video ID for hover functionality
+      latestVideoId = fullVideo.id;
+
+      // Populate the hover video with a small delay to ensure DOM is ready
+      setTimeout(() => populateHoverVideo(fullVideo.id), 100);
 
     } catch (e) {
       console.error(e);
-      document.getElementById("latest-video").innerHTML =
-        "<p style='color:red;'>rrror loading video.</p>";
+    }
+  }
+
+  function populateHoverVideo(videoId) {
+    const hoverVideoDiv = document.getElementById("hover-video");
+    if (hoverVideoDiv) {
+      hoverVideoDiv.innerHTML = `
+        <iframe width="100%" height="225"
+          src="https://www.youtube.com/embed/${videoId}"
+          frameborder="0" allowfullscreen
+          style="border-radius:8px;">
+        </iframe>`;
+    } else {
+      console.error("hover-video element not found");
     }
   }
 
@@ -315,5 +418,18 @@
       <img src="patreon.png" alt="Patreon" />
       PATREON
     </a>
+    <a href="https://www.youtube.com/@parsydev" target="_blank" class="youtube-btn">
+      <img src="youtube.png" alt="YouTube" />
+      YOUTUBE
+      <div class="hover-video-container">
+        <h3>LATEST DEVLOG</h3>
+        <div id="hover-video">
+          <div class="hover-video-loading">Loading latest video...</div>
+        </div>
+      </div>
+    </a>
   </div>
 </footer>
+
+</body>
+</html>
