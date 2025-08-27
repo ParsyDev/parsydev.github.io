@@ -64,6 +64,24 @@
     box-shadow: 0 0 100px 5px rgba(255, 255, 255, 0.185);  Glow effect using box-shadow */
 }
 
+    /* Collab label for Spellloom */
+    .collab-label {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #22c55e;
+      color: white;
+      font-family: 'Saira', sans-serif;
+      font-weight: bold;
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      z-index: 10;
+      box-shadow: 0 2px 10px rgba(34, 197, 94, 0.4);
+      backdrop-filter: blur(5px);
+    }
 
     .box:hover {
       transform: scale(1.1); /* Scale up to 110% on hover */
@@ -142,11 +160,14 @@ footer {
   position: relative;           /* stay in normal flow */
   clear: both;                  /* prevent flex push issues */
 }
+
 .footer-buttons {
   display: flex;
-  flex-direction: column;       /* keep vertical list */
-  align-items: center;          /* center items horizontally */
-  gap: 10px;
+  flex-direction: row;          /* horizontal on PC */
+  flex-wrap: wrap;              /* allow wrapping if needed */
+  justify-content: center;      /* center the buttons */
+  align-items: center;
+  gap: 15px;
   margin-top: 20px;
 }
 
@@ -154,18 +175,21 @@ footer {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background-color: #636363;
+        border: 1px solid rgba(255, 255, 255, 0.322);
+      border-radius: 5px;
       color: white;
       font-family: 'Saira', sans-serif;
       font-weight: bold;
       padding: 12px 20px;
       border-radius: 20px;
       text-decoration: none;
-      width: 100%;
+      width: auto;
+      min-width: 140px;
       max-width: 190px;
       max-height: 22px;
       transition: background-color 0.3s ease;
       position: relative;
+      flex: 0 0 auto;
     }
   
     .footer-buttons a:hover {
@@ -188,7 +212,7 @@ footer {
       content: "";
       position: absolute;
       top: 50%;
-      left: -15px;
+      left: 15px;
       transform: translateY(-50%);
       width: 8px;
       height: 8px;
@@ -245,6 +269,27 @@ footer {
       font-family: 'Saira', sans-serif;
     }
   
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column; /* Stack items vertically on smaller screens */
+        height: auto; /* Adjust height */
+      }
+      
+      .box {
+        max-width: 90%; /* Adjust max-width for smaller screens */
+      }
+
+      .footer-buttons {
+        flex-direction: column; /* Stack vertically on mobile */
+        gap: 10px;
+      }
+
+      .footer-buttons a {
+        width: 100%;
+        max-width: 250px;
+      }
+    }
+
     @media (max-width: 480px) {
       .footer-buttons a {
         font-size: 14px;
@@ -264,20 +309,14 @@ footer {
       .hover-video-container iframe {
         height: 180px;
       }
-    }
 
-
-    @media (max-width: 768px) {
-      .container {
-        flex-direction: column; /* Stack items vertically on smaller screens */
-        height: auto; /* Adjust height */
-      }
-      
-      .box {
-        max-width: 90%; /* Adjust max-width for smaller screens */
+      .collab-label {
+        top: 15px;
+        right: 15px;
+        font-size: 12px;
+        padding: 6px 12px;
       }
     }
-
 
     
   </style>
@@ -312,6 +351,16 @@ footer {
     </div>
   </a>
 </div>
+  <div class="box">
+    <div class="collab-label">COLLAB</div>
+    <a href="https://store.steampowered.com/app/3587900/spellloom/" style="text-decoration:none;">
+      <img src="spellloom.jpg" alt="Background Image">
+      <div class="blurry-background">
+        <h2>Spellloom</h2>
+        <p>A roguelike bullet-hell dungeon crawler with deep spell-building and a lot of chaos</p>
+      </div>
+    </a>
+  </div>
 </div>
 
 <div class="info-box">
