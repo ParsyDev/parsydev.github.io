@@ -127,11 +127,11 @@
     }
 
 .info-box {
-  width: 100%;                /* ensures it never exceeds parent/container */
+  width: 90%;                /* ensures it never exceeds parent/container */
   max-width: 900px;
   margin: 40px auto;
   padding: 30px;
-  border: 1px solid white;
+  border: 1px solid rgba(255, 255, 255, 0.445);
   border-radius: 10px;
   background-color: rgba(0,0,0,0.6);
   color: white;
@@ -351,6 +351,15 @@ footer {
     </div>
   </a>
 </div>
+<div class="box">
+  <a href="movement_shooter.html" id="type-link" style="text-decoration:none;">
+    <img src="soon.png" alt="Background Image">
+    <div class="blurry-background">
+      <h2>Movement Shooter</h2>
+      <p>A Prototype / Concept of a movement shooter with 100's of unique guns and fast movement</p>
+    </div>
+  </a>
+</div>
   <div class="box">
     <div class="collab-label">COLLAB</div>
     <a href="https://store.steampowered.com/app/3587900/spellloom/" style="text-decoration:none;">
@@ -370,76 +379,10 @@ footer {
   </p>
 </div>
 
+<iframe src="carousel.html" width="100%" height="650" frameborder="0" 
+        style="border-radius: 20px; overflow: hidden;" 
+        scrolling="no"></iframe>
 
-
-
-<script>
-  let latestVideoId = null;
-
-  async function loadLatestFullVideo() {
-    const key = "AIzaSyDEI2dlqzHG4HyuwCDIHCqIKezUO4ksjhM";         // ← replace
-    const channel = "UCndWwQL8AaXQfDwOh2mSpvg";  // ← replace
-    const searchUrl = `https://youtube.googleapis.com/youtube/v3/search?` +
-      `key=${key}&channelId=${channel}&part=id&order=date&type=video&maxResults=5`;
-
-    try {
-      const searchRes = await fetch(searchUrl);
-      const searchJson = await searchRes.json();
-      const ids = searchJson.items.map(v => v.id.videoId).join(',');
-
-      const detailsUrl = `https://youtube.googleapis.com/youtube/v3/videos?` +
-        `key=${key}&id=${ids}&part=contentDetails`;
-
-      const detailsRes = await fetch(detailsUrl);
-      const detailsJson = await detailsRes.json();
-
-      const fullVideo = detailsJson.items.find(v => {
-        const dur = v.contentDetails.duration;
-        const sec = parseISODuration(dur);
-        return sec >= 65;
-      });
-
-      if (!fullVideo) {
-        console.log("no new videos found.");
-        return;
-      }
-
-      // Store the video ID for hover functionality
-      latestVideoId = fullVideo.id;
-
-      // Populate the hover video with a small delay to ensure DOM is ready
-      setTimeout(() => populateHoverVideo(fullVideo.id), 100);
-
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  function populateHoverVideo(videoId) {
-    const hoverVideoDiv = document.getElementById("hover-video");
-    if (hoverVideoDiv) {
-      hoverVideoDiv.innerHTML = `
-        <iframe width="100%" height="225"
-          src="https://www.youtube.com/embed/${videoId}"
-          frameborder="0" allowfullscreen
-          style="border-radius:8px;">
-        </iframe>`;
-    } else {
-      console.error("hover-video element not found");
-    }
-  }
-
-  // Converts ISO8601 duration (e.g. PT3M20S) to seconds
-  function parseISODuration(iso) {
-    const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-    const h = parseInt(match[1]||0);
-    const m = parseInt(match[2]||0);
-    const s = parseInt(match[3]||0);
-    return h*3600 + m*60 + s;
-  }
-
-  loadLatestFullVideo();
-</script>
 <script>
   // Custom right-click for TYPE link
   const typeLink = document.getElementById('type-link');

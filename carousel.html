@@ -1,0 +1,510 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Video Carousel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #000;
+      font-family: 'Saira', sans-serif;
+      color: white;
+    }
+
+    .carousel-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      position: relative;
+      background: rgba(128, 128, 128, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+    }
+
+    .carousel-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .carousel-header h2 {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 0;
+      color: white;
+    }
+
+    .carousel-wrapper {
+      position: relative;
+      overflow: hidden;
+      border-radius: 15px;
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .video-card {
+      flex: 0 0 350px;
+      margin: 0 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .video-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .video-thumbnail {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+    }
+
+    .video-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .video-card:hover .video-thumbnail img {
+      transform: scale(1.1);
+    }
+
+    .play-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 0, 0, 0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+
+    .video-card:hover .play-overlay {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .play-overlay::after {
+      content: '';
+      width: 0;
+      height: 0;
+      border-left: 15px solid white;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      margin-left: 3px;
+    }
+
+    .video-duration {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .video-info {
+      padding: 20px;
+    }
+
+    .video-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 10px 0;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .video-published {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .carousel-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+
+    .carousel-nav:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .carousel-nav.prev {
+      left: -25px;
+    }
+
+    .carousel-nav.next {
+      right: -25px;
+    }
+
+    .carousel-nav::after {
+      content: '';
+      width: 0;
+      height: 0;
+      border: 8px solid transparent;
+    }
+
+    .carousel-nav.prev::after {
+      border-right-color: white;
+      margin-right: 2px;
+    }
+
+    .carousel-nav.next::after {
+      border-left-color: white;
+      margin-left: 2px;
+    }
+
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+      gap: 10px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dot.active {
+      background: white;
+      transform: scale(1.2);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 50px;
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .error {
+      text-align: center;
+      padding: 50px;
+      font-size: 18px;
+      color: #ff6b6b;
+    }
+
+    @media (max-width: 768px) {
+      .video-card {
+        flex: 0 0 280px;
+        margin: 0 10px;
+      }
+
+      .carousel-nav {
+        width: 40px;
+        height: 40px;
+      }
+
+      .carousel-container {
+        margin: 20px;
+        padding: 20px;
+      }
+
+      .carousel-header h2 {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .video-card {
+        flex: 0 0 250px;
+        margin: 0 8px;
+      }
+
+      .carousel-nav.prev {
+        left: -20px;
+      }
+
+      .carousel-nav.next {
+        right: -20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="carousel-container">
+  <div class="carousel-header">
+    <h2>Game Trailers</h2>
+  </div>
+  
+  <div class="carousel-wrapper">
+    <div id="carousel-content" class="loading">
+      Loading videos...
+    </div>
+  </div>
+</div>
+
+<script>
+class YouTubeCarousel {
+  constructor() {
+    this.apiKey = "AIzaSyDEI2dlqzHG4HyuwCDIHCqIKezUO4ksjhM";
+    this.playlistId = "PLnaDOQygbpr-HcwKUvlxa3SMHdasom-zh";
+    this.videos = [];
+    this.currentIndex = 0;
+    this.videosPerView = window.innerWidth > 768 ? 3 : (window.innerWidth > 480 ? 2 : 1);
+    
+    this.init();
+  }
+
+  async init() {
+    try {
+      await this.loadPlaylistVideos();
+      this.renderCarousel();
+      this.setupEventListeners();
+    } catch (error) {
+      this.showError("Failed to load videos. Please try again later.");
+      console.error('Error:', error);
+    }
+  }
+
+  async loadPlaylistVideos() {
+    const url = `https://youtube.googleapis.com/youtube/v3/playlistItems?` +
+      `key=${this.apiKey}&playlistId=${this.playlistId}&part=snippet&maxResults=10`;
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch playlist');
+    
+    const data = await response.json();
+    this.videos = data.items.map(item => ({
+      id: item.snippet.resourceId.videoId,
+      title: item.snippet.title,
+      thumbnail: item.snippet.thumbnails.medium.url,
+      publishedAt: item.snippet.publishedAt
+    }));
+
+    // Get video durations
+    await this.getVideoDurations();
+  }
+
+  async getVideoDurations() {
+    const videoIds = this.videos.map(v => v.id).join(',');
+    const url = `https://youtube.googleapis.com/youtube/v3/videos?` +
+      `key=${this.apiKey}&id=${videoIds}&part=contentDetails`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      data.items.forEach((item, index) => {
+        if (this.videos[index]) {
+          this.videos[index].duration = this.formatDuration(item.contentDetails.duration);
+        }
+      });
+    } catch (error) {
+      console.log('Could not load durations:', error);
+    }
+  }
+
+  formatDuration(duration) {
+    const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    const hours = parseInt(match[1] || 0);
+    const minutes = parseInt(match[2] || 0);
+    const seconds = parseInt(match[3] || 0);
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now - date;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return `${days} days ago`;
+    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+    if (days < 365) return `${Math.floor(days / 30)} months ago`;
+    return `${Math.floor(days / 365)} years ago`;
+  }
+
+  renderCarousel() {
+    if (this.videos.length === 0) {
+      this.showError("No videos found in playlist");
+      return;
+    }
+
+    const carouselHtml = `
+      <div class="carousel-nav prev" onclick="carousel.prev()"></div>
+      <div class="carousel-track" id="carousel-track">
+        ${this.videos.map(video => `
+          <div class="video-card" onclick="carousel.openVideo('${video.id}')">
+            <div class="video-thumbnail">
+              <img src="${video.thumbnail}" alt="${video.title}" loading="lazy">
+              <div class="play-overlay"></div>
+              ${video.duration ? `<div class="video-duration">${video.duration}</div>` : ''}
+            </div>
+            <div class="video-info">
+              <h3 class="video-title">${video.title}</h3>
+              <p class="video-published">${this.formatDate(video.publishedAt)}</p>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="carousel-nav next" onclick="carousel.next()"></div>
+      <div class="carousel-dots">
+        ${Array.from({length: Math.ceil(this.videos.length / this.videosPerView)}, (_, i) => 
+          `<div class="dot ${i === 0 ? 'active' : ''}" onclick="carousel.goToSlide(${i})"></div>`
+        ).join('')}
+      </div>
+    `;
+
+    document.getElementById('carousel-content').innerHTML = carouselHtml;
+    this.updateCarouselPosition();
+  }
+
+  setupEventListeners() {
+    window.addEventListener('resize', () => {
+      const newVideosPerView = window.innerWidth > 768 ? 3 : (window.innerWidth > 480 ? 2 : 1);
+      if (newVideosPerView !== this.videosPerView) {
+        this.videosPerView = newVideosPerView;
+        this.currentIndex = 0;
+        this.renderCarousel();
+      }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') this.prev();
+      if (e.key === 'ArrowRight') this.next();
+    });
+  }
+
+  updateCarouselPosition() {
+    const track = document.getElementById('carousel-track');
+    if (!track) return;
+
+    const cardWidth = 350 + 30; // card width + margins
+    const offset = -this.currentIndex * cardWidth * this.videosPerView;
+    track.style.transform = `translateX(${offset}px)`;
+
+    // Update dots
+    document.querySelectorAll('.dot').forEach((dot, index) => {
+      dot.classList.toggle('active', index === Math.floor(this.currentIndex / this.videosPerView));
+    });
+  }
+
+  next() {
+    const maxIndex = Math.ceil(this.videos.length / this.videosPerView) - 1;
+    if (this.currentIndex < maxIndex) {
+      this.currentIndex++;
+      this.updateCarouselPosition();
+    }
+  }
+
+  prev() {
+    if (this.currentIndex > 0) {
+      this.currentIndex--;
+      this.updateCarouselPosition();
+    }
+  }
+
+  goToSlide(index) {
+    this.currentIndex = index;
+    this.updateCarouselPosition();
+  }
+
+  openVideo(videoId) {
+    window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+  }
+
+  showError(message) {
+    document.getElementById('carousel-content').innerHTML = 
+      `<div class="error">${message}</div>`;
+  }
+}
+
+// Initialize carousel
+const carousel = new YouTubeCarousel();
+
+// Auto-play functionality (optional)
+let autoPlayInterval;
+
+function startAutoPlay() {
+  autoPlayInterval = setInterval(() => {
+    if (carousel.currentIndex < Math.ceil(carousel.videos.length / carousel.videosPerView) - 1) {
+      carousel.next();
+    } else {
+      carousel.currentIndex = 0;
+      carousel.updateCarouselPosition();
+    }
+  }, 5000);
+}
+
+function stopAutoPlay() {
+  clearInterval(autoPlayInterval);
+}
+
+// Pause auto-play on hover
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.querySelector('.carousel-container');
+  if (container) {
+    container.addEventListener('mouseenter', stopAutoPlay);
+    container.addEventListener('mouseleave', startAutoPlay);
+    
+    // Start auto-play after a delay
+    setTimeout(startAutoPlay, 2000);
+  }
+});
+</script>
+
+</body>
+</html>
