@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+  
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -370,6 +371,93 @@ footer {
     
   </style>
 </head>
+
+<script>
+  let latestVideoId = null;
+
+async function loadLatestFullVideo() {
+  const key = "AIzaSyDEI2dlqzHG4HyuwCDIHCqIKezUO4ksjhM";   // keep your key
+  const channel = "UCndWwQL8AaXQfDwOh2mSpvg"; // channel ID
+
+  try {
+    console.log("Fetching videos…");
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?key=${key}&channelId=${channel}&order=date&part=snippet&type=video&maxResults=5`;
+    const res = await fetch(searchUrl);
+    const data = await res.json();
+    console.log("Search response:", data);
+
+    if (!data.items || data.items.length === 0) {
+      showMessage("No videos found.");
+      return;
+    }
+
+    for (const item of data.items) {
+      const videoId = item.id.videoId;
+      console.log("Checking video:", videoId);
+
+      const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?key=${key}&id=${videoId}&part=contentDetails`;
+      const detailsRes = await fetch(detailsUrl);
+      const detailsData = await detailsRes.json();
+      console.log("Details for", videoId, detailsData);
+
+      if (detailsData.items.length > 0) {
+        const duration = detailsData.items[0].contentDetails.duration;
+        console.log("Duration string:", duration);
+
+        const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+        let seconds = 0;
+        if (match) {
+          const hours = match[1] ? parseInt(match[1]) : 0;
+          const minutes = match[2] ? parseInt(match[2]) : 0;
+          const secs = match[3] ? parseInt(match[3]) : 0;
+          seconds = hours * 3600 + minutes * 60 + secs;
+        }
+        console.log("Length in seconds:", seconds);
+
+        if (seconds >= 100) {
+          latestVideoId = videoId;
+          console.log("Using video:", videoId);
+
+          populateHoverVideo(videoId);
+          return;
+        }
+      }
+    }
+
+    showMessage("No recent full-length videos.");
+  } catch (err) {
+    console.error("Error in loadLatestFullVideo:", err);
+    showMessage("Error loading video.");
+  }
+}
+
+function makeIframe(videoId) {
+  return `
+    <iframe width="100%" height="225"
+      src="https://www.youtube.com/embed/${videoId}"
+      frameborder="0" allowfullscreen
+      style="border-radius:8px; max-width:100%;">
+    </iframe>`;
+}
+
+
+function populateHoverVideo(videoId) {
+  const hoverVideoDiv = document.getElementById("hover-video");
+  if (hoverVideoDiv) {
+    hoverVideoDiv.innerHTML = makeIframe(videoId);
+  }
+}
+
+function showMessage(msg) {
+  const hoverDiv = document.getElementById("hover-video");
+  if (hoverDiv) {
+    hoverDiv.innerHTML = `<p style='color:white;'>${msg}</p>`;
+  }
+}
+
+  loadLatestFullVideo();
+</script>
+
 <body>
 
 <div class="container">
@@ -490,4 +578,5 @@ footer {
 </footer>
 
 </body>
+
 </html>
