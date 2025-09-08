@@ -131,7 +131,7 @@
   max-width: 900px;
   margin: 40px auto;
   padding: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.322);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   background-color: rgba(0,0,0,0.6);
   color: white;
@@ -150,6 +150,54 @@
     margin-top: 0;   
   font-weight: bold;
 }
+.team-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.team-member {
+  text-align: center;
+  width: 180px;
+}
+
+.team-member img {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid rgba(247, 247, 247, 0.842);
+  box-shadow: 0 0 15px rgba(255,255,255,0.2);
+  transition: transform 0.3s ease;
+}
+
+.team-member img:hover {
+  transform: scale(1.1);
+}
+
+.team-member h3 {
+  margin: 10px 0 5px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  font-family: 'Saira', sans-serif;
+}
+
+.team-member p {
+  margin: 0;
+  font-size: 16px;
+  color: #ccc;
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+@media (max-width: 600px) {
+  .team-member {
+    width: 45%;
+  }
+}
+
 
 footer {
   width: 100%;                  /* full width across screen */
@@ -176,7 +224,7 @@ footer {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-        border: 1px solid rgba(255, 255, 255, 0.274);
+        border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 5px;
       color: white;
       font-family: 'Saira', sans-serif;
@@ -376,10 +424,27 @@ footer {
 <div class="info-box">
   <h2>About Us</h2>
   <p>
-      Parcyval Studios is an indie game studio with the aim to shape our games to the exact state in which players say "that is exactly what i always wanted to play, why did nobody make this earlier?" and tickle all the itches players all around the world ever had. it's a hard task, but we have fun along the way. and pump out some side projects!
+    Parcyval Studios is an indie game studio with the aim to shape our games to the exact state in which players say 
+    "that is exactly what i always wanted to play, why did nobody make this earlier?" and tickle all the itches 
+    players all around the world ever had. it's a hard task, but we have fun along the way. and pump out some side projects!
   </p>
-</div>
 
+  <h2 style="margin-top: 40px;">The Team</h2>
+  <div class="team-container">
+    <div class="team-member">
+      <img src="marian.jpg" alt="Team Member 1">
+      <h3>Marian</h3>
+      <p>CEO / Game Designer</p>
+    </div>
+    <div class="team-member">
+      <img src="none.jpg" alt="Team Member 2">
+      <h3>Khalil</h3>
+      <p>Music Composer</p>
+    </div>
+  </p>
+    </div>
+  </div>
+</div>
 <iframe src="carousel.html" width="100%" height="650" frameborder="0" 
         style="border-radius: 20px; overflow: hidden;" 
         scrolling="no"></iframe>
