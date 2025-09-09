@@ -20,6 +20,7 @@
       position: relative;
       backdrop-filter: blur(10px);
       overflow-x: hidden; /* Prevent horizontal scrollbar */
+       padding-top: 30px;
     }
 
     /* Dark tint overlay */
@@ -37,6 +38,34 @@
     top: 0;
     z-index: -1;
 }
+.logo {
+  position: absolute;      /* top-left corner */
+  top: 25px;
+  left: 15px;
+  display: flex;           /* place items in a row */
+  align-items: center;     /* vertically center image and text */
+  gap: 10px;               /* space between logo and text */
+  
+  background-color: rgba(0, 0, 0, 0.5); /* translucent base for contrast */
+  backdrop-filter: blur(10px);         /* creates the blurry/flurry effect */
+  -webkit-backdrop-filter: blur(10px); /* for Safari */
+  
+  border-radius: 10px;     /* rounded corners */
+  padding: 5px 10px;       /* some inner spacing */
+}
+
+.logo img {
+  width: 50px;             /* adjust size of logo */
+  height: auto;
+}
+
+.company-name {
+  font-family: 'Saira', sans-serif;
+  font-weight: bold;
+  font-size: 22px;         /* adjust text size */
+  color: white;            /* visible on dark background */
+}
+
 
 .container {
   display: flex;
@@ -129,10 +158,10 @@
 
 .info-box {
   width: 90%;                /* ensures it never exceeds parent/container */
-  max-width: 900px;
+  max-width: 1200px;
   margin: 40px auto;
   padding: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 10px;
   background-color: rgba(0,0,0,0.6);
   color: white;
@@ -169,7 +198,7 @@
   height: 160px;
   object-fit: cover;
   border-radius: 50%;
-  border: 2px solid rgba(247, 247, 247, 0.842);
+  border: 1.5px solid rgba(247, 247, 247, 0.842);
   box-shadow: 0 0 15px rgba(255,255,255,0.2);
   transition: transform 0.3s ease;
 }
@@ -458,7 +487,13 @@ function showMessage(msg) {
   loadLatestFullVideo();
 </script>
 
-<body>
+<div class="logo">
+  <img src="icon_t.png" alt="logo">
+  <span class="company-name">PARCYVAL STUDIOS</span>
+</div>
+
+
+
 
 <div class="container">
   <div class="box">
@@ -466,7 +501,7 @@ function showMessage(msg) {
       <img src="descending_empires.png" alt="Background Image">
       <div class="blurry-background">
         <h2>Descending Empires</h2>
-        <p>A multiplayer RTS blending in depth mechanics with fast paced skirmish matches. manage an empire together with your team in large-scale online battles</p>
+        <p>A multiplayer RTS blending in depth mechanics with fast paced skirmish matches. manage an empire in large-scale online battles</p>
       </div>
     </a>
   </div>
