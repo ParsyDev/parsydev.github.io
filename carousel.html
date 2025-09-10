@@ -13,22 +13,28 @@
 
     body {
       margin: 0;
-      padding: 20px;
+      padding: 0;
       background-color: #000;
       font-family: 'Saira', sans-serif;
       color: white;
     }
 
     .carousel-container {
-      max-width: 1200px;
-      margin: 40px auto;
-      position: relative;
-      background: rgba(128, 128, 128, 0.1);
-      border-radius: 20px;
-      padding: 30px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+  width: 90%;                /* ensures it never exceeds parent/container */
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  background-color: rgba(0,0,0,0.6);
+  color: white;
+  font-family: 'Saira', sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(255,255,255,0.2);
+  backdrop-filter: blur(6px);
+  box-sizing: border-box;      /* include padding & border in width */
     }
 
     .carousel-header {
