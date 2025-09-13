@@ -23,21 +23,44 @@
        padding-top: 30px;
     }
 
-    /* Dark tint overlay */
-    body::before {
-    --line: rgb(134, 134, 134); /* Change the color to white */
-    --size: 55px;
-    content: "";
-    height: 100%;
-    width: 100%; /* WE NEED TO REMOVE THE SCROLLBAR */
-    position: fixed;
-    background:
-        linear-gradient(90deg, var(--line) 1px, transparent 1px var(--size)) 0 -5vmin / var(--size) var(--size),
-        linear-gradient(var(--line) 2px, transparent 2px var(--size)) 0 -5vmin / var(--size) var(--size);
-    mask: linear-gradient(-15deg, transparent 65%, white);
-    top: 0;
-    z-index: -1;
+
+/* original top fade */
+body::before {
+  --line: rgb(100, 100, 100);
+  --size: 55px;
+  content: "";
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  background:
+    linear-gradient(90deg, var(--line) 1px, transparent 1px var(--size)) 0 -5vmin / var(--size) var(--size),
+    linear-gradient(var(--line) 2px, transparent 2px var(--size)) 0 -5vmin / var(--size) var(--size);
+  mask: linear-gradient(-15deg, transparent 65%, white);
+  -webkit-mask: linear-gradient(-15deg, transparent 65%, white);
+  top: 0;
+  z-index: -1;
 }
+
+/* bottom fade duplicate */
+body::after {
+  --line: rgb(100, 100, 100);
+  --size: 55px;
+  content: "";
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  background:
+    linear-gradient(90deg, var(--line) 1px, transparent 1px var(--size)) 0 -5vmin / var(--size) var(--size),
+    linear-gradient(var(--line) 2px, transparent 2px var(--size)) 0 -5vmin / var(--size) var(--size);
+  mask: linear-gradient(-15deg, white, transparent 65%);
+  -webkit-mask: linear-gradient(-15deg, white, transparent 65%);
+  top: 0;
+  z-index: -1;
+}
+
+
+
+
 .logo {
   position: absolute;      /* top-left corner */
   top: 25px;
@@ -198,7 +221,8 @@
   height: 160px;
   object-fit: cover;
   border-radius: 50%;
-  border: 1.5px solid rgba(247, 247, 247, 0.842);
+  border: 2.5px solid rgba(247, 247, 247, 0.842);
+  border-style:dashed;
   box-shadow: 0 0 15px rgba(255,255,255,0.2);
   transition: transform 0.3s ease;
 }
@@ -247,6 +271,7 @@ footer {
   justify-content: center;      /* center the buttons */
   align-items: center;
   gap: 15px;
+  background-color: #0000009c;
   margin-top: 20px;
 }
 
@@ -489,7 +514,7 @@ function showMessage(msg) {
 
 <div class="logo">
   <img src="icon_t.png" alt="logo">
-  <span class="company-name">PARCYVAL STUDIOS</span>
+  <span class="company-name">PARCYVAL</span>
 </div>
 
 
