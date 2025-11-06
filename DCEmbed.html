@@ -1,0 +1,497 @@
+import React, { useState } from 'react';
+import { Copy, Trash2, Plus, X } from 'lucide-react';
+
+export default function DiscordEmbedGenerator() {
+  const [embed, setEmbed] = useState({
+    title: '',
+    description: '',
+    url: '',
+    color: '#5865F2',
+    timestamp: false,
+    footer: { text: '', iconUrl: '' },
+    image: '',
+    thumbnail: '',
+    author: { name: '', url: '', iconUrl: '' },
+    fields: []
+  });
+
+  const [copiedJson, setCopiedJson] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  const updateEmbed = (key, value) => {
+    setEmbed(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateNested = (parent, key, value) => {
+    setEmbed(prev => ({
+      ...prev,
+      [parent]: { ...prev[parent], [key]: value }
+    }));
+  };
+
+  const addField = () => {
+    setEmbed(prev => ({
+      ...prev,
+      fields: [...prev.fields, { name: '', value: '', inline: false }]
+    }));
+  };
+
+  const updateField = (idx, key, value) => {
+    setEmbed(prev => ({
+      ...prev,
+      fields: prev.fields.map((f, i) => i === idx ? { ...f, [key]: value } : f)
+    }));
+  };
+
+  const removeField = (idx) => {
+    setEmbed(prev => ({
+      ...prev,
+      fields: prev.fields.filter((_, i) => i !== idx)
+    }));
+  };
+
+  const generateJSON = () => {
+    const output = {};
+    if (embed.title) output.title = embed.title;
+    if (embed.description) output.description = embed.description;
+    if (embed.url) output.url = embed.url;
+    if (embed.color) output.color = parseInt(embed.color.replace('#', ''), 16);
+    if (embed.timestamp) output.timestamp = new Date().toISOString();
+    if (embed.footer.text) {
+      output.footer = { text: embed.footer.text };
+      if (embed.footer.iconUrl) output.footer.icon_url = embed.footer.iconUrl;
+    }
+    if (embed.image) output.image = { url: embed.image };
+    if (embed.thumbnail) output.thumbnail = { url: embed.thumbnail };
+    if (embed.author.name) {
+      output.author = { name: embed.author.name };
+      if (embed.author.url) output.author.url = embed.author.url;
+      if (embed.author.iconUrl) output.author.icon_url = embed.author.iconUrl;
+    }
+    if (embed.fields.length > 0) {
+      output.fields = embed.fields.filter(f => f.name && f.value).map(f => ({
+        name: f.name,
+        value: f.value,
+        inline: f.inline
+      }));
+    }
+    return output;
+  };
+
+  const copyJSON = () => {
+    navigator.clipboard.writeText(JSON.stringify(generateJSON(), null, 2));
+    setCopiedJson(true);
+    setTimeout(() => setCopiedJson(false), 2000);
+  };
+
+  const copyCode = () => {
+    const code = `const embed = new EmbedBuilder()\n${
+      embed.title ? `  .setTitle('${embed.title}')\n` : ''
+    }${embed.description ? `  .setDescription('${embed.description}')\n` : ''
+    }${embed.url ? `  .setURL('${embed.url}')\n` : ''
+    }${embed.color ? `  .setColor('${embed.color}')\n` : ''
+    }${embed.timestamp ? `  .setTimestamp()\n` : ''
+    }${embed.footer.text ? `  .setFooter({ text: '${embed.footer.text}'${embed.footer.iconUrl ? `, iconURL: '${embed.footer.iconUrl}'` : ''} })\n` : ''
+    }${embed.image ? `  .setImage('${embed.image}')\n` : ''
+    }${embed.thumbnail ? `  .setThumbnail('${embed.thumbnail}')\n` : ''
+    }${embed.author.name ? `  .setAuthor({ name: '${embed.author.name}'${embed.author.iconUrl ? `, iconURL: '${embed.author.iconUrl}'` : ''}${embed.author.url ? `, url: '${embed.author.url}'` : ''} })\n` : ''
+    }${embed.fields.filter(f => f.name && f.value).map(f => 
+      `  .addFields({ name: '${f.name}', value: '${f.value}', inline: ${f.inline} })`
+    ).join('\n')}`;
+    
+    navigator.clipboard.writeText(code);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-4xl font-bold text-white mb-8 text-center">
+          Discord Embed Generator
+        </h1>
+        
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Input Section */}
+          <div className="space-y-4">
+            <div className="bg-slate-800 rounded-lg p-6 shadow-xl">
+              <h2 className="text-xl font-semibold text-white mb-4">Embed Settings</h2>
+              
+              {/* Color Picker */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Color
+                </label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="color"
+                    value={embed.color}
+                    onChange={(e) => updateEmbed('color', e.target.value)}
+                    className="w-20 h-10 rounded cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={embed.color}
+                    onChange={(e) => updateEmbed('color', e.target.value)}
+                    className="flex-1 bg-slate-700 text-white px-3 py-2 rounded border border-slate-600 focus:border-purple-500 focus:outline-none"
+                    placeholder="#5865F2"
+                  />
+                </div>
+              </div>
+
+              {/* Author */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Author Name
+                </label>
+                <input
+                  type="text"
+                  value={embed.author.name}
+                  onChange={(e) => updateNested('author', 'name', e.target.value)}
+                  className="w-full bg-slate-700 text-white px-3 py-2 rounded border border-slate-600 focus:border-purple-500 focus:outline-none"
+                  placeholder="Author name"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Author Icon URL
+                </label>
+                <input
+                  type="text"
+                  value={embed.author.iconUrl}
+                  onChange={(e) => updateNested('author', 'iconUrl', e.target.value)}
+                  className="w-full bg-slate-700 text-white px-3 py-2 rounded border border-slate-600 focus:border-purple-500 focus:outline-none"
+                  placeholder="https://..."
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Author URL (clickable)
+                </label>
+                <input
+                  type="text"
+                  value={embed.author.url}
+                  onChange={(e) => updateNested('author', 'url', e.target.value)}
+                  className="w-full bg-slate-700 text-white px-3 py-2 rounded border border-slate-600 focus:border-purple-500 focus:outline-none"
+                  placeholder="https://..."
+                />
+              </div>
+
+              {/* Title */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={embed.title}
+                  onChange={(e) => updateEmbed('title', e.target.value)}
+                  className="w-full bg-slate-700 text-white px-3 py-2 rounded border border-slate-600 focus:border-purple-500 focus:outline-none"
+                  placeholder="Embed title"
+                />
+              </div>
+
+              {/* Title URL */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Title URL (clickable)
+                </label>
+                <input
+                  type="text"
+                  value={embed.url}
+                  onChange={(e) => updateEmbed('url', e.target.value)}
+                  className="w-full bg-slate-700 text-white px-3 py-2 rounded border border-slate-600 focus:border-purple-500 focus:outline-none"
+                  placeholder="https://..."
+                />
+              </div>
+
+              {/* Description */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={embed.description}
+                  onChange={(e) => updateEmbed('description', e.target.value)}
+                  className="w-full bg-slate-700 text-white px-3 py-2 rounded border border-slate-600 focus:border-purple-500 focus:outline-none resize-none"
+                  rows="4"
+                  placeholder="Embed description"
+                />
+              </div>
+
+              {/* Thumbnail */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Thumbnail URL
+                </label>
+                <input
+                  type="text"
+                  value={embed.thumbnail}
+                  onChange={(e) => updateEmbed('thumbnail', e.target.value)}
+                  className="w-full bg-slate-700 text-white px-3 py-2 rounded border border-slate-600 focus:border-purple-500 focus:outline-none"
+                  placeholder="https://..."
+                />
+              </div>
+
+              {/* Fields */}
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-300">
+                    Fields
+                  </label>
+                  <button
+                    onClick={addField}
+                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center gap-1 text-sm"
+                  >
+                    <Plus size={16} /> Add Field
+                  </button>
+                </div>
+                
+                <div className="space-y-3">
+                  {embed.fields.map((field, idx) => (
+                    <div key={idx} className="bg-slate-700 p-3 rounded border border-slate-600">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs text-gray-400">Field {idx + 1}</span>
+                        <button
+                          onClick={() => removeField(idx)}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={field.name}
+                        onChange={(e) => updateField(idx, 'name', e.target.value)}
+                        className="w-full bg-slate-600 text-white px-2 py-1 rounded mb-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        placeholder="Field name"
+                      />
+                      <textarea
+                        value={field.value}
+                        onChange={(e) => updateField(idx, 'value', e.target.value)}
+                        className="w-full bg-slate-600 text-white px-2 py-1 rounded mb-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        rows="2"
+                        placeholder="Field value"
+                      />
+                      <label className="flex items-center gap-2 text-sm text-gray-300">
+                        <input
+                          type="checkbox"
+                          checked={field.inline}
+                          onChange={(e) => updateField(idx, 'inline', e.target.checked)}
+                          className="rounded"
+                        />
+                        Inline
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Image */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Image URL
+                </label>
+                <input
+                  type="text"
+                  value={embed.image}
+                  onChange={(e) => updateEmbed('image', e.target.value)}
+                  className="w-full bg-slate-700 text-white px-3 py-2 rounded border border-slate-600 focus:border-purple-500 focus:outline-none"
+                  placeholder="https://..."
+                />
+              </div>
+
+              {/* Footer */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Footer Text
+                </label>
+                <input
+                  type="text"
+                  value={embed.footer.text}
+                  onChange={(e) => updateNested('footer', 'text', e.target.value)}
+                  className="w-full bg-slate-700 text-white px-3 py-2 rounded border border-slate-600 focus:border-purple-500 focus:outline-none"
+                  placeholder="Footer text"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Footer Icon URL
+                </label>
+                <input
+                  type="text"
+                  value={embed.footer.iconUrl}
+                  onChange={(e) => updateNested('footer', 'iconUrl', e.target.value)}
+                  className="w-full bg-slate-700 text-white px-3 py-2 rounded border border-slate-600 focus:border-purple-500 focus:outline-none"
+                  placeholder="https://..."
+                />
+              </div>
+
+              {/* Timestamp */}
+              <div className="mb-4">
+                <label className="flex items-center gap-2 text-sm text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={embed.timestamp}
+                    onChange={(e) => updateEmbed('timestamp', e.target.checked)}
+                    className="rounded"
+                  />
+                  Add Timestamp
+                </label>
+              </div>
+            </div>
+
+            {/* Code Output */}
+            <div className="bg-slate-800 rounded-lg p-6 shadow-xl">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-white">JSON Output</h2>
+                <button
+                  onClick={copyJSON}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded flex items-center gap-2 text-sm"
+                >
+                  <Copy size={16} />
+                  {copiedJson ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              <pre className="bg-slate-900 text-green-400 p-4 rounded text-xs overflow-x-auto">
+                {JSON.stringify(generateJSON(), null, 2)}
+              </pre>
+            </div>
+
+            <div className="bg-slate-800 rounded-lg p-6 shadow-xl">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-white">Discord.js Code</h2>
+                <button
+                  onClick={copyCode}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded flex items-center gap-2 text-sm"
+                >
+                  <Copy size={16} />
+                  {copiedCode ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              <pre className="bg-slate-900 text-blue-400 p-4 rounded text-xs overflow-x-auto">
+                {`const embed = new EmbedBuilder()\n${
+                  embed.title ? `  .setTitle('${embed.title}')\n` : ''
+                }${embed.description ? `  .setDescription('${embed.description}')\n` : ''
+                }${embed.url ? `  .setURL('${embed.url}')\n` : ''
+                }${embed.color ? `  .setColor('${embed.color}')\n` : ''
+                }${embed.timestamp ? `  .setTimestamp()\n` : ''
+                }${embed.footer.text ? `  .setFooter({ text: '${embed.footer.text}'${embed.footer.iconUrl ? `, iconURL: '${embed.footer.iconUrl}'` : ''} })\n` : ''
+                }${embed.image ? `  .setImage('${embed.image}')\n` : ''
+                }${embed.thumbnail ? `  .setThumbnail('${embed.thumbnail}')\n` : ''
+                }${embed.author.name ? `  .setAuthor({ name: '${embed.author.name}'${embed.author.iconUrl ? `, iconURL: '${embed.author.iconUrl}'` : ''}${embed.author.url ? `, url: '${embed.author.url}'` : ''} })\n` : ''
+                }${embed.fields.filter(f => f.name && f.value).map(f => 
+                  `  .addFields({ name: '${f.name}', value: '${f.value}', inline: ${f.inline} })`
+                ).join('\n')}`}
+              </pre>
+            </div>
+          </div>
+
+          {/* Preview Section */}
+          <div className="lg:sticky lg:top-6 h-fit">
+            <div className="bg-slate-800 rounded-lg p-6 shadow-xl">
+              <h2 className="text-xl font-semibold text-white mb-4">Preview</h2>
+              
+              <div className="bg-[#36393f] rounded p-4">
+                <div className="flex gap-3">
+                  <div className="w-10 h-10 rounded-full bg-purple-600 flex-shrink-0" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-white font-semibold">Bot Name</span>
+                      <span className="bg-[#5865F2] text-xs text-white px-1 rounded">BOT</span>
+                      <span className="text-xs text-gray-400">Today at 12:00</span>
+                    </div>
+                    
+                    {/* Embed */}
+                    <div className="bg-[#2f3136] rounded flex">
+                      <div 
+                        className="w-1 rounded-l flex-shrink-0"
+                        style={{ backgroundColor: embed.color }}
+                      />
+                      <div className="flex-1 p-3">
+                        {/* Author */}
+                        {embed.author.name && (
+                          <div className="flex items-center gap-2 mb-2">
+                            {embed.author.iconUrl && (
+                              <img src={embed.author.iconUrl} className="w-6 h-6 rounded-full" alt="" />
+                            )}
+                            <span className="text-sm text-white font-semibold">
+                              {embed.author.url ? (
+                                <a href={embed.author.url} className="hover:underline">{embed.author.name}</a>
+                              ) : embed.author.name}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {/* Title */}
+                        {embed.title && (
+                          <div className="text-white font-semibold mb-2">
+                            {embed.url ? (
+                              <a href={embed.url} className="text-[#00b0f4] hover:underline">{embed.title}</a>
+                            ) : embed.title}
+                          </div>
+                        )}
+                        
+                        {/* Description */}
+                        {embed.description && (
+                          <div className="text-sm text-gray-300 mb-2 whitespace-pre-wrap">
+                            {embed.description}
+                          </div>
+                        )}
+                        
+                        {/* Fields */}
+                        {embed.fields.filter(f => f.name && f.value).length > 0 && (
+                          <div className="grid gap-2 mb-2" style={{
+                            gridTemplateColumns: embed.fields.some(f => f.inline) ? 'repeat(3, 1fr)' : '1fr'
+                          }}>
+                            {embed.fields.filter(f => f.name && f.value).map((field, idx) => (
+                              <div key={idx} className={field.inline ? '' : 'col-span-full'}>
+                                <div className="text-xs text-white font-semibold mb-1">{field.name}</div>
+                                <div className="text-xs text-gray-300 whitespace-pre-wrap">{field.value}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Image */}
+                        {embed.image && (
+                          <img src={embed.image} className="max-w-full rounded mt-4" alt="" />
+                        )}
+                        
+                        <div className="flex justify-between items-end">
+                          {/* Footer */}
+                          <div>
+                            {(embed.footer.text || embed.timestamp) && (
+                              <div className="flex items-center gap-2 mt-2">
+                                {embed.footer.iconUrl && (
+                                  <img src={embed.footer.iconUrl} className="w-5 h-5 rounded-full" alt="" />
+                                )}
+                                <span className="text-xs text-gray-400">
+                                  {embed.footer.text}
+                                  {embed.footer.text && embed.timestamp && ' • '}
+                                  {embed.timestamp && new Date().toLocaleString()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Thumbnail */}
+                          {embed.thumbnail && (
+                            <img src={embed.thumbnail} className="w-20 h-20 rounded ml-4" alt="" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
