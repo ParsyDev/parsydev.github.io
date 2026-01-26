@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Hub</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="nav">
+        <div class="nav-title">Creator Hub</div>
+        <div class="profile-menu">
+            <div class="profile-trigger" id="profileTrigger"></div>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-item" id="menuBrowse">👥 Browse Profiles</div>
+                <div class="dropdown-item" id="menuCreate">✨ Create Profile</div>
+                <div class="dropdown-item disabled" id="menuMyProfile">👤 My Profile</div>
+                <div class="dropdown-item" id="menuLogin">🔒 Log In</div>
+                <div class="dropdown-item" id="menuLogout" style="display:none;">🚪 Log Out</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Browse Page -->
+    <div class="page active" id="browsePage">
+        <div class="browse-container">
+            <div class="browse-header">👥 All Profiles</div>
+            <div class="profiles-grid" id="profilesGrid">
+                <div style="text-align:center; padding:40px; color:#999;">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Page -->
+    <div class="page" id="createPage">
+        <div class="create-container">
+            <div class="creator-panel">
+                <div class="creator-header" id="createHeader">Create Profile</div>
+                <div class="creator-content">
+                    <div class="field">
+                        <label>Profile Name</label>
+                        <input type="text" id="profileName" placeholder="Your name">
+                    </div>
+                    <div class="field">
+                        <label>Password (for editing later)</label>
+                        <input type="password" id="profilePassword" placeholder="Create a password">
+                    </div>
+                    <div class="field">
+                        <label>Profile Image URL</label>
+                        <div class="drop-zone" id="dropZone">Drag URL here</div>
+                        <input type="text" id="imageUrl" placeholder="or enter URL">
+                        <div class="crop-container" id="cropContainer">
+                            <label>Crop Image</label>
+                            <div class="crop-preview">
+                                <img class="crop-image" id="cropImage">
+                            </div>
+                            <div class="crop-label">Zoom</div>
+                            <input type="range" class="crop-slider" id="zoom" min="100" max="300" value="100">
+                            <div class="crop-label">Position X</div>
+                            <input type="range" class="crop-slider" id="posX" min="0" max="100" value="50">
+                            <div class="crop-label">Position Y</div>
+                            <input type="range" class="crop-slider" id="posY" min="0" max="100" value="50">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Stream URL (optional)</label>
+                        <input type="text" id="streamUrl" placeholder="YouTube or Twitch URL">
+                    </div>
+                    <button id="createProfile">✨ Create Profile</button>
+                    <button id="updateProfile" style="display:none; background:#e67e22;">✏️ Update Profile</button>
+                    <div class="status" id="createStatus"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Page -->
+    <div class="page" id="viewPage">
+        <div class="view-container">
+            <div class="profile-container">
+                <div class="profile-header"></div>
+                <div class="profile-content">
+                    <div class="profile-img" id="viewProfileImg"></div>
+                    <div class="profile-name" id="viewProfileName">Profile Name</div>
+                    <div class="profile-bio">Content Creator & Streamer</div>
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <div class="stat-number">1.2K</div>
+                            <div class="stat-label">Followers</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">342</div>
+                            <div class="stat-label">Following</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">89</div>
+                            <div class="stat-label">Videos</div>
+                        </div>
+                    </div>
+                    <!-- EDIT BUTTON ADDED HERE -->
+                    <button id="editProfileBtn" style="display:none; background:#e67e22; margin-bottom: 20px;">✏️ Edit Profile</button>
+                    <div class="stream" id="viewStream">No stream active</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">🔒 LOG IN</div>
+            <div class="modal-body">
+                <label>Profile Name</label>
+                <input type="text" id="loginProfileName" placeholder="Enter your profile name">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter password">
+                <button id="loginBtn">Log In</button>
+                <button class="close-btn" id="closeLoginModal">Close</button>
+                <div class="status" id="loginStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

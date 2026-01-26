@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body 
+        {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url("leaderboard_background.jpg");
+            backdrop-filter: blur(15px);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .leaderboard-container {
+            background: rgba(0, 0, 0, 0.568);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        h1 
+        {
+            text-align:center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .leaderboard-entry
+        {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        .leaderboard-entry:hover
+        {
+            transform: translate(-5px);
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .rank {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 30%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .leaderboard-entry:nth-child(1) .rank {
+            background: linear-gradient(135deg, #ffd9000c, #ffd900);
+        }
+        .leaderboard-entry:nth-child(2) .rank {
+            background: linear-gradient(135deg, #c0c0c050, #A8A8A8);
+        }
+        .leaderboard-entry:nth-child(3) .rank {
+            background: linear-gradient(135deg, #cd80321e, #8B4513);
+        }
+        .player-name {
+            flex: 1;
+            margin: 0 20px;
+            color: white;
+            font-size: 1.3em;
+            font-weight: 500;
+        }
+            .score {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+                .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            padding: 20px;
+        }
+                .main-wrapper {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            max-width: 1400px;
+            align-items: flex-start;
+        }
+        .stream-container {
+            background: rgba(0, 0, 0, 0.582);
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat; /* Kein Wiederholen */
+            background-size: cover;       /* Füllt den Bildschirm */
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stream-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        
+        .stream-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+        @media (max-width: 1200px) {
+            .main-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>  
+    <div class="main-wrapper">
+        <!-- Linke Seite: Leaderboard -->
+        <div class="leaderboard-container">
+            <h1>#Bewerten Leaderboard</h1>
+            <div id="leaderboard" class="loading">Lade Daten...</div>
+        </div>
+        
+        <!-- Rechte Seite: YouTube Stream -->
+        <div class="stream-container">
+            <h2>🔴 Live Stream</h2>
+            <div class="stream-wrapper">
+                <iframe 
+                    src="https://www.youtube.com/embed/live_stream?channel=UCkQX1tChV7lrewriPhf2g1Q&autoplay=1&mute=1" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const players = 
+        [
+            {name: "Parsy", score: 10000},
+            {name: "DraggerLP", score: -100},
+            {name: "Geibes", score: 67}
+        ];
+        function loadLeaderboard()
+        {
+            players.sort((a, b) => b.score - a.score);
+            displayLeaderboard(players);
+        }
+        function displayLeaderboard(players) {
+            const container = document.getElementById('leaderboard');
+            
+            container.innerHTML = '';
+            container.classList.remove('loading');
+            
+            players.forEach((player, index) => {
+                const rank = index + 1;
+                const entryHTML = `
+                    <div class="leaderboard-entry">
+                        <div class="rank">${rank}</div>
+                        <div class="player-name">${player.name}</div>
+                        <div class="score">${player.score} Punkte</div>
+                        
+                    </div>
+                `;
+                container.innerHTML += entryHTML;
+            });
+        }
+        window.onload = loadLeaderboard;
+    </script>
+</body>
