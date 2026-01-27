@@ -1,11 +1,13 @@
-const TOKEN = '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';
+// Your Cloudflare Worker URL - this proxies requests to GitHub API securely
+const API_URL = 'https://creator-hub-api.emdejiku.workers.dev';
+
 const REG = '5d51e42426b9f95c110b7c92e4ac7bfe';
 let registry = {};
 let cropData = {zoom: 100, x: 50, y: 50};
 let imageUrl = '';
 let editingProfileId = null;
 let currentUser = null;
-let currentViewingProfileId = null; // Track which profile is being viewed
+let currentViewingProfileId = null;
 
 const pages = {
     browse: document.getElementById('browsePage'),
@@ -125,21 +127,17 @@ els.editProfileBtn.onclick = async () => {
     }
 };
 
-// Registry functions
+// Registry functions - Now using the proxy!
 async function loadRegistry() {
     try {
-        console.log('Fetching registry...');
-        const response = await fetch(`https://api.github.com/gists/${REG}`, {
-            headers: {
-                'Authorization': `token ${TOKEN}`
-            }
-        });
+        console.log('Fetching registry via proxy...');
+        const response = await fetch(`${API_URL}/registry`);
         console.log('Registry response status:', response.status);
         
         if (!response.ok) {
             const errorData = await response.json();
             console.error('API Error:', errorData);
-            throw new Error(`HTTP error! status: ${response.status} - ${errorData.message || 'Unknown error'}`);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const gist = await response.json();
@@ -155,15 +153,14 @@ async function loadRegistry() {
     } catch(e) {
         console.error('Error loading registry:', e);
         registry = {};
-        throw e; // Re-throw to let caller know there was an error
+        throw e;
     }
 }
 
 async function saveRegistry() {
-    await fetch(`https://api.github.com/gists/${REG}`, {
+    await fetch(`${API_URL}/registry`, {
         method: 'PATCH',
         headers: {
-            'Authorization': `token ${TOKEN}`,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -201,7 +198,6 @@ async function loadAllProfiles() {
                 els.grid.appendChild(card);
             } catch(e) {
                 console.error('Failed to load profile:', name, e);
-                // Still show a card with error state
                 const errorCard = document.createElement('div');
                 errorCard.className = 'profile-card';
                 errorCard.style.opacity = '0.5';
@@ -219,25 +215,14 @@ async function loadAllProfiles() {
         }
     } catch(e) {
         console.error('Failed to load registry:', e);
-        
-        // Check if it's a rate limit error
-        if (e.message && e.message.includes('rate limit')) {
-            els.grid.innerHTML = `
-                <div style="text-align:center;padding:40px;color:#ff6b6b;">
-                    <h3 style="margin-bottom:10px;">⚠️ GitHub API Rate Limit Exceeded</h3>
-                    <p style="color:#666;font-size:14px;">The GitHub API token may be expired or rate limited.</p>
-                    <p style="color:#666;font-size:14px;margin-top:10px;">Please update the TOKEN variable in the code with a valid GitHub Personal Access Token.</p>
-                    <a href="https://github.com/settings/tokens" target="_blank" style="color:#0066cc;font-size:14px;margin-top:10px;display:block;">Create a new token here →</a>
-                </div>
-            `;
-        } else {
-            els.grid.innerHTML = `
-                <div style="text-align:center;padding:40px;color:#ff0000;">
-                    <h3>Error loading profiles</h3>
-                    <p style="color:#666;font-size:12px;margin-top:10px;">${e.message}</p>
-                </div>
-            `;
-        }
+        els.grid.innerHTML = `
+            <div style="text-align:center;padding:40px;color:#ff6b6b;">
+                <h3 style="margin-bottom:10px;">⚠️ Error Loading Profiles</h3>
+                <p style="color:#666;font-size:14px;">Could not connect to the API proxy.</p>
+                <p style="color:#666;font-size:14px;margin-top:10px;">Make sure API_URL is set correctly in app.js</p>
+                <p style="color:#999;font-size:12px;margin-top:10px;">Error: ${e.message}</p>
+            </div>
+        `;
     }
 }
 
@@ -274,7 +259,6 @@ async function viewProfile(id) {
         currentViewingProfileId = id;
         displayProfile(profile);
         
-        // Show edit button only if viewing own profile
         if (currentUser && currentUser.id === id) {
             els.editProfileBtn.style.display = 'block';
         } else {
@@ -315,11 +299,7 @@ function displayProfile(profile) {
 
 async function loadProfile(id) {
     console.log('Fetching profile with ID:', id);
-    const response = await fetch(`https://api.github.com/gists/${id}`, {
-        headers: {
-            'Authorization': `token ${TOKEN}`
-        }
-    });
+    const response = await fetch(`${API_URL}/profile/${id}`);
     console.log('Profile response status:', response.status);
     
     if (!response.ok) {
@@ -352,7 +332,6 @@ els.loginBtn.onclick = async () => {
     
     await loadRegistry();
     
-    // Check if profile name exists
     if (!registry[name]) {
         showStatus(els.loginStatus, 'error', '❌ Profile not found!');
         return;
@@ -379,7 +358,6 @@ els.loginBtn.onclick = async () => {
         
         editingProfileId = profileId;
         
-        // Update profile picture in nav
         if (profile.imageUrl && profile.cropData) {
             const scale = profile.cropData.zoom / 100;
             const x = profile.cropData.x;
@@ -549,10 +527,9 @@ els.create.onclick = async () => {
     };
     
     try {
-        const response = await fetch('https://api.github.com/gists', {
+        const response = await fetch(`${API_URL}/profile`, {
             method: 'POST',
             headers: {
-                'Authorization': `token ${TOKEN}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -611,10 +588,9 @@ els.update.onclick = async () => {
     };
     
     try {
-        const response = await fetch(`https://api.github.com/gists/${editingProfileId}`, {
+        const response = await fetch(`${API_URL}/profile/${editingProfileId}`, {
             method: 'PATCH',
             headers: {
-                'Authorization': `token ${TOKEN}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -627,7 +603,6 @@ els.update.onclick = async () => {
         });
         
         if (response.ok) {
-            // Update the nav profile picture if changed
             if (profileData.imageUrl && profileData.cropData) {
                 const scale = profileData.cropData.zoom / 100;
                 const x = profileData.cropData.x;
