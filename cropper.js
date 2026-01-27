@@ -9,6 +9,8 @@ class ImageCropper {
         this.cropBox = document.getElementById('cropBox');
         this.image = new Image();
         this.imageLoaded = false;
+        this.loadAttempts = 0;
+        this.maxLoadAttempts = 3;
         
         // Crop box state
         this.cropData = {
@@ -28,49 +30,112 @@ class ImageCropper {
     }
     
     setupEventListeners() {
+        // Support both mouse and touch events
+        
         // Mouse down on crop box (start dragging)
-        this.cropBox.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('crop-handle')) {
-                this.isResizing = true;
-                this.resizeHandle = e.target;
-            } else {
-                this.isDragging = true;
-            }
-            this.dragStart = {
-                x: e.clientX - this.cropBox.offsetLeft,
-                y: e.clientY - this.cropBox.offsetTop
-            };
+        this.cropBox.addEventListener('mousedown', (e) => this.handleStart(e, false));
+        this.cropBox.addEventListener('touchstart', (e) => this.handleStart(e, true));
+        
+        // Mouse/touch move (dragging or resizing)
+        document.addEventListener('mousemove', (e) => this.handleMove(e, false));
+        document.addEventListener('touchmove', (e) => this.handleMove(e, true), { passive: false });
+        
+        // Mouse/touch up (stop dragging/resizing)
+        document.addEventListener('mouseup', () => this.handleEnd());
+        document.addEventListener('touchend', () => this.handleEnd());
+        document.addEventListener('touchcancel', () => this.handleEnd());
+    }
+    
+    handleStart(e, isTouch) {
+        const target = isTouch ? document.elementFromPoint(
+            e.touches[0].clientX, 
+            e.touches[0].clientY
+        ) : e.target;
+        
+        if (target && target.classList.contains('crop-handle')) {
+            this.isResizing = true;
+            this.resizeHandle = target;
+        } else if (target && target.classList.contains('crop-box')) {
+            this.isDragging = true;
+        } else {
+            return; // Don't handle if not on crop elements
+        }
+        
+        const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+        const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+        
+        this.dragStart = {
+            x: clientX - this.cropBox.offsetLeft,
+            y: clientY - this.cropBox.offsetTop
+        };
+        
+        e.preventDefault();
+    }
+    
+    handleMove(e, isTouch) {
+        if (!this.isDragging && !this.isResizing) return;
+        
+        const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+        const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+        
+        const moveEvent = {
+            clientX: clientX,
+            clientY: clientY
+        };
+        
+        if (this.isDragging) {
+            this.moveCropBox(moveEvent);
+        } else if (this.isResizing) {
+            this.resizeCropBox(moveEvent);
+        }
+        
+        if (isTouch) {
             e.preventDefault();
-        });
-        
-        // Mouse move (dragging or resizing)
-        document.addEventListener('mousemove', (e) => {
-            if (this.isDragging) {
-                this.moveCropBox(e);
-            } else if (this.isResizing) {
-                this.resizeCropBox(e);
-            }
-        });
-        
-        // Mouse up (stop dragging/resizing)
-        document.addEventListener('mouseup', () => {
-            this.isDragging = false;
-            this.isResizing = false;
-            this.resizeHandle = null;
-        });
+        }
+    }
+    
+    handleEnd() {
+        this.isDragging = false;
+        this.isResizing = false;
+        this.resizeHandle = null;
     }
     
     loadImage(url) {
+        this.imageLoaded = false;
+        this.loadAttempts = 0;
+        this.attemptLoadImage(url);
+    }
+    
+    attemptLoadImage(url) {
         this.image.crossOrigin = "anonymous";
+        
         this.image.onload = () => {
+            console.log('Image loaded successfully');
             this.imageLoaded = true;
+            this.loadAttempts = 0;
             this.drawImage();
             this.initializeCropBox();
         };
+        
         this.image.onerror = () => {
-            console.error('Failed to load image');
-            alert('Failed to load image. Make sure the URL is correct and publicly accessible.');
+            this.loadAttempts++;
+            console.error(`Failed to load image (attempt ${this.loadAttempts}/${this.maxLoadAttempts})`);
+            
+            if (this.loadAttempts < this.maxLoadAttempts) {
+                // Retry after a short delay
+                console.log('Retrying image load...');
+                setTimeout(() => {
+                    this.image.src = url;
+                }, 500 * this.loadAttempts);
+            } else {
+                // Only show error after all attempts failed
+                console.error('All image load attempts failed');
+                alert('Failed to load image after multiple attempts. Please check:\n\n1. The URL is correct\n2. The image is publicly accessible\n3. CORS is enabled on the server\n4. Try a different image host (imgur, imgbb, etc.)');
+                this.imageLoaded = false;
+            }
         };
+        
+        // Set src to trigger load
         this.image.src = url;
     }
     
@@ -216,3 +281,8 @@ class ImageCropper {
 
 // Global cropper instance
 let cropper = new ImageCropper();
+
+// Add mobile viewport optimization
+if ('ontouchstart' in window) {
+    console.log('Touch device detected - mobile optimization enabled');
+}

@@ -9,7 +9,10 @@
 <body>
     <div class="site-background" id="siteBackground"></div>
     <div class="nav">
-        <div class="nav-title">Creator Hub</div>
+    <div class="nav-left">
+        <span class="nav-title">Creator Hub</span>
+        <img src="creator_hub_icon.png" alt="Creator Hub Icon" class="nav-logo">
+    </div>
         <div class="profile-menu">
             <div class="profile-trigger" id="profileTrigger"></div>
             <div class="dropdown-menu" id="dropdownMenu">
@@ -25,7 +28,13 @@
     <!-- Browse Page -->
     <div class="page active" id="browsePage">
         <div class="browse-container">
-            <div class="browse-header">👥 All Profiles</div>
+            <div class="browse-header">All Users</div>
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="profileSearch" placeholder="Search profiles by name...">
+                    <span class="search-icon">🔍</span>
+                </div>
+            </div>
             <div class="profiles-grid" id="profilesGrid">
                 <div style="text-align:center; padding:40px; color:#999;">Loading...</div>
             </div>
@@ -77,12 +86,47 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="button" id="applyCrop" style="background: #27ae60; margin-top: 10px;">✓ Apply Crop</button>
+                            <button type="button" id="applyCrop" style="background: #ffffff; color: #18181b; margin-top: 10px; font-weight: 600;">✓ Apply Crop</button>
                         </div>
                     </div>
                     <div class="field">
                         <label>Stream URL (optional)</label>
                         <input type="text" id="streamUrl" placeholder="YouTube or Twitch URL">
+                    </div>
+                    <div class="field">
+                        <label>Profile Card Style</label>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px;">
+                            <div class="card-style-option" data-style="solid" style="background: #f4f4f5; border: 2px solid #52525b; padding: 15px; text-align: center; cursor: pointer; border-radius: 8px;">
+                                <div style="font-weight: bold; margin-bottom: 5px; color: #18181b;">Solid</div>
+                                <div style="font-size: 11px; color: #71717a;">Classic light</div>
+                            </div>
+                            <div class="card-style-option active" data-style="frosted" style="background: rgba(31, 33, 48, 0.8); backdrop-filter: blur(20px); border: 2px solid #ffffff; padding: 15px; text-align: center; cursor: pointer; border-radius: 8px;">
+                                <div style="font-weight: bold; margin-bottom: 5px; color: #ffffff;">Frosted</div>
+                                <div style="font-size: 11px; color: #a1a1aa;">Glass effect</div>
+                            </div>
+                            <div class="card-style-option" data-style="custom" style="background: linear-gradient(135deg, #18181b 0%, #27272a 100%); border: 2px solid #52525b; padding: 15px; text-align: center; cursor: pointer; border-radius: 8px; color: white;">
+                                <div style="font-weight: bold; margin-bottom: 5px;">Custom</div>
+                                <div style="font-size: 11px;">Pick color</div>
+                            </div>
+                        </div>
+                        <div id="customColorPicker" style="display: none; margin-top: 10px;">
+                            <label style="font-size: 11px; color: #666;">Card Background Color</label>
+                            <div style="display: flex; gap: 5px; align-items: center;">
+                                <input type="color" id="cardColor" value="#18181b" style="width: 60px; height: 40px; border: 1px solid #ddd; cursor: pointer;">
+                                <input type="text" id="cardColorHex" value="#18181b" placeholder="#18181b" style="flex: 1;">
+                            </div>
+                            <label style="font-size: 11px; color: #666; margin-top: 8px; display: block;">Gradient (optional)</label>
+                            <div style="display: flex; gap: 5px; align-items: center;">
+                                <input type="color" id="cardColorGradient" value="#27272a" style="width: 60px; height: 40px; border: 1px solid #ddd; cursor: pointer;">
+                                <input type="text" id="cardColorGradientHex" value="#27272a" placeholder="#27272a" style="flex: 1;">
+                            </div>
+                            <label style="font-size: 11px; color: #666; margin-top: 8px; display: block;">Text Color</label>
+                            <div style="display: flex; gap: 5px; align-items: center;">
+                                <input type="color" id="fontColor" value="#ffffff" style="width: 60px; height: 40px; border: 1px solid #ddd; cursor: pointer;">
+                                <input type="text" id="fontColorHex" value="#ffffff" placeholder="#ffffff" style="flex: 1;">
+                            </div>
+                        </div>
+                        <input type="hidden" id="cardStyle" value="frosted">
                     </div>
                     <div class="field">
                         <label>Social Media Links</label>
@@ -97,6 +141,12 @@
                             </div>
                         </div>
                     </div>
+                    <div class="field">
+                        <label>🎬 Favorite Media (optional)</label>
+                        <div id="editMediaCardsContainer" style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; min-height: 210px;">
+                            <!-- Media cards will be shown here during edit -->
+                        </div>
+                    </div>
                     <button id="createProfile">✨ Create Profile</button>
                     <button id="updateProfile" style="display:none; background:#e67e22;">✏️ Update Profile</button>
                     <div class="status" id="createStatus"></div>
@@ -108,6 +158,7 @@
     <!-- View Page -->
     <div class="page" id="viewPage">
         <div class="view-container">
+            <button id="editProfileBtn" style="display:none; background:#27a700; height: 45px; margin-bottom: 18px; font-size: 20px">Edit Profile</button>
             <div class="profile-container">
                 <div class="profile-header" id="viewBannerImg"></div>
                 <div class="profile-content" id="viewProfileContent">
@@ -130,7 +181,22 @@
                         </div>
                     </div>
                     <!-- EDIT BUTTON ADDED HERE -->
-                    <button id="editProfileBtn" style="display:none; background:#e67e22; margin-bottom: 20px;">✏️ Edit Profile</button>
+                    
+                    
+                    <!-- MEDIA CARDS SECTION -->
+                    <div id="mediaCardsSection" style="display: none; margin: 20px 0;">
+                        <div style="font-size: 14px; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid rgba(0,0,0,0.1);">
+                            🎬 Favorite Media
+                        </div>
+                        <div id="mediaCardsContainer" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start;">
+                            <!-- Media cards will be populated here -->
+                            <div id="addMediaCard" class="add-media-card" style="display: none;">
+                                <div style="font-size: 40px; color: #999;">+</div>
+                                <div style="font-size: 11px; color: #999;">Add Media</div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="stream" id="viewStream">No stream active</div>
                 </div>
             </div>
@@ -149,6 +215,30 @@
                 <button id="loginBtn">Log In</button>
                 <button class="close-btn" id="closeLoginModal">Close</button>
                 <div class="status" id="loginStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Search Modal -->
+    <div class="modal" id="mediaModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">🎬 Add Favorite Media</div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="mediaSearchInput" placeholder="Search movies or TV shows..." style="flex: 1;">
+                    <select id="mediaTypeSelect" style="width: 120px;">
+                        <option value="movie">Movies</option>
+                        <option value="tv">TV Shows</option>
+                    </select>
+                    <button id="mediaSearchBtn" style="width: auto; padding: 8px 20px; margin: 0;">Search</button>
+                </div>
+                <div id="mediaSearchResults" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+                        Search for movies or TV shows to add to your profile
+                    </div>
+                </div>
+                <button class="close-btn" id="closeMediaModal">Close</button>
+                <div class="status" id="mediaStatus"></div>
             </div>
         </div>
     </div>

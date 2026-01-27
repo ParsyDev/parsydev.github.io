@@ -1,4 +1,6 @@
 const API_URL = 'https://creator-hub-api.emdejiku.workers.dev';
+const TMDB_API_KEY = 'ef368b77a32d9d65464c5470b20971fa'; // TMDB API key
+const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 
 const REG = '5d51e42426b9f95c110b7c92e4ac7bfe';
 let registry = {};
@@ -11,6 +13,7 @@ let imageCrops = {
 let editingProfileId = null;
 let currentUser = null;
 let currentViewingProfileId = null;
+let currentMediaCards = []; // Track media cards being edited
 
 const pages = {
     browse: document.getElementById('browsePage'),
@@ -30,6 +33,7 @@ const menu = {
 
 const els = {
     grid: document.getElementById('profilesGrid'),
+    profileSearch: document.getElementById('profileSearch'),
     name: document.getElementById('profileName'),
     pass: document.getElementById('profilePassword'),
     description: document.getElementById('profileDescription'),
@@ -63,7 +67,26 @@ const els = {
     loginPass: document.getElementById('loginPassword'),
     loginBtn: document.getElementById('loginBtn'),
     closeLogin: document.getElementById('closeLoginModal'),
-    loginStatus: document.getElementById('loginStatus')
+    loginStatus: document.getElementById('loginStatus'),
+    cardStyle: document.getElementById('cardStyle'),
+    cardColor: document.getElementById('cardColor'),
+    cardColorHex: document.getElementById('cardColorHex'),
+    cardColorGradient: document.getElementById('cardColorGradient'),
+    cardColorGradientHex: document.getElementById('cardColorGradientHex'),
+    fontColor: document.getElementById('fontColor'),
+    fontColorHex: document.getElementById('fontColorHex'),
+    customColorPicker: document.getElementById('customColorPicker'),
+    mediaCardsSection: document.getElementById('mediaCardsSection'),
+    mediaCardsContainer: document.getElementById('mediaCardsContainer'),
+    editMediaCardsContainer: document.getElementById('editMediaCardsContainer'),
+    addMediaCard: document.getElementById('addMediaCard'),
+    mediaModal: document.getElementById('mediaModal'),
+    mediaSearchInput: document.getElementById('mediaSearchInput'),
+    mediaTypeSelect: document.getElementById('mediaTypeSelect'),
+    mediaSearchBtn: document.getElementById('mediaSearchBtn'),
+    mediaSearchResults: document.getElementById('mediaSearchResults'),
+    closeMediaModal: document.getElementById('closeMediaModal'),
+    mediaStatus: document.getElementById('mediaStatus')
 };
 
 // Navigation
@@ -148,6 +171,8 @@ els.editProfileBtn.onclick = async () => {
             const profile = await loadProfile(currentUser.id);
             loadProfileForEdit(profile);
             showPage('create');
+            // Render media cards AFTER switching to create page
+            renderMediaCards(true);
         } catch(e) {
             console.error('Failed to load profile for editing:', e);
         }
@@ -208,6 +233,7 @@ async function loadAllProfiles() {
         await loadRegistry();
         console.log('Registry loaded:', registry);
         els.grid.innerHTML = '';
+        allProfileCards = []; // Reset cards array for search
         
         const entries = Object.entries(registry);
         console.log('Registry entries:', entries.length);
@@ -223,6 +249,7 @@ async function loadAllProfiles() {
                 const profile = await loadProfile(id);
                 const card = createProfileCard(profile, id);
                 els.grid.appendChild(card);
+                allProfileCards.push(card); // Store for search
             } catch(e) {
                 console.error('Failed to load profile:', name, e);
                 const errorCard = document.createElement('div');
@@ -314,13 +341,15 @@ async function viewProfile(id) {
         currentViewingProfileId = id;
         displayProfile(profile);
         
+        // Show page first
+        showPage('view');
+        
+        // Then check edit button visibility
         if (currentUser && currentUser.id === id) {
             els.editProfileBtn.style.display = 'block';
         } else {
             els.editProfileBtn.style.display = 'none';
         }
-        
-        showPage('view');
     } catch(e) {
         console.error('Failed to view profile:', e);
     }
@@ -391,6 +420,66 @@ function displayProfile(profile) {
     // Show/hide social links container
     els.socialLinks.style.display = hasSocialLinks ? 'flex' : 'none';
     
+    // Apply card style
+    const profileContainer = document.querySelector('.profile-container');
+    const profileContent = document.getElementById('viewProfileContent');
+    
+    if (profile.cardStyle === 'frosted') {
+        profileContainer.style.background = 'rgba(255, 255, 255, 0.7)';
+        profileContainer.style.backdropFilter = 'blur(20px)';
+        profileContainer.style.webkitBackdropFilter = 'blur(20px)';
+        profileContent.style.background = 'transparent';
+    } else if (profile.cardStyle === 'custom' && profile.cardColor) {
+        if (profile.cardColorGradient) {
+            profileContainer.style.background = `linear-gradient(135deg, ${profile.cardColor} 0%, ${profile.cardColorGradient} 100%)`;
+        } else {
+            profileContainer.style.background = profile.cardColor;
+        }
+        profileContainer.style.backdropFilter = 'none';
+        profileContainer.style.webkitBackdropFilter = 'none';
+        profileContent.style.background = 'transparent';
+        
+        // Use custom font color if provided
+        if (profile.fontColor) {
+            els.viewName.style.color = profile.fontColor;
+            els.viewDescription.style.color = profile.fontColor;
+            els.viewDescription.style.background = 'rgba(0, 0, 0, 0.1)';
+            els.viewDescription.style.borderLeftColor = profile.fontColor;
+        } else {
+            // Auto-adjust text color based on background brightness
+            const color = profile.cardColor;
+            const rgb = parseInt(color.slice(1), 16);
+            const r = (rgb >> 16) & 0xff;
+            const g = (rgb >>  8) & 0xff;
+            const b = (rgb >>  0) & 0xff;
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            
+            if (brightness < 128) {
+                // Dark background - use light text
+                els.viewName.style.color = 'white';
+                els.viewDescription.style.color = 'rgba(255, 255, 255, 0.9)';
+                els.viewDescription.style.background = 'rgba(0, 0, 0, 0.2)';
+                els.viewDescription.style.borderLeftColor = 'rgba(255, 255, 255, 0.5)';
+            } else {
+                // Light background - use dark text
+                els.viewName.style.color = '#333';
+                els.viewDescription.style.color = '#555';
+                els.viewDescription.style.background = 'rgba(255, 255, 255, 0.3)';
+                els.viewDescription.style.borderLeftColor = '#333';
+            }
+        }
+    } else {
+        // Solid white (default)
+        profileContainer.style.background = 'white';
+        profileContainer.style.backdropFilter = 'none';
+        profileContainer.style.webkitBackdropFilter = 'none';
+        profileContent.style.background = 'white';
+        els.viewName.style.color = '#333';
+        els.viewDescription.style.color = '#555';
+        els.viewDescription.style.background = '#f9f9f9';
+        els.viewDescription.style.borderLeftColor = '#333';
+    }
+    
     // Display profile picture
     if (profile.imageUrl) {
         if (profile.profileCrop) {
@@ -431,6 +520,10 @@ function displayProfile(profile) {
     } else {
         els.viewStream.innerHTML = 'No stream active';
     }
+    
+    // Display media cards
+    currentMediaCards = profile.mediaCards || [];
+    renderMediaCards(false); // false = viewing mode, not editing
 }
 
 async function loadProfile(id) {
@@ -549,6 +642,9 @@ function loadProfileForEdit(profile) {
     els.youtubeUrl.value = profile.youtubeUrl || '';
     els.twitchUrl.value = profile.twitchUrl || '';
     
+    // Load media cards
+    currentMediaCards = profile.mediaCards || [];
+    
     // Load profile picture
     imageCrops.profile = {
         url: profile.imageUrl || '',
@@ -575,6 +671,39 @@ function loadProfileForEdit(profile) {
         // Don't load immediately, wait for user to interact
     }
     
+    // Load card style settings
+    const cardStyle = profile.cardStyle || 'solid';
+    els.cardStyle.value = cardStyle;
+    
+    // Update UI to reflect current style
+    document.querySelectorAll('.card-style-option').forEach(opt => {
+        if (opt.dataset.style === cardStyle) {
+            opt.style.borderColor = '#ffffff';
+            opt.classList.add('active');
+        } else {
+            opt.style.borderColor = '#52525b';
+            opt.classList.remove('active');
+        }
+    });
+    
+    if (cardStyle === 'custom') {
+        els.customColorPicker.style.display = 'block';
+        if (profile.cardColor) {
+            els.cardColor.value = profile.cardColor;
+            els.cardColorHex.value = profile.cardColor;
+        }
+        if (profile.cardColorGradient) {
+            els.cardColorGradient.value = profile.cardColorGradient;
+            els.cardColorGradientHex.value = profile.cardColorGradient;
+        }
+        if (profile.fontColor) {
+            els.fontColor.value = profile.fontColor;
+            els.fontColorHex.value = profile.fontColor;
+        }
+    } else {
+        els.customColorPicker.style.display = 'none';
+    }
+    
     els.create.style.display = 'none';
     els.update.style.display = 'block';
 }
@@ -594,6 +723,8 @@ function resetCreateForm() {
         banner: { url: '', crop: null },
         background: { url: '', crop: null }
     };
+    
+    currentMediaCards = [];
     
     currentImageType = 'profile';
     els.imageType.value = 'profile';
@@ -736,6 +867,11 @@ els.create.onclick = async () => {
         streamUrl: stream,
         youtubeUrl: youtubeUrl,
         twitchUrl: twitchUrl,
+        cardStyle: els.cardStyle.value,
+        cardColor: els.cardStyle.value === 'custom' ? els.cardColorHex.value : null,
+        cardColorGradient: els.cardStyle.value === 'custom' ? els.cardColorGradientHex.value : null,
+        fontColor: els.cardStyle.value === 'custom' ? els.fontColorHex.value : null,
+        mediaCards: currentMediaCards,
         createdAt: new Date().toISOString()
     };
     
@@ -797,23 +933,31 @@ els.update.onclick = async () => {
     els.update.disabled = true;
     showStatus(els.createStatus, 'success', 'Updating profile...');
     
-    const profileData = {
-        name: name,
-        password: password,
-        description: description,
-        imageUrl: imageCrops.profile.url,
-        profileCrop: imageCrops.profile.crop,
-        bannerUrl: imageCrops.banner.url,
-        bannerCrop: imageCrops.banner.crop,
-        backgroundUrl: imageCrops.background.url,
-        backgroundCrop: imageCrops.background.crop,
-        streamUrl: stream,
-        youtubeUrl: youtubeUrl,
-        twitchUrl: twitchUrl,
-        updatedAt: new Date().toISOString()
-    };
-    
     try {
+        // Load current profile to preserve mediaCards
+        const currentProfile = await loadProfile(editingProfileId);
+        
+        const profileData = {
+            name: name,
+            password: password,
+            description: description,
+            imageUrl: imageCrops.profile.url,
+            profileCrop: imageCrops.profile.crop,
+            bannerUrl: imageCrops.banner.url,
+            bannerCrop: imageCrops.banner.crop,
+            backgroundUrl: imageCrops.background.url,
+            backgroundCrop: imageCrops.background.crop,
+            streamUrl: stream,
+            youtubeUrl: youtubeUrl,
+            twitchUrl: twitchUrl,
+            cardStyle: els.cardStyle.value,
+            cardColor: els.cardStyle.value === 'custom' ? els.cardColorHex.value : null,
+            cardColorGradient: els.cardStyle.value === 'custom' ? els.cardColorGradientHex.value : null,
+            fontColor: els.cardStyle.value === 'custom' ? els.fontColorHex.value : null,
+            mediaCards: currentMediaCards,
+            updatedAt: new Date().toISOString()
+        };
+    
         const response = await fetch(`${API_URL}/profile/${editingProfileId}`, {
             method: 'PATCH',
             headers: {
@@ -850,6 +994,7 @@ els.update.onclick = async () => {
             showStatus(els.createStatus, 'error', 'Failed to update profile');
         }
     } catch(e) {
+        console.error('Update error:', e);
         showStatus(els.createStatus, 'error', 'Error: ' + e.message);
     }
     
@@ -869,6 +1014,74 @@ function showStatus(element, type, message) {
 
 // Initialize
 loadAllProfiles();
+
+// Card style selection
+document.querySelectorAll('.card-style-option').forEach(option => {
+    option.onclick = function() {
+        // Remove active from all
+        document.querySelectorAll('.card-style-option').forEach(opt => {
+            opt.style.borderColor = '#52525b';
+            opt.classList.remove('active');
+        });
+        
+        // Add active to clicked
+        this.style.borderColor = '#ffffff';
+        this.classList.add('active');
+        
+        const style = this.dataset.style;
+        els.cardStyle.value = style;
+        
+        // Show/hide color picker
+        if (style === 'custom') {
+            els.customColorPicker.style.display = 'block';
+        } else {
+            els.customColorPicker.style.display = 'none';
+        }
+    };
+});
+
+// Sync color inputs
+els.cardColor.oninput = () => {
+    els.cardColorHex.value = els.cardColor.value;
+};
+els.cardColorHex.oninput = () => {
+    if (/^#[0-9A-F]{6}$/i.test(els.cardColorHex.value)) {
+        els.cardColor.value = els.cardColorHex.value;
+    }
+};
+els.cardColorGradient.oninput = () => {
+    els.cardColorGradientHex.value = els.cardColorGradient.value;
+};
+els.cardColorGradientHex.oninput = () => {
+    if (/^#[0-9A-F]{6}$/i.test(els.cardColorGradientHex.value)) {
+        els.cardColorGradient.value = els.cardColorGradientHex.value;
+    }
+};
+els.fontColor.oninput = () => {
+    els.fontColorHex.value = els.fontColor.value;
+};
+els.fontColorHex.oninput = () => {
+    if (/^#[0-9A-F]{6}$/i.test(els.fontColorHex.value)) {
+        els.fontColor.value = els.fontColorHex.value;
+    }
+};
+
+
+// Profile search functionality
+let allProfileCards = [];
+els.profileSearch.oninput = () => {
+    const searchTerm = els.profileSearch.value.toLowerCase().trim();
+    
+    allProfileCards.forEach(card => {
+        const profileName = card.querySelector('.profile-card-name').textContent.toLowerCase();
+        if (profileName.includes(searchTerm)) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+};
+
 
 // Restore login state from localStorage
 async function restoreLoginState() {
@@ -926,3 +1139,200 @@ async function restoreLoginState() {
 
 // Restore login on page load
 restoreLoginState();
+
+// ==================== MEDIA CARDS (TMDB) ====================
+
+// TMDB API Functions
+async function searchTMDB(query, type = 'movie') {
+    try {
+        const response = await fetch(
+            `https://api.themoviedb.org/3/search/${type}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`
+        );
+        const data = await response.json();
+        return data.results || [];
+    } catch(e) {
+        console.error('TMDB search error:', e);
+        return [];
+    }
+}
+
+function extractYear(dateString) {
+    return dateString ? dateString.split('-')[0] : '';
+}
+
+// Media Modal Handlers
+els.closeMediaModal.onclick = () => els.mediaModal.classList.remove('active');
+els.mediaModal.onclick = (e) => {
+    if (e.target === els.mediaModal) els.mediaModal.classList.remove('active');
+};
+
+// Search on Enter key
+els.mediaSearchInput.onkeypress = (e) => {
+    if (e.key === 'Enter') {
+        els.mediaSearchBtn.click();
+    }
+};
+
+// Media Search
+els.mediaSearchBtn.onclick = async () => {
+    const query = els.mediaSearchInput.value.trim();
+    if (!query) return;
+    
+    const type = els.mediaTypeSelect.value;
+    els.mediaSearchBtn.disabled = true;
+    els.mediaSearchBtn.textContent = 'Searching...';
+    
+    try {
+        const results = await searchTMDB(query, type);
+        
+        if (results.length === 0) {
+            els.mediaSearchResults.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">No results found</div>';
+        } else {
+            els.mediaSearchResults.innerHTML = '';
+            
+            results.slice(0, 12).forEach(item => {
+                if (!item.poster_path) return; // Skip if no poster
+                
+                const card = document.createElement('div');
+                card.className = 'media-search-result';
+                card.innerHTML = `
+                    <img src="${TMDB_IMAGE_BASE}${item.poster_path}" alt="${item.title || item.name}">
+                    <div class="media-search-result-info">
+                        <div class="media-search-result-title">${item.title || item.name}</div>
+                        <div class="media-search-result-year">${extractYear(item.release_date || item.first_air_date)}</div>
+                    </div>
+                `;
+                
+                card.onclick = () => addMediaToProfile(item, type);
+                els.mediaSearchResults.appendChild(card);
+            });
+        }
+    } catch(e) {
+        console.error('Search error:', e);
+        els.mediaSearchResults.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #e74c3c;">Error searching. Please try again.</div>';
+    }
+    
+    els.mediaSearchBtn.disabled = false;
+    els.mediaSearchBtn.textContent = 'Search';
+};
+
+// Add media to profile
+function addMediaToProfile(item, type) {
+    const maxCards = 12;
+    
+    if (currentMediaCards.length >= maxCards) {
+        showStatus(els.mediaStatus, 'warning', `Maximum ${maxCards} cards allowed`);
+        return;
+    }
+    
+    // Check if already added
+    if (currentMediaCards.some(c => c.id === String(item.id))) {
+        showStatus(els.mediaStatus, 'warning', 'Already added!');
+        return;
+    }
+    
+    const mediaCard = {
+        id: String(item.id),
+        type: type,
+        title: item.title || item.name,
+        image: `${TMDB_IMAGE_BASE}${item.poster_path}`,
+        year: extractYear(item.release_date || item.first_air_date),
+        rating: item.vote_average || 0,
+        order: currentMediaCards.length
+    };
+    
+    currentMediaCards.push(mediaCard);
+    renderMediaCards();
+    els.mediaModal.classList.remove('active');
+}
+
+// Remove media card
+function removeMediaCard(cardId) {
+    currentMediaCards = currentMediaCards.filter(c => c.id !== cardId);
+    // Reorder
+    currentMediaCards.forEach((card, i) => card.order = i);
+    renderMediaCards();
+}
+
+// Render media cards in edit/view mode
+function renderMediaCards(isEditMode = false) {
+    // Use edit container if on create/edit page, otherwise use view container
+    const isOnCreatePage = pages.create.classList.contains('active');
+    const container = isOnCreatePage ? els.editMediaCardsContainer : els.mediaCardsContainer;
+    
+    console.log('renderMediaCards called:', {
+        isOnCreatePage,
+        isEditMode,
+        containerExists: !!container,
+        currentMediaCardsCount: currentMediaCards.length,
+        containerDisplay: container ? window.getComputedStyle(container).display : 'N/A',
+        containerWidth: container ? container.offsetWidth : 'N/A',
+        containerHeight: container ? container.offsetHeight : 'N/A'
+    });
+    
+    if (!container) {
+        console.error('Container not found!');
+        return;
+    }
+    
+    // Clear container
+    container.innerHTML = '';
+    
+    // Add existing cards
+    currentMediaCards.forEach(card => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'media-card';
+        cardEl.innerHTML = `
+            <img src="${card.image}" alt="${card.title}">
+            ${isEditMode || isOnCreatePage ? '<div class="media-card-remove">×</div>' : ''}
+            <div class="media-card-overlay">
+                <div class="media-card-title">${card.title}</div>
+                <div class="media-card-year">${card.year}</div>
+                <div class="media-card-rating">⭐ ${card.rating.toFixed(1)}</div>
+            </div>
+        `;
+        
+        if (isEditMode || isOnCreatePage) {
+            const removeBtn = cardEl.querySelector('.media-card-remove');
+            removeBtn.onclick = (e) => {
+                e.stopPropagation();
+                removeMediaCard(card.id);
+            };
+        }
+        
+        container.appendChild(cardEl);
+    });
+    
+    // Add "+" card ONLY if in edit mode or on create page
+    if (isEditMode || isOnCreatePage) {
+        if (currentMediaCards.length < 12) {
+            console.log('Adding + card');
+            const addCard = document.createElement('div');
+            addCard.className = 'add-media-card';
+            // Explicit dimensions instead of relying on aspect-ratio
+            addCard.style.width = '140px';
+            addCard.style.height = '210px'; // 140 * 1.5 = 2:3 ratio
+            addCard.innerHTML = `
+                <div style="font-size: 40px; color: #999;">+</div>
+                <div style="font-size: 11px; color: #999;">Add Media</div>
+            `;
+            addCard.onclick = () => {
+                console.log('+ card clicked');
+                els.mediaModal.classList.add('active');
+                els.mediaSearchInput.value = '';
+                els.mediaSearchResults.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">Search for movies or TV shows to add to your profile</div>';
+            };
+            container.appendChild(addCard);
+            console.log('+ card added with explicit height');
+        }
+    }
+    
+    // Show/hide section (only for view page)
+    if (!isOnCreatePage) {
+        if (currentMediaCards.length > 0 || isEditMode) {
+            els.mediaCardsSection.style.display = 'block';
+        } else {
+            els.mediaCardsSection.style.display = 'none';
+        }
+    }
+}
