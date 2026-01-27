@@ -32,6 +32,8 @@ const els = {
     description: document.getElementById('profileDescription'),
     img: document.getElementById('imageUrl'),
     stream: document.getElementById('streamUrl'),
+    youtubeUrl: document.getElementById('youtubeUrl'),
+    twitchUrl: document.getElementById('twitchUrl'),
     drop: document.getElementById('dropZone'),
     cropCont: document.getElementById('cropContainer'),
     cropImg: document.getElementById('cropImage'),
@@ -47,6 +49,9 @@ const els = {
     viewBio: document.getElementById('viewProfileBio'),
     viewDescription: document.getElementById('viewProfileDescription'),
     viewStream: document.getElementById('viewStream'),
+    socialLinks: document.getElementById('socialLinks'),
+    youtubeLink: document.getElementById('youtubeLink'),
+    twitchLink: document.getElementById('twitchLink'),
     editProfileBtn: document.getElementById('editProfileBtn'),
     loginModal: document.getElementById('loginModal'),
     loginName: document.getElementById('loginProfileName'),
@@ -102,6 +107,10 @@ menu.logout.onclick = () => {
     currentUser = null;
     editingProfileId = null;
     currentViewingProfileId = null;
+    
+    // Clear login state from localStorage
+    localStorage.removeItem('currentUser');
+    
     menu.trigger.style.backgroundImage = '';
     menu.trigger.classList.remove('logged-in');
     menu.myProfile.classList.add('disabled');
@@ -285,6 +294,28 @@ function displayProfile(profile) {
         els.viewDescription.style.display = 'none';
     }
     
+    // Display social media links
+    let hasSocialLinks = false;
+    
+    if (profile.youtubeUrl && profile.youtubeUrl.trim()) {
+        els.youtubeLink.href = profile.youtubeUrl;
+        els.youtubeLink.style.display = 'flex';
+        hasSocialLinks = true;
+    } else {
+        els.youtubeLink.style.display = 'none';
+    }
+    
+    if (profile.twitchUrl && profile.twitchUrl.trim()) {
+        els.twitchLink.href = profile.twitchUrl;
+        els.twitchLink.style.display = 'flex';
+        hasSocialLinks = true;
+    } else {
+        els.twitchLink.style.display = 'none';
+    }
+    
+    // Show/hide social links container
+    els.socialLinks.style.display = hasSocialLinks ? 'flex' : 'none';
+    
     if (profile.imageUrl && profile.cropData) {
         const scale = profile.cropData.zoom / 100;
         const x = profile.cropData.x;
@@ -369,6 +400,12 @@ els.loginBtn.onclick = async () => {
         
         editingProfileId = profileId;
         
+        // Save login state to localStorage
+        localStorage.setItem('currentUser', JSON.stringify({
+            name: profile.name,
+            id: profileId
+        }));
+        
         if (profile.imageUrl && profile.cropData) {
             const scale = profile.cropData.zoom / 100;
             const x = profile.cropData.x;
@@ -403,6 +440,8 @@ function loadProfileForEdit(profile) {
     els.description.value = profile.description || '';
     els.img.value = profile.imageUrl || '';
     els.stream.value = profile.streamUrl || '';
+    els.youtubeUrl.value = profile.youtubeUrl || '';
+    els.twitchUrl.value = profile.twitchUrl || '';
     
     cropData = profile.cropData || {zoom: 100, x: 50, y: 50};
     
@@ -421,6 +460,8 @@ function resetCreateForm() {
     els.description.value = '';
     els.img.value = '';
     els.stream.value = '';
+    els.youtubeUrl.value = '';
+    els.twitchUrl.value = '';
     cropData = {zoom: 100, x: 50, y: 50};
     imageUrl = '';
     els.cropCont.classList.remove('active');
@@ -515,6 +556,8 @@ els.create.onclick = async () => {
     const description = els.description.value.trim();
     const image = els.img.value.trim();
     const stream = els.stream.value.trim();
+    const youtubeUrl = els.youtubeUrl.value.trim();
+    const twitchUrl = els.twitchUrl.value.trim();
     
     if (!name || !password) {
         showStatus(els.createStatus, 'error', 'Name and password required!');
@@ -537,6 +580,8 @@ els.create.onclick = async () => {
         description: description,
         imageUrl: image,
         streamUrl: stream,
+        youtubeUrl: youtubeUrl,
+        twitchUrl: twitchUrl,
         cropData: cropData,
         createdAt: new Date().toISOString()
     };
@@ -588,6 +633,8 @@ els.update.onclick = async () => {
     const description = els.description.value.trim();
     const image = els.img.value.trim();
     const stream = els.stream.value.trim();
+    const youtubeUrl = els.youtubeUrl.value.trim();
+    const twitchUrl = els.twitchUrl.value.trim();
     
     if (!name || !password) {
         showStatus(els.createStatus, 'error', 'Name and password required!');
@@ -603,6 +650,8 @@ els.update.onclick = async () => {
         description: description,
         imageUrl: image,
         streamUrl: stream,
+        youtubeUrl: youtubeUrl,
+        twitchUrl: twitchUrl,
         cropData: cropData,
         updatedAt: new Date().toISOString()
     };
@@ -660,3 +709,47 @@ function showStatus(element, type, message) {
 
 // Initialize
 loadAllProfiles();
+
+// Restore login state from localStorage
+async function restoreLoginState() {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        try {
+            const userData = JSON.parse(savedUser);
+            console.log('Restoring login state for:', userData.name);
+            
+            // Load the profile to get full data
+            const profile = await loadProfile(userData.id);
+            
+            // Set current user
+            currentUser = {
+                name: userData.name,
+                id: userData.id
+            };
+            editingProfileId = userData.id;
+            
+            // Update UI
+            if (profile.imageUrl && profile.cropData) {
+                const scale = profile.cropData.zoom / 100;
+                const x = profile.cropData.x;
+                const y = profile.cropData.y;
+                menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
+                menu.trigger.style.backgroundSize = `${scale * 100}%`;
+                menu.trigger.style.backgroundPosition = `${x}% ${y}%`;
+            }
+            menu.trigger.classList.add('logged-in');
+            menu.myProfile.classList.remove('disabled');
+            menu.login.style.display = 'none';
+            menu.logout.style.display = 'block';
+            
+            console.log('Login state restored successfully');
+        } catch(e) {
+            console.error('Failed to restore login state:', e);
+            // Clear invalid saved data
+            localStorage.removeItem('currentUser');
+        }
+    }
+}
+
+// Restore login on page load
+restoreLoginState();
