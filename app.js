@@ -1218,7 +1218,7 @@ els.mediaSearchBtn.onclick = async () => {
 
 // Add media to profile
 function addMediaToProfile(item, type) {
-    const maxCards = 12;
+    const maxCards = 16;
     
     if (currentMediaCards.length >= maxCards) {
         showStatus(els.mediaStatus, 'warning', `Maximum ${maxCards} cards allowed`);
