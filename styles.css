@@ -159,6 +159,14 @@ input[type="password"] {
     border: 1px solid #ddd;
     font-size: 13px;
 }
+textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    resize: vertical;
+}
 
 .crop-container {
     margin-top: 15px;

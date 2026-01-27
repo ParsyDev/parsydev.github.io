@@ -37,10 +37,14 @@
             <div class="creator-panel">
                 <div class="creator-header" id="createHeader">Create Profile</div>
                 <div class="creator-content">
-                    <div class="field">
-                        <label>Profile Name</label>
-                        <input type="text" id="profileName" placeholder="Your name">
-                    </div>
+                <div class="field">
+                    <label>Profile Name</label>
+                    <input type="text" id="profileName" placeholder="Your name">
+                </div>
+                <div class="field">
+                    <label>Description</label>
+                    <textarea id="profileDescription" ...></textarea>
+                </div>
                     <div class="field">
                         <label>Password (for editing later)</label>
                         <input type="password" id="profilePassword" placeholder="Create a password">
@@ -82,7 +86,7 @@
                 <div class="profile-content">
                     <div class="profile-img" id="viewProfileImg"></div>
                     <div class="profile-name" id="viewProfileName">Profile Name</div>
-                    <div class="profile-bio">Content Creator & Streamer</div>
+                    <div class="profile-description" id="viewProfileDescription"> </div>
                     <div class="profile-stats">
                         <div class="stat">
                             <div class="stat-number">0</div>

@@ -29,6 +29,7 @@ const els = {
     grid: document.getElementById('profilesGrid'),
     name: document.getElementById('profileName'),
     pass: document.getElementById('profilePassword'),
+    description: document.getElementById('profileDescription'),
     img: document.getElementById('imageUrl'),
     stream: document.getElementById('streamUrl'),
     drop: document.getElementById('dropZone'),
@@ -43,6 +44,8 @@ const els = {
     createHeader: document.getElementById('createHeader'),
     viewImg: document.getElementById('viewProfileImg'),
     viewName: document.getElementById('viewProfileName'),
+    viewBio: document.getElementById('viewProfileBio'),
+    viewDescription: document.getElementById('viewProfileDescription'),
     viewStream: document.getElementById('viewStream'),
     editProfileBtn: document.getElementById('editProfileBtn'),
     loginModal: document.getElementById('loginModal'),
@@ -274,6 +277,14 @@ async function viewProfile(id) {
 function displayProfile(profile) {
     els.viewName.textContent = profile.name;
     
+    // Display description if available
+    if (profile.description && profile.description.trim()) {
+        els.viewDescription.textContent = profile.description;
+        els.viewDescription.style.display = 'block';
+    } else {
+        els.viewDescription.style.display = 'none';
+    }
+    
     if (profile.imageUrl && profile.cropData) {
         const scale = profile.cropData.zoom / 100;
         const x = profile.cropData.x;
@@ -389,6 +400,7 @@ function loadProfileForEdit(profile) {
     els.createHeader.textContent = 'Edit Your Profile';
     els.name.value = profile.name;
     els.pass.value = profile.password;
+    els.description.value = profile.description || '';
     els.img.value = profile.imageUrl || '';
     els.stream.value = profile.streamUrl || '';
     
@@ -406,6 +418,7 @@ function resetCreateForm() {
     els.createHeader.textContent = 'Create Profile';
     els.name.value = '';
     els.pass.value = '';
+    els.description.value = '';
     els.img.value = '';
     els.stream.value = '';
     cropData = {zoom: 100, x: 50, y: 50};
@@ -499,6 +512,7 @@ function getStreamEmbedUrl(url) {
 els.create.onclick = async () => {
     const name = els.name.value.trim();
     const password = els.pass.value.trim();
+    const description = els.description.value.trim();
     const image = els.img.value.trim();
     const stream = els.stream.value.trim();
     
@@ -520,6 +534,7 @@ els.create.onclick = async () => {
     const profileData = {
         name: name,
         password: password,
+        description: description,
         imageUrl: image,
         streamUrl: stream,
         cropData: cropData,
@@ -544,6 +559,7 @@ els.create.onclick = async () => {
         });
         
         const result = await response.json();
+        console.log('Create profile response:', result);
         
         if (result.id) {
             registry[name] = result.id;
@@ -555,9 +571,11 @@ els.create.onclick = async () => {
                 loadAllProfiles();
             }, 2000);
         } else {
-            showStatus(els.createStatus, 'error', 'Failed to create profile');
+            console.error('No ID in response:', result);
+            showStatus(els.createStatus, 'error', `Failed to create profile: ${result.message || 'Unknown error'}`);
         }
     } catch(e) {
+        console.error('Create profile error:', e);
         showStatus(els.createStatus, 'error', 'Error: ' + e.message);
     }
     
@@ -567,6 +585,7 @@ els.create.onclick = async () => {
 els.update.onclick = async () => {
     const name = els.name.value.trim();
     const password = els.pass.value.trim();
+    const description = els.description.value.trim();
     const image = els.img.value.trim();
     const stream = els.stream.value.trim();
     
@@ -581,6 +600,7 @@ els.update.onclick = async () => {
     const profileData = {
         name: name,
         password: password,
+        description: description,
         imageUrl: image,
         streamUrl: stream,
         cropData: cropData,
