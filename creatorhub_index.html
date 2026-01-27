@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="site-background" id="siteBackground"></div>
     <div class="nav">
         <div class="nav-title">Creator Hub</div>
         <div class="profile-menu">
@@ -50,20 +51,33 @@
                         <textarea id="profileDescription" placeholder="Tell us about yourself..." rows="4" style="width: 100%; padding: 8px; border: 1px solid #ddd; font-size: 13px; font-family: Arial, sans-serif; resize: vertical;"></textarea>
                     </div>
                     <div class="field">
-                        <label>Profile Image URL</label>
-                        <div class="drop-zone" id="dropZone">Drag URL here</div>
-                        <input type="text" id="imageUrl" placeholder="or enter URL">
+                        <label>Profile Images</label>
+                        <select id="imageType" style="margin-bottom: 10px;">
+                            <option value="profile">Profile Picture</option>
+                            <option value="banner">Banner Image</option>
+                            <option value="background">Background Image</option>
+                        </select>
+                        <div class="drop-zone" id="dropZone">Drop image URL here or paste below</div>
+                        <div style="display: flex; gap: 5px;">
+                            <input type="text" id="imageUrl" placeholder="Paste image URL" style="flex: 1;">
+                            <button type="button" id="clearImage" style="width: auto; padding: 8px 15px; background: #e74c3c; margin: 0;">✕ Clear</button>
+                        </div>
+                        
                         <div class="crop-container" id="cropContainer">
                             <label>Crop Image</label>
-                            <div class="crop-preview">
-                                <img class="crop-image" id="cropImage">
+                            <div class="crop-instructions">Click and drag to select crop area. Drag corners to resize.</div>
+                            <div class="crop-canvas-wrapper">
+                                <canvas id="cropCanvas"></canvas>
+                                <div class="crop-overlay" id="cropOverlay">
+                                    <div class="crop-box" id="cropBox">
+                                        <div class="crop-handle top-left"></div>
+                                        <div class="crop-handle top-right"></div>
+                                        <div class="crop-handle bottom-left"></div>
+                                        <div class="crop-handle bottom-right"></div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="crop-label">Zoom</div>
-                            <input type="range" class="crop-slider" id="zoom" min="100" max="300" value="100">
-                            <div class="crop-label">Position X</div>
-                            <input type="range" class="crop-slider" id="posX" min="0" max="100" value="50">
-                            <div class="crop-label">Position Y</div>
-                            <input type="range" class="crop-slider" id="posY" min="0" max="100" value="50">
+                            <button type="button" id="applyCrop" style="background: #27ae60; margin-top: 10px;">✓ Apply Crop</button>
                         </div>
                     </div>
                     <div class="field">
@@ -95,11 +109,11 @@
     <div class="page" id="viewPage">
         <div class="view-container">
             <div class="profile-container">
-                <div class="profile-header"></div>
-                <div class="profile-content">
+                <div class="profile-header" id="viewBannerImg"></div>
+                <div class="profile-content" id="viewProfileContent">
                     <div class="profile-img" id="viewProfileImg"></div>
                     <div class="profile-name" id="viewProfileName">Profile Name</div>
-                    <div class="profile-bio" id="viewProfileBio">Content Creator & Streamer</div>
+                    <div class="profile-bio" id="viewProfileBio" style="display: none;"></div>
                     <div class="profile-description" id="viewProfileDescription" style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-left: 3px solid #333; color: #555; font-size: 14px; line-height: 1.6; display: none;"></div>
                     <div class="profile-stats">
                         <div class="stat social-links" id="socialLinks" style="display: none; justify-content: center; width: 100%;">
@@ -139,6 +153,7 @@
         </div>
     </div>
 
+    <script src="cropper.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

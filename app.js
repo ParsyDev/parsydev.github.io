@@ -1,10 +1,13 @@
-// Your Cloudflare Worker URL - this proxies requests to GitHub API securely
 const API_URL = 'https://creator-hub-api.emdejiku.workers.dev';
 
 const REG = '5d51e42426b9f95c110b7c92e4ac7bfe';
 let registry = {};
-let cropData = {zoom: 100, x: 50, y: 50};
-let imageUrl = '';
+let currentImageType = 'profile'; // Track which image we're editing
+let imageCrops = {
+    profile: { url: '', crop: null },
+    banner: { url: '', crop: null },
+    background: { url: '', crop: null }
+};
 let editingProfileId = null;
 let currentUser = null;
 let currentViewingProfileId = null;
@@ -31,15 +34,14 @@ const els = {
     pass: document.getElementById('profilePassword'),
     description: document.getElementById('profileDescription'),
     img: document.getElementById('imageUrl'),
+    imageType: document.getElementById('imageType'),
+    clearImage: document.getElementById('clearImage'),
     stream: document.getElementById('streamUrl'),
     youtubeUrl: document.getElementById('youtubeUrl'),
     twitchUrl: document.getElementById('twitchUrl'),
     drop: document.getElementById('dropZone'),
     cropCont: document.getElementById('cropContainer'),
-    cropImg: document.getElementById('cropImage'),
-    zoom: document.getElementById('zoom'),
-    posX: document.getElementById('posX'),
-    posY: document.getElementById('posY'),
+    applyCrop: document.getElementById('applyCrop'),
     create: document.getElementById('createProfile'),
     update: document.getElementById('updateProfile'),
     createStatus: document.getElementById('createStatus'),
@@ -48,6 +50,9 @@ const els = {
     viewName: document.getElementById('viewProfileName'),
     viewBio: document.getElementById('viewProfileBio'),
     viewDescription: document.getElementById('viewProfileDescription'),
+    viewBannerImg: document.getElementById('viewBannerImg'),
+    viewProfileContent: document.getElementById('viewProfileContent'),
+    siteBackground: document.getElementById('siteBackground'),
     viewStream: document.getElementById('viewStream'),
     socialLinks: document.getElementById('socialLinks'),
     youtubeLink: document.getElementById('youtubeLink'),
@@ -66,6 +71,16 @@ function showPage(pageName) {
     Object.values(pages).forEach(p => p.classList.remove('active'));
     pages[pageName].classList.add('active');
     menu.dropdown.classList.remove('active');
+    
+    // Hide crop UI when switching pages
+    if (pageName === 'browse' || pageName === 'view') {
+        els.cropCont.classList.remove('active');
+    }
+    
+    // Clear site background when not viewing a profile
+    if (pageName !== 'view' && els.siteBackground) {
+        els.siteBackground.style.backgroundImage = '';
+    }
 }
 
 // Dropdown toggle
@@ -244,13 +259,41 @@ function createProfileCard(profile, id) {
     
     const img = document.createElement('div');
     img.className = 'profile-card-img';
-    if (profile.imageUrl && profile.cropData) {
-        const scale = profile.cropData.zoom / 100;
-        const x = profile.cropData.x;
-        const y = profile.cropData.y;
-        img.style.backgroundImage = `url(${profile.imageUrl})`;
-        img.style.backgroundSize = `${scale * 100}%`;
-        img.style.backgroundPosition = `${x}% ${y}%`;
+    
+    // Handle both new and old crop formats
+    if (profile.imageUrl) {
+        try {
+            if (profile.profileCrop && profile.profileCrop.width > 0) {
+                // New format
+                const crop = profile.profileCrop;
+                const scale = 100 / (crop.width * 100);
+                const offsetX = -(crop.x * 100) * scale;
+                const offsetY = -(crop.y * 100) * scale;
+                
+                img.style.backgroundImage = `url(${profile.imageUrl})`;
+                img.style.backgroundSize = `${scale * 100}%`;
+                img.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
+            } else if (profile.cropData) {
+                // Old format (backwards compatibility)
+                const scale = profile.cropData.zoom / 100;
+                const x = profile.cropData.x;
+                const y = profile.cropData.y;
+                img.style.backgroundImage = `url(${profile.imageUrl})`;
+                img.style.backgroundSize = `${scale * 100}%`;
+                img.style.backgroundPosition = `${x}% ${y}%`;
+            } else {
+                // No crop data
+                img.style.backgroundImage = `url(${profile.imageUrl})`;
+                img.style.backgroundSize = 'cover';
+                img.style.backgroundPosition = 'center';
+            }
+        } catch(e) {
+            console.error('Error displaying profile card image:', e);
+            // Fallback to simple display
+            img.style.backgroundImage = `url(${profile.imageUrl})`;
+            img.style.backgroundSize = 'cover';
+            img.style.backgroundPosition = 'center';
+        }
     }
     
     const name = document.createElement('div');
@@ -294,6 +337,38 @@ function displayProfile(profile) {
         els.viewDescription.style.display = 'none';
     }
     
+    // Display banner image
+    if (profile.bannerUrl && profile.bannerCrop) {
+        const crop = profile.bannerCrop;
+        // Scale: Make the crop width fill 100% of container
+        const scale = 100 / (crop.width * 100); // Convert to percentage
+        // Position: Move image so crop area is visible (negative offset)
+        const offsetX = -(crop.x * 100) * scale;
+        const offsetY = -(crop.y * 100) * scale;
+        
+        els.viewBannerImg.style.backgroundImage = `url(${profile.bannerUrl})`;
+        els.viewBannerImg.style.backgroundSize = `${scale * 100}%`;
+        els.viewBannerImg.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
+    } else {
+        els.viewBannerImg.style.backgroundImage = '';
+    }
+    
+    // Display background image (only if element exists)
+    if (els.siteBackground) {
+        if (profile.backgroundUrl && profile.backgroundCrop) {
+            const crop = profile.backgroundCrop;
+            const scale = 100 / (crop.width * 100);
+            const offsetX = -(crop.x * 100) * scale;
+            const offsetY = -(crop.y * 100) * scale;
+            
+            els.siteBackground.style.backgroundImage = `url(${profile.backgroundUrl})`;
+            els.siteBackground.style.backgroundSize = `${scale * 100}%`;
+            els.siteBackground.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
+        } else {
+            els.siteBackground.style.backgroundImage = '';
+        }
+    }
+    
     // Display social media links
     let hasSocialLinks = false;
     
@@ -316,13 +391,32 @@ function displayProfile(profile) {
     // Show/hide social links container
     els.socialLinks.style.display = hasSocialLinks ? 'flex' : 'none';
     
-    if (profile.imageUrl && profile.cropData) {
-        const scale = profile.cropData.zoom / 100;
-        const x = profile.cropData.x;
-        const y = profile.cropData.y;
-        els.viewImg.style.backgroundImage = `url(${profile.imageUrl})`;
-        els.viewImg.style.backgroundSize = `${scale * 100}%`;
-        els.viewImg.style.backgroundPosition = `${x}% ${y}%`;
+    // Display profile picture
+    if (profile.imageUrl) {
+        if (profile.profileCrop) {
+            // New format
+            const crop = profile.profileCrop;
+            const scale = 100 / (crop.width * 100);
+            const offsetX = -(crop.x * 100) * scale;
+            const offsetY = -(crop.y * 100) * scale;
+            
+            els.viewImg.style.backgroundImage = `url(${profile.imageUrl})`;
+            els.viewImg.style.backgroundSize = `${scale * 100}%`;
+            els.viewImg.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
+        } else if (profile.cropData) {
+            // Old format (backwards compatibility)
+            const scale = profile.cropData.zoom / 100;
+            const x = profile.cropData.x;
+            const y = profile.cropData.y;
+            els.viewImg.style.backgroundImage = `url(${profile.imageUrl})`;
+            els.viewImg.style.backgroundSize = `${scale * 100}%`;
+            els.viewImg.style.backgroundPosition = `${x}% ${y}%`;
+        } else {
+            // No crop data, just show the image
+            els.viewImg.style.backgroundImage = `url(${profile.imageUrl})`;
+            els.viewImg.style.backgroundSize = 'cover';
+            els.viewImg.style.backgroundPosition = 'center';
+        }
     } else {
         els.viewImg.style.backgroundImage = '';
     }
@@ -406,13 +500,26 @@ els.loginBtn.onclick = async () => {
             id: profileId
         }));
         
-        if (profile.imageUrl && profile.cropData) {
-            const scale = profile.cropData.zoom / 100;
-            const x = profile.cropData.x;
-            const y = profile.cropData.y;
-            menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
-            menu.trigger.style.backgroundSize = `${scale * 100}%`;
-            menu.trigger.style.backgroundPosition = `${x}% ${y}%`;
+        if (profile.imageUrl) {
+            if (profile.profileCrop) {
+                // New format
+                const crop = profile.profileCrop;
+                const scale = 100 / (crop.width * 100);
+                const offsetX = -(crop.x * 100) * scale;
+                const offsetY = -(crop.y * 100) * scale;
+                
+                menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
+                menu.trigger.style.backgroundSize = `${scale * 100}%`;
+                menu.trigger.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
+            } else if (profile.cropData) {
+                // Old format (backwards compatibility)
+                const scale = profile.cropData.zoom / 100;
+                const x = profile.cropData.x;
+                const y = profile.cropData.y;
+                menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
+                menu.trigger.style.backgroundSize = `${scale * 100}%`;
+                menu.trigger.style.backgroundPosition = `${x}% ${y}%`;
+            }
         }
         menu.trigger.classList.add('logged-in');
         menu.myProfile.classList.remove('disabled');
@@ -438,15 +545,34 @@ function loadProfileForEdit(profile) {
     els.name.value = profile.name;
     els.pass.value = profile.password;
     els.description.value = profile.description || '';
-    els.img.value = profile.imageUrl || '';
     els.stream.value = profile.streamUrl || '';
     els.youtubeUrl.value = profile.youtubeUrl || '';
     els.twitchUrl.value = profile.twitchUrl || '';
     
-    cropData = profile.cropData || {zoom: 100, x: 50, y: 50};
+    // Load profile picture
+    imageCrops.profile = {
+        url: profile.imageUrl || '',
+        crop: profile.profileCrop || null
+    };
     
-    if (profile.imageUrl) {
-        loadImage(profile.imageUrl);
+    // Load banner
+    imageCrops.banner = {
+        url: profile.bannerUrl || '',
+        crop: profile.bannerCrop || null
+    };
+    
+    // Load background
+    imageCrops.background = {
+        url: profile.backgroundUrl || '',
+        crop: profile.backgroundCrop || null
+    };
+    
+    // Show profile image by default
+    els.imageType.value = 'profile';
+    currentImageType = 'profile';
+    if (imageCrops.profile.url) {
+        els.img.value = imageCrops.profile.url;
+        // Don't load immediately, wait for user to interact
     }
     
     els.create.style.display = 'none';
@@ -462,15 +588,34 @@ function resetCreateForm() {
     els.stream.value = '';
     els.youtubeUrl.value = '';
     els.twitchUrl.value = '';
-    cropData = {zoom: 100, x: 50, y: 50};
-    imageUrl = '';
+    
+    imageCrops = {
+        profile: { url: '', crop: null },
+        banner: { url: '', crop: null },
+        background: { url: '', crop: null }
+    };
+    
+    currentImageType = 'profile';
+    els.imageType.value = 'profile';
     els.cropCont.classList.remove('active');
     els.create.style.display = 'block';
     els.update.style.display = 'none';
     editingProfileId = null;
 }
 
-// Image handling
+// Image handling with new cropper
+els.imageType.onchange = () => {
+    currentImageType = els.imageType.value;
+    // Load existing image URL for this type if available, but don't open crop UI
+    if (imageCrops[currentImageType].url) {
+        els.img.value = imageCrops[currentImageType].url;
+        // Don't auto-load crop UI, let user click input to trigger it
+    } else {
+        els.img.value = '';
+        els.cropCont.classList.remove('active');
+    }
+};
+
 els.drop.ondragover = (e) => {
     e.preventDefault();
     els.drop.classList.add('dragover');
@@ -498,39 +643,43 @@ els.img.oninput = (e) => {
     }
 };
 
+els.clearImage.onclick = () => {
+    // Clear the current image type
+    imageCrops[currentImageType].url = '';
+    imageCrops[currentImageType].crop = null;
+    els.img.value = '';
+    els.cropCont.classList.remove('active');
+};
+
 function loadImage(url) {
-    imageUrl = url;
-    els.cropImg.src = url;
+    if (!url) return;
+    cropper.loadImage(url);
     els.cropCont.classList.add('active');
-    cropData = {zoom: 100, x: 50, y: 50};
-    els.zoom.value = 100;
-    els.posX.value = 50;
-    els.posY.value = 50;
-    updateCropPreview();
+    
+    // Store URL for current image type
+    imageCrops[currentImageType].url = url;
 }
 
-els.zoom.oninput = () => {
-    cropData.zoom = parseInt(els.zoom.value);
-    updateCropPreview();
+els.applyCrop.onclick = () => {
+    // Save crop data for current image type
+    imageCrops[currentImageType].crop = cropper.getCropData();
+    
+    // Hide the crop UI
+    els.cropCont.classList.remove('active');
+    
+    // Show success message
+    alert(`✓ ${currentImageType.charAt(0).toUpperCase() + currentImageType.slice(1)} crop saved!`);
 };
 
-els.posX.oninput = () => {
-    cropData.x = parseInt(els.posX.value);
-    updateCropPreview();
-};
-
-els.posY.oninput = () => {
-    cropData.y = parseInt(els.posY.value);
-    updateCropPreview();
-};
-
-function updateCropPreview() {
-    const scale = cropData.zoom / 100;
-    const x = cropData.x;
-    const y = cropData.y;
-    els.cropImg.style.transform = `scale(${scale})`;
-    els.cropImg.style.left = `${50 - x * scale}%`;
-    els.cropImg.style.top = `${50 - y * scale}%`;
+// Format numbers with K/M suffixes
+function formatNumber(num) {
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+    }
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
 }
 
 // Stream handling
@@ -578,11 +727,15 @@ els.create.onclick = async () => {
         name: name,
         password: password,
         description: description,
-        imageUrl: image,
+        imageUrl: imageCrops.profile.url,
+        profileCrop: imageCrops.profile.crop,
+        bannerUrl: imageCrops.banner.url,
+        bannerCrop: imageCrops.banner.crop,
+        backgroundUrl: imageCrops.background.url,
+        backgroundCrop: imageCrops.background.crop,
         streamUrl: stream,
         youtubeUrl: youtubeUrl,
         twitchUrl: twitchUrl,
-        cropData: cropData,
         createdAt: new Date().toISOString()
     };
     
@@ -648,11 +801,15 @@ els.update.onclick = async () => {
         name: name,
         password: password,
         description: description,
-        imageUrl: image,
+        imageUrl: imageCrops.profile.url,
+        profileCrop: imageCrops.profile.crop,
+        bannerUrl: imageCrops.banner.url,
+        bannerCrop: imageCrops.banner.crop,
+        backgroundUrl: imageCrops.background.url,
+        backgroundCrop: imageCrops.background.crop,
         streamUrl: stream,
         youtubeUrl: youtubeUrl,
         twitchUrl: twitchUrl,
-        cropData: cropData,
         updatedAt: new Date().toISOString()
     };
     
@@ -672,13 +829,16 @@ els.update.onclick = async () => {
         });
         
         if (response.ok) {
-            if (profileData.imageUrl && profileData.cropData) {
-                const scale = profileData.cropData.zoom / 100;
-                const x = profileData.cropData.x;
-                const y = profileData.cropData.y;
+            // Update nav profile pic if present
+            if (profileData.imageUrl && profileData.profileCrop) {
+                const crop = profileData.profileCrop;
+                const scale = 100 / (crop.width * 100);
+                const offsetX = -(crop.x * 100) * scale;
+                const offsetY = -(crop.y * 100) * scale;
+                
                 menu.trigger.style.backgroundImage = `url(${profileData.imageUrl})`;
                 menu.trigger.style.backgroundSize = `${scale * 100}%`;
-                menu.trigger.style.backgroundPosition = `${x}% ${y}%`;
+                menu.trigger.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
             }
             
             showStatus(els.createStatus, 'success', '✅ Profile updated!');
@@ -729,13 +889,26 @@ async function restoreLoginState() {
             editingProfileId = userData.id;
             
             // Update UI
-            if (profile.imageUrl && profile.cropData) {
-                const scale = profile.cropData.zoom / 100;
-                const x = profile.cropData.x;
-                const y = profile.cropData.y;
-                menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
-                menu.trigger.style.backgroundSize = `${scale * 100}%`;
-                menu.trigger.style.backgroundPosition = `${x}% ${y}%`;
+            if (profile.imageUrl) {
+                if (profile.profileCrop) {
+                    // New format
+                    const crop = profile.profileCrop;
+                    const scale = 100 / (crop.width * 100);
+                    const offsetX = -(crop.x * 100) * scale;
+                    const offsetY = -(crop.y * 100) * scale;
+                    
+                    menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
+                    menu.trigger.style.backgroundSize = `${scale * 100}%`;
+                    menu.trigger.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
+                } else if (profile.cropData) {
+                    // Old format (backwards compatibility)
+                    const scale = profile.cropData.zoom / 100;
+                    const x = profile.cropData.x;
+                    const y = profile.cropData.y;
+                    menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
+                    menu.trigger.style.backgroundSize = `${scale * 100}%`;
+                    menu.trigger.style.backgroundPosition = `${x}% ${y}%`;
+                }
             }
             menu.trigger.classList.add('logged-in');
             menu.myProfile.classList.remove('disabled');
