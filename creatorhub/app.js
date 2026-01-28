@@ -136,6 +136,24 @@ menu.browse.onclick = () => {
     loadAllProfiles();
 };
 
+// Logo and title click to go to browse page
+const navTitle = document.querySelector('.nav-title');
+const navLogo = document.querySelector('.nav-logo');
+if (navTitle) {
+    navTitle.onclick = () => {
+        showPage('browse', null, true);
+        loadAllProfiles();
+    };
+    navTitle.style.cursor = 'pointer';
+}
+if (navLogo) {
+    navLogo.onclick = () => {
+        showPage('browse', null, true);
+        loadAllProfiles();
+    };
+    navLogo.style.cursor = 'pointer';
+}
+
 // Refresh button handler
 if (els.refreshBtn) {
     els.refreshBtn.onclick = async () => {
@@ -1394,21 +1412,13 @@ function handleUrlHash() {
     }
 }
 
-// Set initial history state
-if (!window.history.state) {
+// Set initial history state ONLY if there's no hash in URL
+if (!window.history.state && !window.location.hash) {
     window.history.replaceState({ page: 'browse', profileId: null }, '', '#browse');
 }
 
-// Check URL on load - CALL IT IMMEDIATELY, don't wait for DOM
+// Check URL on load - CALL IT IMMEDIATELY
 handleUrlHash();
-
-// Also handle when DOM is ready (in case scripts load before DOM)
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', handleUrlHash);
-} else {
-    // DOM already loaded, ensure we handle the hash
-    handleUrlHash();
-}
 
 // Also handle URL hash changes manually (for links)
 window.addEventListener('hashchange', handleUrlHash);
