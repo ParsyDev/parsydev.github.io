@@ -14,6 +14,7 @@ let editingProfileId = null;
 let currentUser = null;
 let currentViewingProfileId = null;
 let currentMediaCards = []; // Track media cards being edited
+let currentCustomSocialLinks = []; // Track custom social links being edited
 
 const pages = {
     browse: document.getElementById('browsePage'),
@@ -45,6 +46,14 @@ const els = {
     youtubeUrl: document.getElementById('youtubeUrl'),
     twitchUrl: document.getElementById('twitchUrl'),
     instagramUrl: document.getElementById('instagramUrl'),
+    customSocialLinksContainer: document.getElementById('customSocialLinksContainer'),
+    customSocialModal: document.getElementById('customSocialModal'),
+    customSocialUrl: document.getElementById('customSocialUrl'),
+    customSocialName: document.getElementById('customSocialName'),
+    addCustomSocialBtn: document.getElementById('addCustomSocialBtn'),
+    closeCustomSocialModal: document.getElementById('closeCustomSocialModal'),
+    customSocialStatus: document.getElementById('customSocialStatus'),
+    customSocialLinksDisplay: document.getElementById('customSocialLinksDisplay'),
     drop: document.getElementById('dropZone'),
     cropCont: document.getElementById('cropContainer'),
     applyCrop: document.getElementById('applyCrop'),
@@ -462,6 +471,19 @@ function displayProfile(profile) {
     // Display social media links
     let hasSocialLinks = false;
     
+    // Helper function to get favicon/logo from URL
+    function getFaviconUrl(url) {
+        try {
+            const urlObj = new URL(url);
+            const domain = urlObj.hostname;
+            // Use Google's favicon service as primary, with Clearbit as fallback
+            return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+        } catch (e) {
+            console.error('Invalid URL for favicon:', url);
+            return '';
+        }
+    }
+    
     if (profile.youtubeUrl && profile.youtubeUrl.trim()) {
         els.youtubeLink.href = profile.youtubeUrl;
         els.youtubeLink.style.display = 'flex';
@@ -484,6 +506,72 @@ function displayProfile(profile) {
         hasSocialLinks = true;
     } else {
         els.instagramLink.style.display = 'none';
+    }
+    
+    // Display custom social links
+    if (els.customSocialLinksDisplay) {
+        els.customSocialLinksDisplay.innerHTML = '';
+        
+        if (profile.customSocialLinks && profile.customSocialLinks.length > 0) {
+            profile.customSocialLinks.forEach(link => {
+                const linkEl = document.createElement('a');
+                linkEl.href = link.url;
+                linkEl.target = '_blank';
+                linkEl.title = link.name || link.url;
+                linkEl.style.display = 'flex';
+                linkEl.style.flexDirection = 'column';
+                linkEl.style.alignItems = 'center';
+                linkEl.style.textDecoration = 'none';
+                linkEl.style.transition = 'transform 0.2s, opacity 0.2s';
+                linkEl.style.gap = '5px';
+                
+                const faviconUrl = getFaviconUrl(link.url);
+                const img = document.createElement('img');
+                img.src = faviconUrl;
+                img.alt = link.name || 'Social';
+                img.style.width = '48px';
+                img.style.height = '48px';
+                img.style.borderRadius = '8px';
+                img.style.objectFit = 'contain';
+                img.style.background = 'white';
+                img.style.padding = '4px';
+                
+                img.onerror = function() {
+                    // Fallback to Clearbit if Google fails
+                    try {
+                        const urlObj = new URL(link.url);
+                        this.src = `https://logo.clearbit.com/${urlObj.hostname}`;
+                        this.onerror = function() {
+                            // Final fallback to generic link icon
+                            this.style.display = 'none';
+                            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                            svg.setAttribute('width', '48');
+                            svg.setAttribute('height', '48');
+                            svg.setAttribute('viewBox', '0 0 24 24');
+                            svg.setAttribute('fill', '#999');
+                            svg.innerHTML = '<path d="M3.9,12C3.9,10.29 5.29,8.9 7,8.9H11V7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H11V15.1H7C5.29,15.1 3.9,13.71 3.9,12M8,13H16V11H8V13M17,7H13V8.9H17C18.71,8.9 20.1,10.29 20.1,12C20.1,13.71 18.71,15.1 17,15.1H13V17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7Z"/>';
+                            linkEl.insertBefore(svg, this);
+                        };
+                    } catch (e) {
+                        console.error('Error loading fallback icon:', e);
+                    }
+                };
+                
+                linkEl.appendChild(img);
+                
+                linkEl.onmouseover = function() {
+                    this.style.transform = 'scale(1.15)';
+                    this.style.opacity = '0.8';
+                };
+                linkEl.onmouseout = function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.opacity = '1';
+                };
+                
+                els.customSocialLinksDisplay.appendChild(linkEl);
+                hasSocialLinks = true;
+            });
+        }
     }
     
     // Show/hide social links container
@@ -595,6 +683,9 @@ function displayProfile(profile) {
     // Display media cards
     currentMediaCards = profile.mediaCards || [];
     renderMediaCards(false); // false = viewing mode, not editing
+    
+    // Load custom social links
+    currentCustomSocialLinks = profile.customSocialLinks || [];
 }
 
 async function loadProfile(id) {
@@ -819,6 +910,63 @@ document.addEventListener('paste', (e) => {
     }
 });
 
+// Restore login state from localStorage
+async function restoreLoginState() {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        try {
+            const userData = JSON.parse(savedUser);
+            console.log('Restoring login state for:', userData.name);
+            
+            // Load the profile to get full data
+            const profile = await loadProfile(userData.id);
+            
+            // Set current user
+            currentUser = {
+                name: userData.name,
+                id: userData.id
+            };
+            editingProfileId = userData.id;
+            
+            // Update UI
+            if (profile.imageUrl) {
+                if (profile.profileCrop) {
+                    // New format
+                    const crop = profile.profileCrop;
+                    const scale = 100 / (crop.width * 100);
+                    const offsetX = -(crop.x * 100) * scale;
+                    const offsetY = -(crop.y * 100) * scale;
+                    
+                    menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
+                    menu.trigger.style.backgroundSize = `${scale * 100}%`;
+                    menu.trigger.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
+                } else if (profile.cropData) {
+                    // Old format (backwards compatibility)
+                    const scale = profile.cropData.zoom / 100;
+                    const x = profile.cropData.x;
+                    const y = profile.cropData.y;
+                    menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
+                    menu.trigger.style.backgroundSize = `${scale * 100}%`;
+                    menu.trigger.style.backgroundPosition = `${x}% ${y}%`;
+                }
+            }
+            menu.trigger.classList.add('logged-in');
+            menu.myProfile.classList.remove('disabled');
+            menu.login.style.display = 'none';
+            menu.logout.style.display = 'block';
+            
+            console.log('Login state restored successfully');
+        } catch(e) {
+            console.error('Failed to restore login state:', e);
+            // Clear invalid saved data
+            localStorage.removeItem('currentUser');
+        }
+    }
+}
+
+// Restore login on page load
+restoreLoginState();
+
 // Profile search
 let allProfileCards = [];
 els.profileSearch.oninput = (e) => {
@@ -938,6 +1086,7 @@ els.create.onclick = async () => {
         youtubeUrl: youtubeUrl,
         twitchUrl: twitchUrl,
         instagramUrl: instagramUrl,
+        customSocialLinks: currentCustomSocialLinks,
         cardStyle: cardStyle,
         cardColor: cardColor,
         cardColorGradient: cardColorGradient,
@@ -985,7 +1134,7 @@ els.create.onclick = async () => {
                         content: JSON.stringify(profileData, null, 2)
                     }
                 },
-                description: `Creator Hub Profile: ${name}`,
+                description: `Parsona Profile: ${name}`,
                 public: true
             })
         });
@@ -1092,6 +1241,7 @@ els.update.onclick = async () => {
         youtubeUrl: youtubeUrl,
         twitchUrl: twitchUrl,
         instagramUrl: instagramUrl,
+        customSocialLinks: currentCustomSocialLinks,
         cardStyle: cardStyle,
         cardColor: cardColor,
         cardColorGradient: cardColorGradient,
@@ -1250,6 +1400,10 @@ function resetCreateForm() {
     els.twitchUrl.value = '';
     els.instagramUrl.value = '';
     
+    // Reset custom social links
+    currentCustomSocialLinks = [];
+    renderCustomSocialLinks();
+    
     // Reset image crops
     imageCrops = {
         profile: { url: '', crop: null },
@@ -1286,6 +1440,10 @@ function loadProfileForEdit(profile) {
     els.youtubeUrl.value = profile.youtubeUrl || '';
     els.twitchUrl.value = profile.twitchUrl || '';
     els.instagramUrl.value = profile.instagramUrl || '';
+    
+    // Load custom social links
+    currentCustomSocialLinks = profile.customSocialLinks || [];
+    renderCustomSocialLinks();
     
     // Load images
     imageCrops.profile = {
@@ -1635,3 +1793,107 @@ function renderMediaCards(isEditMode) {
         }
     }
 }
+
+// ==================== CUSTOM SOCIAL LINKS ====================
+
+// Render custom social links in edit mode
+function renderCustomSocialLinks() {
+    const container = els.customSocialLinksContainer;
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    // Add existing links
+    currentCustomSocialLinks.forEach((link, index) => {
+        const item = document.createElement('div');
+        item.className = 'custom-social-item';
+        
+        const faviconUrl = `https://www.google.com/s2/favicons?domain=${extractDomain(link.url)}&sz=64`;
+        
+        item.innerHTML = `
+            <img src="${faviconUrl}" alt="icon" onerror="this.style.display='none'">
+            <div class="custom-social-item-text">${link.name || extractDomain(link.url)}</div>
+            <div class="custom-social-item-remove">×</div>
+        `;
+        
+        const removeBtn = item.querySelector('.custom-social-item-remove');
+        removeBtn.onclick = () => removeCustomSocialLink(index);
+        
+        container.appendChild(item);
+    });
+    
+    // Add "+" button
+    const addBtn = document.createElement('div');
+    addBtn.className = 'add-custom-social-btn';
+    addBtn.innerHTML = '<span style="font-size: 20px;">+</span> Add Social Link';
+    addBtn.onclick = () => {
+        els.customSocialModal.classList.add('active');
+        els.customSocialUrl.value = '';
+        els.customSocialName.value = '';
+    };
+    
+    container.appendChild(addBtn);
+}
+
+// Extract domain from URL
+function extractDomain(url) {
+    try {
+        const urlObj = new URL(url);
+        return urlObj.hostname.replace('www.', '');
+    } catch (e) {
+        return url;
+    }
+}
+
+// Add custom social link
+function addCustomSocialLink() {
+    const url = els.customSocialUrl.value.trim();
+    const name = els.customSocialName.value.trim();
+    
+    if (!url) {
+        showStatus(els.customSocialStatus, 'error', 'URL is required!');
+        return;
+    }
+    
+    // Validate URL
+    try {
+        new URL(url);
+    } catch (e) {
+        showStatus(els.customSocialStatus, 'error', 'Invalid URL!');
+        return;
+    }
+    
+    // Check limit
+    if (currentCustomSocialLinks.length >= 10) {
+        showStatus(els.customSocialStatus, 'error', 'Maximum 10 links allowed!');
+        return;
+    }
+    
+    // Add link
+    currentCustomSocialLinks.push({
+        url: url,
+        name: name || extractDomain(url)
+    });
+    
+    renderCustomSocialLinks();
+    els.customSocialModal.classList.remove('active');
+    showStatus(els.customSocialStatus, 'success', 'Link added!');
+    setTimeout(() => els.customSocialStatus.style.display = 'none', 2000);
+}
+
+// Remove custom social link
+function removeCustomSocialLink(index) {
+    currentCustomSocialLinks.splice(index, 1);
+    renderCustomSocialLinks();
+}
+
+// Custom social modal handlers
+els.closeCustomSocialModal.onclick = () => els.customSocialModal.classList.remove('active');
+els.customSocialModal.onclick = (e) => {
+    if (e.target === els.customSocialModal) els.customSocialModal.classList.remove('active');
+};
+els.addCustomSocialBtn.onclick = addCustomSocialLink;
+els.customSocialUrl.onkeypress = (e) => {
+    if (e.key === 'Enter') addCustomSocialLink();
+};
+

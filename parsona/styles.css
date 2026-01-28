@@ -1070,6 +1070,79 @@ input[type="color"] {
     border-radius: 6px;
 }
 
+/* Custom social link items */
+.custom-social-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    font-size: 13px;
+    position: relative;
+    max-width: 300px;
+}
+
+.custom-social-item img {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.custom-social-item-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-primary);
+}
+
+.custom-social-item-remove {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--error);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.custom-social-item-remove:hover {
+    background: #c73030;
+    transform: scale(1.1);
+}
+
+.add-custom-social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 10px 15px;
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border-medium);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    min-height: 44px;
+}
+
+.add-custom-social-btn:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     body {
