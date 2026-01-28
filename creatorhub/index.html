@@ -61,7 +61,7 @@
                     </div>
                     <div class="field">
                         <label>Description</label>
-                        <textarea id="profileDescription" placeholder="Tell us about yourself..." rows="4" style="width: 100%; padding: 8px; border: 1px solid #ddd; font-size: 13px; font-family: Arial, sans-serif; resize: vertical;"></textarea>
+                        <textarea id="profileDescription" placeholder="Tell us about yourself..." rows="4"></textarea>
                     </div>
                     <div class="field">
                         <label>Profile Images</label>
@@ -133,7 +133,7 @@
                         <input type="hidden" id="cardStyle" value="frosted">
                     </div>
                     <div class="field">
-                        <label>Social Media Links</label>
+                        <label>🔗 Social Media Links</label>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                             <div>
                                 <label style="font-size: 11px; color: #666;">YouTube Channel</label>
@@ -142,6 +142,10 @@
                             <div>
                                 <label style="font-size: 11px; color: #666;">Twitch Channel</label>
                                 <input type="text" id="twitchUrl" placeholder="Twitch URL" style="margin-top: 3px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: #666;">Instagram Profile</label>
+                                <input type="text" id="instagramUrl" placeholder="Instagram URL" style="margin-top: 3px;">
                             </div>
                         </div>
                     </div>
@@ -169,7 +173,7 @@
                     <div class="profile-img" id="viewProfileImg"></div>
                     <div class="profile-name" id="viewProfileName">Profile Name</div>
                     <div class="profile-bio" id="viewProfileBio" style="display: none;"></div>
-                    <div class="profile-description" id="viewProfileDescription" style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-left: 3px solid #333; color: #555; font-size: 14px; line-height: 1.6; display: none;"></div>
+                    <div class="profile-description" id="viewProfileDescription" style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-left: 3px solid #333; color: #555; font-size: 14px; line-height: 1.6; white-space: pre-wrap; display: none;"></div>
                     <div class="profile-stats">
                         <div class="stat social-links" id="socialLinks" style="display: none; justify-content: center; width: 100%;">
                             <a href="#" id="youtubeLink" target="_blank" style="display: none;" title="YouTube Channel">
@@ -180,6 +184,19 @@
                             <a href="#" id="twitchLink" target="_blank" style="display: none;" title="Twitch Channel">
                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="#9146FF">
                                     <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
+                                </svg>
+                            </a>
+                            <a href="#" id="instagramLink" target="_blank" style="display: none;" title="Instagram Profile">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="url(#instagram-gradient)">
+                                    <defs>
+                                        <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                                            <stop offset="0%" style="stop-color:#FED576;stop-opacity:1" />
+                                            <stop offset="25%" style="stop-color:#F47133;stop-opacity:1" />
+                                            <stop offset="50%" style="stop-color:#BC3081;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#4C63D2;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z"/>
                                 </svg>
                             </a>
                         </div>
@@ -201,7 +218,7 @@
                         </div>
                     </div>
                     
-                    <div class="stream" id="viewStream">No stream active</div>
+                    <div class="stream" id="viewStream" style="display: none;">No stream active</div>
                 </div>
             </div>
         </div>

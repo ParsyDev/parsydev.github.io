@@ -894,13 +894,16 @@ button:disabled {
 
 .profiles-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 220px));
+    gap: 16px;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .profile-card {
     border: 1px solid var(--border-subtle);
-    padding: clamp(12px, 3vw, 20px);
+    padding: 20px;
     cursor: pointer;
     transition: all 0.2s ease;
 
@@ -909,13 +912,16 @@ button:disabled {
     align-items: center;
     justify-content: center;
 
-    gap: clamp(10px, 3vw, 18px);
+    gap: 15px;
     text-align: center;
 
     background: var(--bg-secondary);
     border-radius: 16px;
 
+    /* Fixed aspect ratio and max size */
     aspect-ratio: 1 / 1;
+    width: 100%;
+    max-width: 220px;
 }
 
 .profile-card:hover {
@@ -926,23 +932,34 @@ button:disabled {
 }
 
 .profile-card-img {
-    width: clamp(96px, 45%, 140px);
-    aspect-ratio: 1 / 1;
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
 
     border-radius: 50%;
     background: var(--bg-tertiary);
     border: 2px solid var(--border-medium);
+    background-size: cover;
+    background-position: center;
 }
 
 
 /* NAME */
 .profile-card-name {
-    font-size: clamp(16px, 3vw, 22px);
+    font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
 
     line-height: 1.2;
     text-align: center;
+    
+    /* Prevent text overflow */
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 /* Modal Styles */

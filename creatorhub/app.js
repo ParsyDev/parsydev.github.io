@@ -44,6 +44,7 @@ const els = {
     stream: document.getElementById('streamUrl'),
     youtubeUrl: document.getElementById('youtubeUrl'),
     twitchUrl: document.getElementById('twitchUrl'),
+    instagramUrl: document.getElementById('instagramUrl'),
     drop: document.getElementById('dropZone'),
     cropCont: document.getElementById('cropContainer'),
     applyCrop: document.getElementById('applyCrop'),
@@ -62,6 +63,7 @@ const els = {
     socialLinks: document.getElementById('socialLinks'),
     youtubeLink: document.getElementById('youtubeLink'),
     twitchLink: document.getElementById('twitchLink'),
+    instagramLink: document.getElementById('instagramLink'),
     editProfileBtn: document.getElementById('editProfileBtn'),
     loginModal: document.getElementById('loginModal'),
     loginName: document.getElementById('loginProfileName'),
@@ -178,23 +180,18 @@ menu.logout.onclick = () => {
     currentUser = null;
     editingProfileId = null;
     currentViewingProfileId = null;
-    
-    // Clear login state from localStorage
-    localStorage.removeItem('currentUser');
-    
-    menu.trigger.style.backgroundImage = '';
-    menu.trigger.classList.remove('logged-in');
-    menu.myProfile.classList.remove('disabled');
-    menu.login.style.display = 'block';
+    menu.myProfile.classList.add('disabled');
     menu.logout.style.display = 'none';
-    els.editProfileBtn.style.display = 'none';
+    menu.login.style.display = 'block';
+    menu.trigger.classList.remove('logged-in');
+    menu.trigger.style.backgroundImage = '';
     showPage('browse', null, true);
     loadAllProfiles();
-};
-
-els.closeLogin.onclick = () => els.loginModal.classList.remove('active');
-els.loginModal.onclick = (e) => {
-    if (e.target === els.loginModal) els.loginModal.classList.remove('active');
+    
+    // Also logout from auth manager
+    if (typeof authManager !== 'undefined') {
+        authManager.logout();
+    }
 };
 
 // Edit Profile Button Handler
@@ -276,13 +273,23 @@ async function loadAllProfiles() {
             return;
         }
         
+        // Track loaded profiles to avoid duplicates
+        const loadedProfiles = new Set();
+        
         for (const [name, id] of entries) {
+            // Skip if we already loaded this profile ID
+            if (loadedProfiles.has(id)) {
+                console.log('Skipping duplicate profile:', name, id);
+                continue;
+            }
+            
             try {
                 console.log('Loading profile:', name, id);
                 const profile = await loadProfile(id);
                 const card = createProfileCard(profile, id);
                 els.grid.appendChild(card);
                 allProfileCards.push(card); // Store for search
+                loadedProfiles.add(id); // Mark as loaded
             } catch(e) {
                 console.error('Failed to load profile:', name, e);
                 const errorCard = document.createElement('div');
@@ -393,9 +400,10 @@ async function viewProfile(id, addToHistory = true) {
 function displayProfile(profile) {
     els.viewName.textContent = profile.name;
     
-    // Display description if available
+    // Display description if available (preserving line breaks)
     if (profile.description && profile.description.trim()) {
-        els.viewDescription.textContent = profile.description;
+        // Convert newlines to <br> for proper display
+        els.viewDescription.innerHTML = profile.description.replace(/\n/g, '<br>');
         els.viewDescription.style.display = 'block';
     } else {
         els.viewDescription.style.display = 'none';
@@ -450,6 +458,14 @@ function displayProfile(profile) {
         hasSocialLinks = true;
     } else {
         els.twitchLink.style.display = 'none';
+    }
+    
+    if (profile.instagramUrl && profile.instagramUrl.trim()) {
+        els.instagramLink.href = profile.instagramUrl;
+        els.instagramLink.style.display = 'flex';
+        hasSocialLinks = true;
+    } else {
+        els.instagramLink.style.display = 'none';
     }
     
     // Show/hide social links container
@@ -545,15 +561,17 @@ function displayProfile(profile) {
         els.viewImg.style.backgroundImage = '';
     }
     
-    if (profile.streamUrl) {
+    // Only show stream if it exists
+    if (profile.streamUrl && profile.streamUrl.trim()) {
         const embedUrl = getStreamEmbedUrl(profile.streamUrl);
         if (embedUrl) {
             els.viewStream.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+            els.viewStream.style.display = 'block';
         } else {
-            els.viewStream.innerHTML = 'Invalid stream URL';
+            els.viewStream.style.display = 'none';
         }
     } else {
-        els.viewStream.innerHTML = 'No stream active';
+        els.viewStream.style.display = 'none';
     }
     
     // Display media cards
@@ -603,91 +621,76 @@ els.loginBtn.onclick = async () => {
     
     const profileId = registry[name];
     
-    els.loginBtn.disabled = true;
-    showStatus(els.loginStatus, 'success', 'Logging in...');
-    
     try {
+        showStatus(els.loginStatus, 'loading', '🔄 Loading profile...');
         const profile = await loadProfile(profileId);
         
-        // Check if profile uses encryption
-        const useCrypto = typeof cryptoHelper !== 'undefined';
-        let passwordValid = false;
+        // Check if profile has password protection
+        if (!profile.passwordHash) {
+            showStatus(els.loginStatus, 'error', '❌ This profile has no password!');
+            return;
+        }
         
-        if (profile.encrypted && profile.passwordHash) {
-            // NEW ENCRYPTED FORMAT
-            if (!useCrypto) {
-                showStatus(els.loginStatus, 'error', '⚠️ Encryption support not loaded!');
-                els.loginBtn.disabled = false;
+        // Verify password using CryptoHelper
+        if (typeof cryptoHelper !== 'undefined') {
+            const inputHash = await cryptoHelper.hashPassword(password);
+            
+            if (inputHash !== profile.passwordHash) {
+                showStatus(els.loginStatus, 'error', '❌ Wrong password!');
                 return;
             }
             
-            console.log('🔐 Verifying encrypted profile');
-            const inputHash = await cryptoHelper.hashPassword(password);
-            passwordValid = (inputHash === profile.passwordHash);
-            
-        } else if (profile.password) {
-            // OLD PLAINTEXT FORMAT (backwards compatibility)
-            console.log('⚠️ Using plaintext password verification');
-            passwordValid = (profile.password === password);
-            
-        } else {
-            showStatus(els.loginStatus, 'error', '❌ Profile data corrupted!');
-            els.loginBtn.disabled = false;
-            return;
-        }
-        
-        if (!passwordValid) {
-            showStatus(els.loginStatus, 'error', '❌ Incorrect password!');
-            els.loginBtn.disabled = false;
-            return;
-        }
-        
-        currentUser = {
-            name: profile.name,
-            id: profileId,
-            encrypted: profile.encrypted || false
-        };
-        
-        editingProfileId = profileId;
-        
-        // Save login state to localStorage
-        localStorage.setItem('currentUser', JSON.stringify({
-            name: profile.name,
-            id: profileId
-        }));
-        
-        if (profile.imageUrl) {
-            if (profile.profileCrop) {
-                // New format
-                const crop = profile.profileCrop;
-                const scale = 100 / (crop.width * 100);
-                const offsetX = -(crop.x * 100) * scale;
-                const offsetY = -(crop.y * 100) * scale;
-                
-                menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
-                menu.trigger.style.backgroundSize = `${scale * 100}%`;
-                menu.trigger.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
-            } else if (profile.cropData) {
-                // Old format (backwards compatibility)
-                const scale = profile.cropData.zoom / 100;
-                const x = profile.cropData.x;
-                const y = profile.cropData.y;
-                menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
-                menu.trigger.style.backgroundSize = `${scale * 100}%`;
-                menu.trigger.style.backgroundPosition = `${x}% ${y}%`;
+            // Decrypt private data if exists
+            let privateData = {};
+            if (profile.encryptedData) {
+                try {
+                    privateData = await cryptoHelper.decrypt(password, profile.encryptedData);
+                } catch(e) {
+                    console.error('Failed to decrypt private data:', e);
+                }
             }
-        }
-        menu.trigger.classList.add('logged-in');
-        menu.myProfile.classList.remove('disabled');
-        menu.login.style.display = 'none';
-        menu.logout.style.display = 'block';
-        
-        // Show encryption status
-        if (profile.encrypted) {
-            showStatus(els.loginStatus, 'success', '✅ Logged in!');
+            
+            // Success!
+            currentUser = {
+                id: profileId,
+                name: name,
+                password: password,
+                privateData: privateData
+            };
+            
+            // Save session
+            if (typeof authManager !== 'undefined') {
+                authManager.saveSession(profileId, name);
+            }
+            
         } else {
-            showStatus(els.loginStatus, 'success', '✅ Logged in! ⚠️ Not encrypted');
+            // Fallback: simple password check
+            if (profile.password !== password) {
+                showStatus(els.loginStatus, 'error', '❌ Wrong password!');
+                return;
+            }
+            
+            currentUser = {
+                id: profileId,
+                name: name,
+                password: password
+            };
         }
+        
+        // Update UI
+        menu.myProfile.classList.remove('disabled');
+        menu.logout.style.display = 'block';
+        menu.login.style.display = 'none';
+        menu.trigger.classList.add('logged-in');
+        
+        // Set profile picture in nav
+        if (profile.imageUrl) {
+            menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
+            menu.trigger.style.backgroundSize = 'cover';
+            menu.trigger.style.backgroundPosition = 'center';
+        }
+        
+        showStatus(els.loginStatus, 'success', '✅ Logged in successfully!');
         
         setTimeout(() => {
             els.loginModal.classList.remove('active');
@@ -696,143 +699,72 @@ els.loginBtn.onclick = async () => {
         
     } catch(e) {
         console.error('Login error:', e);
-        showStatus(els.loginStatus, 'error', 'Error: ' + e.message);
+        showStatus(els.loginStatus, 'error', '❌ Error loading profile!');
     }
-    
-    els.loginBtn.disabled = false;
 };
 
-function loadProfileForEdit(profile) {
-    els.createHeader.textContent = 'Edit Your Profile';
-    els.name.value = profile.name;
-    
-    // Handle password field based on profile type
-    if (profile.encrypted && profile.passwordHash) {
-        // Encrypted profile - password optional if already logged in
-        els.pass.value = '';
-        els.pass.placeholder = 'Password (optional - leave blank to keep current)';
-    } else if (profile.password) {
-        // Plaintext profile - show existing password
-        els.pass.value = profile.password;
-        els.pass.placeholder = 'Password';
-    } else {
-        els.pass.value = '';
-        els.pass.placeholder = 'Password';
-    }
-    
-    els.description.value = profile.description || '';
-    els.stream.value = profile.streamUrl || '';
-    els.youtubeUrl.value = profile.youtubeUrl || '';
-    els.twitchUrl.value = profile.twitchUrl || '';
-    
-    // Load media cards
-    currentMediaCards = profile.mediaCards || [];
-    
-    // Load profile picture
-    imageCrops.profile = {
-        url: profile.imageUrl || '',
-        crop: profile.profileCrop || null
-    };
-    
-    // Load banner
-    imageCrops.banner = {
-        url: profile.bannerUrl || '',
-        crop: profile.bannerCrop || null
-    };
-    
-    // Load background
-    imageCrops.background = {
-        url: profile.backgroundUrl || '',
-        crop: profile.backgroundCrop || null
-    };
-    
-    // Show profile image by default
-    els.imageType.value = 'profile';
-    currentImageType = 'profile';
-    if (imageCrops.profile.url) {
-        els.img.value = imageCrops.profile.url;
-        // Don't load immediately, wait for user to interact
-    }
-    
-    // Load card style settings
-    const cardStyle = profile.cardStyle || 'solid';
-    els.cardStyle.value = cardStyle;
-    
-    // Update UI to reflect current style
-    document.querySelectorAll('.card-style-option').forEach(opt => {
-        if (opt.dataset.style === cardStyle) {
-            opt.style.borderColor = '#ffffff';
-            opt.classList.add('active');
-        } else {
-            opt.style.borderColor = '#52525b';
-            opt.classList.remove('active');
-        }
-    });
-    
-    if (cardStyle === 'custom') {
-        els.customColorPicker.style.display = 'block';
-        if (profile.cardColor) {
-            els.cardColor.value = profile.cardColor;
-            els.cardColorHex.value = profile.cardColor;
-        }
-        if (profile.cardColorGradient) {
-            els.cardColorGradient.value = profile.cardColorGradient;
-            els.cardColorGradientHex.value = profile.cardColorGradient;
-        }
-        if (profile.fontColor) {
-            els.fontColor.value = profile.fontColor;
-            els.fontColorHex.value = profile.fontColor;
-        }
-    } else {
-        els.customColorPicker.style.display = 'none';
-    }
-    
-    els.create.style.display = 'none';
-    els.update.style.display = 'block';
-}
+els.closeLogin.onclick = () => {
+    els.loginModal.classList.remove('active');
+};
 
-function resetCreateForm() {
-    els.createHeader.textContent = 'Create Profile';
-    els.name.value = '';
-    els.pass.value = '';
-    els.description.value = '';
-    els.img.value = '';
-    els.stream.value = '';
-    els.youtubeUrl.value = '';
-    els.twitchUrl.value = '';
-    
-    imageCrops = {
-        profile: { url: '', crop: null },
-        banner: { url: '', crop: null },
-        background: { url: '', crop: null }
-    };
-    
-    currentMediaCards = [];
-    
-    currentImageType = 'profile';
-    els.imageType.value = 'profile';
-    els.cropCont.classList.remove('active');
-    els.create.style.display = 'block';
-    els.update.style.display = 'none';
-    editingProfileId = null;
-    
-    // Render empty media cards container with + button
-    renderMediaCards();
-}
+// Close modal when clicking outside
+els.loginModal.onclick = (e) => {
+    if (e.target === els.loginModal) {
+        els.loginModal.classList.remove('active');
+    }
+};
 
-// Image handling with new cropper
+// Image crop system
 els.imageType.onchange = () => {
     currentImageType = els.imageType.value;
-    // Load existing image URL for this type if available, but don't open crop UI
+    // Load the image if URL exists
     if (imageCrops[currentImageType].url) {
         els.img.value = imageCrops[currentImageType].url;
-        // Don't auto-load crop UI, let user click input to trigger it
+        cropper.loadImage(imageCrops[currentImageType].url);
+        els.cropCont.classList.add('active');
+        
+        // Apply saved crop data if exists
+        if (imageCrops[currentImageType].crop) {
+            cropper.applyCropData(imageCrops[currentImageType].crop);
+        }
     } else {
         els.img.value = '';
         els.cropCont.classList.remove('active');
     }
 };
 
+// Image URL input
+els.img.oninput = (e) => {
+    const url = e.target.value.trim();
+    if (url) {
+        imageCrops[currentImageType].url = url;
+        cropper.loadImage(url);
+        els.cropCont.classList.add('active');
+    } else {
+        els.cropCont.classList.remove('active');
+    }
+};
+
+// Clear image button
+els.clearImage.onclick = () => {
+    els.img.value = '';
+    imageCrops[currentImageType].url = '';
+    imageCrops[currentImageType].crop = null;
+    els.cropCont.classList.remove('active');
+    cropper.imageLoaded = false;
+};
+
+// Apply crop
+els.applyCrop.onclick = () => {
+    if (cropper.imageLoaded) {
+        const cropData = cropper.getCropData();
+        imageCrops[currentImageType].crop = cropData;
+        console.log(`Crop saved for ${currentImageType}:`, cropData);
+        alert(`✓ ${currentImageType.charAt(0).toUpperCase() + currentImageType.slice(1)} crop applied!`);
+    }
+};
+
+// Drop zone
 els.drop.ondragover = (e) => {
     e.preventDefault();
     els.drop.classList.add('dragover');
@@ -845,363 +777,391 @@ els.drop.ondragleave = () => {
 els.drop.ondrop = (e) => {
     e.preventDefault();
     els.drop.classList.remove('dragover');
-    const url = e.dataTransfer.getData('text/plain');
-    if (url) {
-        els.img.value = url;
-        loadImage(url);
-    }
-};
-
-els.img.oninput = (e) => {
-    if (e.target.value) {
-        loadImage(e.target.value);
-    } else {
-        els.cropCont.classList.remove('active');
-    }
-};
-
-els.clearImage.onclick = () => {
-    // Clear the current image type
-    imageCrops[currentImageType].url = '';
-    imageCrops[currentImageType].crop = null;
-    els.img.value = '';
-    els.cropCont.classList.remove('active');
-};
-
-function loadImage(url) {
-    if (!url) return;
-    cropper.loadImage(url);
-    els.cropCont.classList.add('active');
     
-    // Store URL for current image type
-    imageCrops[currentImageType].url = url;
-}
-
-els.applyCrop.onclick = () => {
-    // Save crop data for current image type
-    imageCrops[currentImageType].crop = cropper.getCropData();
-    
-    // Hide the crop UI
-    els.cropCont.classList.remove('active');
-    
-    // Show success message
-    alert(`✓ ${currentImageType.charAt(0).toUpperCase() + currentImageType.slice(1)} crop saved!`);
+    const text = e.dataTransfer.getData('text');
+    if (text) {
+        els.img.value = text;
+        imageCrops[currentImageType].url = text;
+        cropper.loadImage(text);
+        els.cropCont.classList.add('active');
+    }
 };
 
-// Format numbers with K/M suffixes
-function formatNumber(num) {
-    if (num >= 1000000) {
-        return (num / 1000000).toFixed(1) + 'M';
+// Paste detection
+document.addEventListener('paste', (e) => {
+    if (document.activeElement === els.img) {
+        setTimeout(() => {
+            const url = els.img.value.trim();
+            if (url) {
+                imageCrops[currentImageType].url = url;
+                cropper.loadImage(url);
+                els.cropCont.classList.add('active');
+            }
+        }, 10);
     }
-    if (num >= 1000) {
-        return (num / 1000).toFixed(1) + 'K';
-    }
-    return num.toString();
-}
+});
 
-// Stream handling
-function getStreamEmbedUrl(url) {
-    if (url.includes('youtube')) {
-        const match = url.match(/(?:v=|\/)([\w-]{11})/);
-        if (match) {
-            return `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1`;
+// Profile search
+let allProfileCards = [];
+els.profileSearch.oninput = (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    
+    allProfileCards.forEach(card => {
+        const name = card.querySelector('.profile-card-name').textContent.toLowerCase();
+        if (name.includes(query)) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
         }
-    } else if (url.includes('twitch')) {
-        const match = url.match(/twitch\.tv\/(\w+)/);
-        if (match) {
-            return `https://player.twitch.tv/?channel=${match[1]}&parent=${location.hostname}&muted=true`;
-        }
-    }
-    return null;
-}
+    });
+};
 
-// Create/Update profile
+// Card style selection
+document.querySelectorAll('.card-style-option').forEach(option => {
+    option.onclick = function() {
+        // Remove active from all
+        document.querySelectorAll('.card-style-option').forEach(o => o.classList.remove('active'));
+        // Add active to clicked
+        this.classList.add('active');
+        
+        // Show/hide custom color picker
+        const style = this.dataset.style;
+        if (style === 'custom') {
+            els.customColorPicker.style.display = 'block';
+        } else {
+            els.customColorPicker.style.display = 'none';
+        }
+    };
+});
+
+// Sync color pickers with hex inputs
+els.cardColor.oninput = (e) => {
+    els.cardColorHex.value = e.target.value;
+};
+
+els.cardColorHex.oninput = (e) => {
+    if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+        els.cardColor.value = e.target.value;
+    }
+};
+
+els.cardColorGradient.oninput = (e) => {
+    els.cardColorGradientHex.value = e.target.value;
+};
+
+els.cardColorGradientHex.oninput = (e) => {
+    if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+        els.cardColorGradient.value = e.target.value;
+    }
+};
+
+els.fontColor.oninput = (e) => {
+    els.fontColorHex.value = e.target.value;
+};
+
+els.fontColorHex.oninput = (e) => {
+    if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+        els.fontColor.value = e.target.value;
+    }
+};
+
+// Create profile
 els.create.onclick = async () => {
     const name = els.name.value.trim();
     const password = els.pass.value.trim();
-    const description = els.description.value.trim();
-    const image = els.img.value.trim();
-    const stream = els.stream.value.trim();
+    const description = els.description.value.trim(); // Keep line breaks
+    const streamUrl = els.stream.value.trim();
     const youtubeUrl = els.youtubeUrl.value.trim();
     const twitchUrl = els.twitchUrl.value.trim();
+    const instagramUrl = els.instagramUrl.value.trim();
     
-    if (!name || !password) {
-        showStatus(els.createStatus, 'error', 'Name and password required!');
+    if (!name) {
+        showStatus(els.createStatus, 'error', 'Name is required!');
         return;
     }
     
+    if (!password) {
+        showStatus(els.createStatus, 'error', 'Password is required!');
+        return;
+    }
+    
+    // Check if name already exists
     await loadRegistry();
-    
     if (registry[name]) {
-        showStatus(els.createStatus, 'warning', '⚠️ Name already exists!');
+        showStatus(els.createStatus, 'error', 'Name already taken!');
         return;
     }
     
-    els.create.disabled = true;
-    showStatus(els.createStatus, 'success', 'Creating profile...');
+    // Get card style
+    const activeStyle = document.querySelector('.card-style-option.active');
+    const cardStyle = activeStyle ? activeStyle.dataset.style : 'frosted';
+    
+    let cardColor = null;
+    let cardColorGradient = null;
+    let fontColor = null;
+    
+    if (cardStyle === 'custom') {
+        cardColor = els.cardColorHex.value;
+        cardColorGradient = els.cardColorGradientHex.value;
+        fontColor = els.fontColorHex.value;
+    }
+    
+    // Prepare profile data
+    const publicData = {
+        name: name,
+        description: description,
+        imageUrl: imageCrops.profile.url,
+        profileCrop: imageCrops.profile.crop,
+        bannerUrl: imageCrops.banner.url,
+        bannerCrop: imageCrops.banner.crop,
+        backgroundUrl: imageCrops.background.url,
+        backgroundCrop: imageCrops.background.crop,
+        streamUrl: streamUrl,
+        youtubeUrl: youtubeUrl,
+        twitchUrl: twitchUrl,
+        instagramUrl: instagramUrl,
+        cardStyle: cardStyle,
+        cardColor: cardColor,
+        cardColorGradient: cardColorGradient,
+        fontColor: fontColor,
+        mediaCards: currentMediaCards,
+        createdAt: new Date().toISOString()
+    };
+    
+    let profileData;
+    
+    // Use encryption if available
+    if (typeof cryptoHelper !== 'undefined' && typeof authManager !== 'undefined') {
+        showStatus(els.createStatus, 'loading', '🔒 Creating encrypted profile...');
+        
+        const privateData = {
+            notes: '' // Can be expanded later
+        };
+        
+        try {
+            profileData = await authManager.createAccount(name, password, publicData, privateData);
+        } catch(e) {
+            console.error('Encryption failed:', e);
+            showStatus(els.createStatus, 'error', '❌ Encryption failed!');
+            return;
+        }
+    } else {
+        // Fallback: simple password storage
+        showStatus(els.createStatus, 'loading', '🔄 Creating profile...');
+        profileData = {
+            ...publicData,
+            password: password // Not secure, but works
+        };
+    }
     
     try {
-        // Check if crypto helper is available (auth-system.js loaded)
-        const useCrypto = typeof cryptoHelper !== 'undefined';
-        
-        let profileData;
-        
-        if (useCrypto) {
-            // NEW ENCRYPTED FORMAT
-            
-            // Public data (visible to everyone)
-            const publicData = {
-                name: name,
-                description: description,
-                imageUrl: imageCrops.profile.url,
-                profileCrop: imageCrops.profile.crop,
-                bannerUrl: imageCrops.banner.url,
-                bannerCrop: imageCrops.banner.crop,
-                backgroundUrl: imageCrops.background.url,
-                backgroundCrop: imageCrops.background.crop,
-                streamUrl: stream,
-                youtubeUrl: youtubeUrl,
-                twitchUrl: twitchUrl,
-                cardStyle: els.cardStyle.value,
-                cardColor: els.cardStyle.value === 'custom' ? els.cardColorHex.value : null,
-                cardColorGradient: els.cardStyle.value === 'custom' ? els.cardColorGradientHex.value : null,
-                fontColor: els.cardStyle.value === 'custom' ? els.fontColorHex.value : null,
-                mediaCards: currentMediaCards,
-                createdAt: new Date().toISOString(),
-                encrypted: true // Flag to indicate this profile uses encryption
-            };
-            
-            // Private data (encrypted with password)
-            const privateData = {
-                // Add any private fields here in the future
-                // email: '',
-                // notes: ''
-            };
-            
-            // Hash password and encrypt private data
-            const passwordHash = await cryptoHelper.hashPassword(password);
-            const encryptedPrivateData = await cryptoHelper.encrypt(password, privateData);
-            
-            profileData = {
-                ...publicData,
-                passwordHash: passwordHash,
-                encryptedData: encryptedPrivateData
-            };
-            
-        } else {
-            // OLD PLAINTEXT FORMAT (backwards compatibility)
-            console.log('⚠️ Creating plaintext profile (auth-system.js not loaded)');
-            
-            profileData = {
-                name: name,
-                password: password, // ⚠️ Plaintext password
-                description: description,
-                imageUrl: imageCrops.profile.url,
-                profileCrop: imageCrops.profile.crop,
-                bannerUrl: imageCrops.banner.url,
-                bannerCrop: imageCrops.banner.crop,
-                backgroundUrl: imageCrops.background.url,
-                backgroundCrop: imageCrops.background.crop,
-                streamUrl: stream,
-                youtubeUrl: youtubeUrl,
-                twitchUrl: twitchUrl,
-                cardStyle: els.cardStyle.value,
-                cardColor: els.cardStyle.value === 'custom' ? els.cardColorHex.value : null,
-                cardColorGradient: els.cardStyle.value === 'custom' ? els.cardColorGradientHex.value : null,
-                fontColor: els.cardStyle.value === 'custom' ? els.fontColorHex.value : null,
-                mediaCards: currentMediaCards,
-                createdAt: new Date().toISOString(),
-                encrypted: false
-            };
-        }
-        
+        // Create gist
         const response = await fetch(`${API_URL}/profile`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                description: `Profile: ${name}`,
-                public: true,
                 files: {
                     'profile.json': {
                         content: JSON.stringify(profileData, null, 2)
                     }
-                }
+                },
+                description: `Creator Hub Profile: ${name}`,
+                public: true
             })
         });
         
-        const result = await response.json();
-        console.log('Create profile response:', result);
-        
-        if (result.id) {
-            registry[name] = result.id;
-            await saveRegistry();
-            
-            // Invalidate cache so new profile appears immediately
-            if (typeof cacheManager !== 'undefined') {
-                cacheManager.delete('registry');
-                cacheManager.delete(`profile_${result.id}`);
-                console.log('💾 Cache invalidated for new profile');
-            }
-            
-            showStatus(els.createStatus, 'success', `✅ Profile created!`);
-            
-            setTimeout(() => {
-                showPage('browse', null, true);
-                loadAllProfiles();
-            }, 2000);
-        } else {
-            console.error('No ID in response:', result);
-            showStatus(els.createStatus, 'error', `Failed to create profile: ${result.message || 'Unknown error'}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('API Error:', errorData);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
+        const gist = await response.json();
+        const gistId = gist.id;
+        
+        // Update registry
+        registry[name] = gistId;
+        await saveRegistry();
+        
+        // Log in the user
+        currentUser = {
+            id: gistId,
+            name: name,
+            password: password
+        };
+        
+        // Update UI
+        menu.myProfile.classList.remove('disabled');
+        menu.logout.style.display = 'block';
+        menu.login.style.display = 'none';
+        menu.trigger.classList.add('logged-in');
+        
+        if (imageCrops.profile.url) {
+            menu.trigger.style.backgroundImage = `url(${imageCrops.profile.url})`;
+            menu.trigger.style.backgroundSize = 'cover';
+            menu.trigger.style.backgroundPosition = 'center';
+        }
+        
+        showStatus(els.createStatus, 'success', '✅ Profile created!');
+        
+        setTimeout(() => {
+            viewProfile(gistId);
+            resetCreateForm();
+        }, 1500);
+        
     } catch(e) {
-        console.error('Create profile error:', e);
-        showStatus(els.createStatus, 'error', 'Error: ' + e.message);
+        console.error('Error creating profile:', e);
+        showStatus(els.createStatus, 'error', '❌ Failed to create profile!');
     }
-    
-    els.create.disabled = false;
 };
 
+// Update profile
 els.update.onclick = async () => {
-    const name = els.name.value.trim();
-    let password = els.pass.value.trim();
-    const description = els.description.value.trim();
-    const image = els.img.value.trim();
-    const stream = els.stream.value.trim();
-    const youtubeUrl = els.youtubeUrl.value.trim();
-    const twitchUrl = els.twitchUrl.value.trim();
-    
-    if (!name) {
-        showStatus(els.createStatus, 'error', 'Name required!');
+    if (!editingProfileId || !currentUser) {
+        showStatus(els.createStatus, 'error', 'Not logged in!');
         return;
     }
     
-    els.update.disabled = true;
-    showStatus(els.createStatus, 'success', 'Updating profile...');
+    const name = els.name.value.trim();
+    const password = els.pass.value.trim();
+    const description = els.description.value.trim(); // Keep line breaks
+    const streamUrl = els.stream.value.trim();
+    const youtubeUrl = els.youtubeUrl.value.trim();
+    const twitchUrl = els.twitchUrl.value.trim();
+    const instagramUrl = els.instagramUrl.value.trim();
     
-    try {
-        // Load current profile
-        const currentProfile = await loadProfile(editingProfileId);
+    if (!name) {
+        showStatus(els.createStatus, 'error', 'Name is required!');
+        return;
+    }
+    
+    // Get card style
+    const activeStyle = document.querySelector('.card-style-option.active');
+    const cardStyle = activeStyle ? activeStyle.dataset.style : 'frosted';
+    
+    let cardColor = null;
+    let cardColorGradient = null;
+    let fontColor = null;
+    
+    if (cardStyle === 'custom') {
+        cardColor = els.cardColorHex.value;
+        cardColorGradient = els.cardColorGradientHex.value;
+        fontColor = els.fontColorHex.value;
+    }
+    
+    // Check if name changed and is available
+    if (name !== currentUser.name) {
+        await loadRegistry();
+        if (registry[name]) {
+            showStatus(els.createStatus, 'error', 'Name already taken!');
+            return;
+        }
+    }
+    
+    // Prepare profile data
+    const publicData = {
+        name: name,
+        description: description,
+        imageUrl: imageCrops.profile.url,
+        profileCrop: imageCrops.profile.crop,
+        bannerUrl: imageCrops.banner.url,
+        bannerCrop: imageCrops.banner.crop,
+        backgroundUrl: imageCrops.background.url,
+        backgroundCrop: imageCrops.background.crop,
+        streamUrl: streamUrl,
+        youtubeUrl: youtubeUrl,
+        twitchUrl: twitchUrl,
+        instagramUrl: instagramUrl,
+        cardStyle: cardStyle,
+        cardColor: cardColor,
+        cardColorGradient: cardColorGradient,
+        fontColor: fontColor,
+        mediaCards: currentMediaCards,
+        createdAt: currentUser.createdAt || new Date().toISOString()
+    };
+    
+    let profileData;
+    
+    // Use encryption if available
+    if (typeof cryptoHelper !== 'undefined' && typeof authManager !== 'undefined' && password) {
+        showStatus(els.createStatus, 'loading', '🔒 Updating encrypted profile...');
         
-        // If no password provided, use stored password
-        if (!password) {
-            if (currentProfile.encrypted && currentProfile.passwordHash) {
-                // For encrypted profiles, we need to verify user is logged in
-                if (!currentUser || currentUser.id !== editingProfileId) {
-                    showStatus(els.createStatus, 'error', 'Please enter your password!');
-                    els.update.disabled = false;
-                    return;
-                }
-                // User is logged in, we'll keep the existing hash
-                console.log('✅ Updating without re-entering password (already authenticated)');
-            } else if (currentProfile.password) {
-                // Old plaintext format - use stored password
-                password = currentProfile.password;
-                console.log('✅ Using stored plaintext password');
-            } else {
-                showStatus(els.createStatus, 'error', 'Password required!');
-                els.update.disabled = false;
-                return;
-            }
+        // Update password in authManager session
+        if (authManager.currentSession) {
+            authManager.currentSession.password = password;
         }
         
-        // Check if crypto helper is available
-        const useCrypto = typeof cryptoHelper !== 'undefined';
+        const privateData = {
+            notes: currentUser.privateData?.notes || ''
+        };
         
-        let profileData;
-        
-        if (useCrypto) {
-            // NEW ENCRYPTED FORMAT
-            console.log('🔐 Updating with encryption');
+        try {
+            // User is logged in, we'll keep the existing hash
+            let passwordHash;
             
-            // If password was provided and profile is encrypted, verify it
-            if (password && currentProfile.encrypted && currentProfile.passwordHash) {
+            if (password) {
+                // User provided password, re-encrypt
                 const inputHash = await cryptoHelper.hashPassword(password);
-                if (inputHash !== currentProfile.passwordHash) {
-                    showStatus(els.createStatus, 'error', '❌ Wrong password! Cannot update encrypted profile.');
-                    els.update.disabled = false;
+                
+                // Load existing profile to verify password
+                const existingProfile = await loadProfile(editingProfileId);
+                
+                if (existingProfile.passwordHash !== inputHash) {
+                    showStatus(els.createStatus, 'error', '❌ Wrong password!');
                     return;
                 }
+                
+                // Password correct, update profile
+                profileData = await authManager.updateAccount(publicData, privateData);
+            } else {
+                // No password provided, keep existing encrypted data
+                const existingProfile = await loadProfile(editingProfileId);
+                profileData = {
+                    ...publicData,
+                    passwordHash: existingProfile.passwordHash,
+                    encryptedData: existingProfile.encryptedData
+                };
             }
-            
-            // Public data
-            const publicData = {
-                name: name,
-                description: description,
-                imageUrl: imageCrops.profile.url,
-                profileCrop: imageCrops.profile.crop,
-                bannerUrl: imageCrops.banner.url,
-                bannerCrop: imageCrops.banner.crop,
-                backgroundUrl: imageCrops.background.url,
-                backgroundCrop: imageCrops.background.crop,
-                streamUrl: stream,
-                youtubeUrl: youtubeUrl,
-                twitchUrl: twitchUrl,
-                cardStyle: els.cardStyle.value,
-                cardColor: els.cardStyle.value === 'custom' ? els.cardColorHex.value : null,
-                cardColorGradient: els.cardStyle.value === 'custom' ? els.cardColorGradientHex.value : null,
-                fontColor: els.cardStyle.value === 'custom' ? els.fontColorHex.value : null,
-                mediaCards: currentMediaCards,
-                updatedAt: new Date().toISOString(),
-                encrypted: true
-            };
-            
-            // Private data (preserve existing or create new)
-            let privateData = {};
-            if (currentProfile.encryptedData && password) {
-                // Try to decrypt existing private data if password provided
-                try {
-                    privateData = await cryptoHelper.decrypt(password, currentProfile.encryptedData);
-                } catch(e) {
-                    console.log('Could not decrypt existing private data, creating new');
-                    privateData = {};
-                }
-            }
-            
-            // Keep existing password hash if no new password provided
-            let passwordHash = currentProfile.passwordHash;
-            let encryptedPrivateData = currentProfile.encryptedData;
-            
-            // Only re-hash and re-encrypt if password was provided
-            if (password) {
-                passwordHash = await cryptoHelper.hashPassword(password);
-                encryptedPrivateData = await cryptoHelper.encrypt(password, privateData);
-            }
-            
+        } catch(e) {
+            console.error('Update failed:', e);
+            showStatus(els.createStatus, 'error', '❌ Update failed!');
+            return;
+        }
+    } else {
+        showStatus(els.createStatus, 'loading', '🔄 Updating profile...');
+        
+        // Load existing profile
+        const existingProfile = await loadProfile(editingProfileId);
+        
+        // Keep existing password hash if no new password provided
+        if (!password) {
             profileData = {
                 ...publicData,
-                passwordHash: passwordHash,
-                encryptedData: encryptedPrivateData
+                password: existingProfile.password || '',
+                passwordHash: existingProfile.passwordHash
             };
-            
         } else {
-            // OLD PLAINTEXT FORMAT (backwards compatibility)
-            console.log('⚠️ Updating with plaintext (auth-system.js not loaded)');
-            
-            profileData = {
-                name: name,
-                password: password, // ⚠️ Plaintext password
-                description: description,
-                imageUrl: imageCrops.profile.url,
-                profileCrop: imageCrops.profile.crop,
-                bannerUrl: imageCrops.banner.url,
-                bannerCrop: imageCrops.banner.crop,
-                backgroundUrl: imageCrops.background.url,
-                backgroundCrop: imageCrops.background.crop,
-                streamUrl: stream,
-                youtubeUrl: youtubeUrl,
-                twitchUrl: twitchUrl,
-                cardStyle: els.cardStyle.value,
-                cardColor: els.cardStyle.value === 'custom' ? els.cardColorHex.value : null,
-                cardColorGradient: els.cardStyle.value === 'custom' ? els.cardColorGradientHex.value : null,
-                fontColor: els.cardStyle.value === 'custom' ? els.fontColorHex.value : null,
-                mediaCards: currentMediaCards,
-                updatedAt: new Date().toISOString(),
-                encrypted: false
-            };
+            // Only re-hash and re-encrypt if password was provided
+            if (typeof cryptoHelper !== 'undefined') {
+                passwordHash = await cryptoHelper.hashPassword(password);
+                profileData = {
+                    ...publicData,
+                    password: password,
+                    passwordHash: passwordHash
+                };
+            } else {
+                profileData = {
+                    ...publicData,
+                    password: password
+                };
+            }
         }
+    }
     
+    try {
+        // Update gist
         const response = await fetch(`${API_URL}/profile/${editingProfileId}`, {
             method: 'PATCH',
             headers: {
@@ -1216,61 +1176,183 @@ els.update.onclick = async () => {
             })
         });
         
-        if (response.ok) {
-            // Invalidate cache for this profile
-            if (typeof cacheManager !== 'undefined') {
-                cacheManager.delete(`profile_${editingProfileId}`);
-                cacheManager.delete('registry');
-                console.log('💾 Cache invalidated for updated profile');
-            }
-            
-            // Update nav profile pic if present
-            if (profileData.imageUrl && profileData.profileCrop) {
-                const crop = profileData.profileCrop;
-                const scale = 100 / (crop.width * 100);
-                const offsetX = -(crop.x * 100) * scale;
-                const offsetY = -(crop.y * 100) * scale;
-                
-                menu.trigger.style.backgroundImage = `url(${profileData.imageUrl})`;
-                menu.trigger.style.backgroundSize = `${scale * 100}%`;
-                menu.trigger.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
-            }
-            
-            showStatus(els.createStatus, 'success', '✅ Profile updated!');
-            
-            setTimeout(async () => {
-                // Reload profile fresh from server (not from cache)
-                const updatedProfile = await loadProfile(editingProfileId);
-                displayProfile(updatedProfile);
-                currentMediaCards = updatedProfile.mediaCards || [];
-                showPage('view', editingProfileId, false); // Don't add to history, we're already on this page
-            }, 1500);
-        } else {
-            showStatus(els.createStatus, 'error', 'Failed to update profile');
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('API Error:', errorData);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
+        // Update registry if name changed
+        if (name !== currentUser.name) {
+            delete registry[currentUser.name];
+            registry[name] = editingProfileId;
+            await saveRegistry();
+        }
+        
+        // Update current user
+        currentUser.name = name;
+        if (password) {
+            currentUser.password = password;
+        }
+        
+        // Clear cache for this profile
+        if (typeof cacheManager !== 'undefined') {
+            cacheManager.delete(`profile_${editingProfileId}`);
+        }
+        
+        showStatus(els.createStatus, 'success', '✅ Profile updated!');
+        
+        setTimeout(() => {
+            viewProfile(editingProfileId);
+            resetCreateForm();
+        }, 1500);
+        
     } catch(e) {
-        console.error('Update error:', e);
-        showStatus(els.createStatus, 'error', 'Error: ' + e.message);
+        console.error('Error updating profile:', e);
+        showStatus(els.createStatus, 'error', '❌ Failed to update profile!');
     }
-    
-    els.update.disabled = false;
 };
 
-function showStatus(element, type, message) {
-    element.className = `status ${type}`;
-    element.textContent = message;
-    
+function showStatus(el, type, message) {
+    el.textContent = message;
+    el.style.display = 'block';
+    el.className = 'status ' + type;
     if (type === 'success') {
-        setTimeout(() => {
-            element.style.display = 'none';
-        }, 5000);
+        setTimeout(() => el.style.display = 'none', 3000);
     }
 }
 
-// Initialize
-loadAllProfiles();
+function resetCreateForm() {
+    els.name.value = '';
+    els.pass.value = '';
+    els.description.value = '';
+    els.img.value = '';
+    els.stream.value = '';
+    els.youtubeUrl.value = '';
+    els.twitchUrl.value = '';
+    els.instagramUrl.value = '';
+    
+    // Reset image crops
+    imageCrops = {
+        profile: { url: '', crop: null },
+        banner: { url: '', crop: null },
+        background: { url: '', crop: null }
+    };
+    
+    currentImageType = 'profile';
+    els.imageType.value = 'profile';
+    els.cropCont.classList.remove('active');
+    
+    // Reset card style to frosted
+    document.querySelectorAll('.card-style-option').forEach(o => o.classList.remove('active'));
+    document.querySelector('.card-style-option[data-style="frosted"]').classList.add('active');
+    els.customColorPicker.style.display = 'none';
+    
+    // Reset media cards
+    currentMediaCards = [];
+    els.editMediaCardsContainer.innerHTML = '';
+    
+    // Reset buttons
+    els.create.style.display = 'block';
+    els.update.style.display = 'none';
+    els.createHeader.textContent = 'Create Profile';
+    
+    editingProfileId = null;
+}
 
-// ==================== BROWSER HISTORY SUPPORT ====================
+function loadProfileForEdit(profile) {
+    els.name.value = profile.name;
+    els.pass.value = ''; // Don't fill password
+    els.description.value = profile.description || '';
+    els.stream.value = profile.streamUrl || '';
+    els.youtubeUrl.value = profile.youtubeUrl || '';
+    els.twitchUrl.value = profile.twitchUrl || '';
+    els.instagramUrl.value = profile.instagramUrl || '';
+    
+    // Load images
+    imageCrops.profile = {
+        url: profile.imageUrl || '',
+        crop: profile.profileCrop || null
+    };
+    imageCrops.banner = {
+        url: profile.bannerUrl || '',
+        crop: profile.bannerCrop || null
+    };
+    imageCrops.background = {
+        url: profile.backgroundUrl || '',
+        crop: profile.backgroundCrop || null
+    };
+    
+    // Set image type selector and load first available image
+    if (imageCrops.profile.url) {
+        currentImageType = 'profile';
+        els.imageType.value = 'profile';
+        els.img.value = imageCrops.profile.url;
+        cropper.loadImage(imageCrops.profile.url);
+        if (imageCrops.profile.crop) {
+            setTimeout(() => cropper.applyCropData(imageCrops.profile.crop), 100);
+        }
+        els.cropCont.classList.add('active');
+    } else if (imageCrops.banner.url) {
+        currentImageType = 'banner';
+        els.imageType.value = 'banner';
+        els.img.value = imageCrops.banner.url;
+        cropper.loadImage(imageCrops.banner.url);
+        if (imageCrops.banner.crop) {
+            setTimeout(() => cropper.applyCropData(imageCrops.banner.crop), 100);
+        }
+        els.cropCont.classList.add('active');
+    }
+    
+    // Load card style
+    const cardStyle = profile.cardStyle || 'frosted';
+    document.querySelectorAll('.card-style-option').forEach(o => o.classList.remove('active'));
+    document.querySelector(`.card-style-option[data-style="${cardStyle}"]`).classList.add('active');
+    
+    if (cardStyle === 'custom') {
+        els.customColorPicker.style.display = 'block';
+        els.cardColor.value = profile.cardColor || '#18181b';
+        els.cardColorHex.value = profile.cardColor || '#18181b';
+        els.cardColorGradient.value = profile.cardColorGradient || '#27272a';
+        els.cardColorGradientHex.value = profile.cardColorGradient || '#27272a';
+        els.fontColor.value = profile.fontColor || '#ffffff';
+        els.fontColorHex.value = profile.fontColor || '#ffffff';
+    } else {
+        els.customColorPicker.style.display = 'none';
+    }
+    
+    // Load media cards
+    currentMediaCards = profile.mediaCards || [];
+    
+    // Switch buttons
+    els.create.style.display = 'none';
+    els.update.style.display = 'block';
+    els.createHeader.textContent = 'Edit Profile';
+    
+    editingProfileId = currentUser.id;
+}
+
+// Stream embed URL converter
+function getStreamEmbedUrl(url) {
+    // YouTube
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        let videoId = '';
+        if (url.includes('youtube.com/watch')) {
+            videoId = new URL(url).searchParams.get('v');
+        } else if (url.includes('youtu.be/')) {
+            videoId = url.split('youtu.be/')[1].split('?')[0];
+        }
+        if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+    }
+    
+    // Twitch
+    if (url.includes('twitch.tv')) {
+        const channel = url.split('twitch.tv/')[1].split('?')[0].split('/')[0];
+        if (channel) return `https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}`;
+    }
+    
+    return null;
+}
 
 // Handle browser back/forward buttons
 window.addEventListener('popstate', (event) => {
@@ -1317,8 +1399,16 @@ if (!window.history.state) {
     window.history.replaceState({ page: 'browse', profileId: null }, '', '#browse');
 }
 
-// Check URL on load
-window.addEventListener('DOMContentLoaded', handleUrlHash);
+// Check URL on load - CALL IT IMMEDIATELY, don't wait for DOM
+handleUrlHash();
+
+// Also handle when DOM is ready (in case scripts load before DOM)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', handleUrlHash);
+} else {
+    // DOM already loaded, ensure we handle the hash
+    handleUrlHash();
+}
 
 // Also handle URL hash changes manually (for links)
 window.addEventListener('hashchange', handleUrlHash);
@@ -1328,275 +1418,140 @@ window.addEventListener('hashchange', handleUrlHash);
 // Allow direct profile access via URL parameter or hash
 // Examples: ?profile=gist_id  or  #profile/gist_id  or  ?username=ProfileName
 const urlParams = new URLSearchParams(window.location.search);
-const directProfileId = urlParams.get('profile');
-const directUsername = urlParams.get('username');
+const profileParam = urlParams.get('profile');
+const usernameParam = urlParams.get('username');
 
-if (directProfileId) {
-    // Direct profile ID provided in URL
-    console.log('Loading profile from URL:', directProfileId);
-    viewProfile(directProfileId, false);
-} else if (directUsername) {
-    // Username provided - need to load registry first
-    console.log('Loading profile by username:', directUsername);
+// Already handled by hash system above, but keeping for backwards compatibility
+if (profileParam && !window.location.hash) {
+    window.location.hash = `#profile/${profileParam}`;
+} else if (usernameParam && !window.location.hash) {
+    // Convert username to profile ID
     loadRegistry().then(() => {
-        if (registry[directUsername]) {
-            viewProfile(registry[directUsername], false);
-        } else {
-            console.error('Profile not found:', directUsername);
-            showPage('browse', null, false);
-            loadAllProfiles();
+        const profileId = registry[usernameParam];
+        if (profileId) {
+            window.location.hash = `#profile/${profileId}`;
         }
     });
 }
 
-// Card style selection
-document.querySelectorAll('.card-style-option').forEach(option => {
-    option.onclick = function() {
-        // Remove active from all
-        document.querySelectorAll('.card-style-option').forEach(opt => {
-            opt.style.borderColor = '#52525b';
-            opt.classList.remove('active');
-        });
-        
-        // Add active to clicked
-        this.style.borderColor = '#ffffff';
-        this.classList.add('active');
-        
-        const style = this.dataset.style;
-        els.cardStyle.value = style;
-        
-        // Show/hide color picker
-        if (style === 'custom') {
-            els.customColorPicker.style.display = 'block';
-        } else {
-            els.customColorPicker.style.display = 'none';
-        }
-    };
-});
+// ==================== MEDIA CARDS FEATURE ====================
 
-// Sync color inputs
-els.cardColor.oninput = () => {
-    els.cardColorHex.value = els.cardColor.value;
-};
-els.cardColorHex.oninput = () => {
-    if (/^#[0-9A-F]{6}$/i.test(els.cardColorHex.value)) {
-        els.cardColor.value = els.cardColorHex.value;
-    }
-};
-els.cardColorGradient.oninput = () => {
-    els.cardColorGradientHex.value = els.cardColorGradient.value;
-};
-els.cardColorGradientHex.oninput = () => {
-    if (/^#[0-9A-F]{6}$/i.test(els.cardColorGradientHex.value)) {
-        els.cardColorGradient.value = els.cardColorGradientHex.value;
-    }
-};
-els.fontColor.oninput = () => {
-    els.fontColorHex.value = els.fontColor.value;
-};
-els.fontColorHex.oninput = () => {
-    if (/^#[0-9A-F]{6}$/i.test(els.fontColorHex.value)) {
-        els.fontColor.value = els.fontColorHex.value;
-    }
+// Media search modal handlers
+els.closeMediaModal.onclick = () => {
+    els.mediaModal.classList.remove('active');
 };
 
-
-// Profile search functionality
-let allProfileCards = [];
-els.profileSearch.oninput = () => {
-    const searchTerm = els.profileSearch.value.toLowerCase().trim();
-    
-    allProfileCards.forEach(card => {
-        const profileName = card.querySelector('.profile-card-name').textContent.toLowerCase();
-        if (profileName.includes(searchTerm)) {
-            card.style.display = 'flex';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-};
-
-
-// Restore login state from localStorage
-async function restoreLoginState() {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-        try {
-            const userData = JSON.parse(savedUser);
-            console.log('Restoring login state for:', userData.name);
-            
-            // Load the profile to get full data
-            const profile = await loadProfile(userData.id);
-            
-            // Set current user
-            currentUser = {
-                name: userData.name,
-                id: userData.id
-            };
-            editingProfileId = userData.id;
-            
-            // Update UI
-            if (profile.imageUrl) {
-                if (profile.profileCrop) {
-                    // New format
-                    const crop = profile.profileCrop;
-                    const scale = 100 / (crop.width * 100);
-                    const offsetX = -(crop.x * 100) * scale;
-                    const offsetY = -(crop.y * 100) * scale;
-                    
-                    menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
-                    menu.trigger.style.backgroundSize = `${scale * 100}%`;
-                    menu.trigger.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
-                } else if (profile.cropData) {
-                    // Old format (backwards compatibility)
-                    const scale = profile.cropData.zoom / 100;
-                    const x = profile.cropData.x;
-                    const y = profile.cropData.y;
-                    menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
-                    menu.trigger.style.backgroundSize = `${scale * 100}%`;
-                    menu.trigger.style.backgroundPosition = `${x}% ${y}%`;
-                }
-            }
-            menu.trigger.classList.add('logged-in');
-            menu.myProfile.classList.remove('disabled');
-            menu.login.style.display = 'none';
-            menu.logout.style.display = 'block';
-            
-            console.log('Login state restored successfully');
-        } catch(e) {
-            console.error('Failed to restore login state:', e);
-            // Clear invalid saved data
-            localStorage.removeItem('currentUser');
-        }
-    }
-}
-
-// Restore login on page load
-restoreLoginState();
-
-// ==================== MEDIA CARDS (TMDB) ====================
-
-// TMDB API Functions
-async function searchTMDB(query, type = 'movie') {
-    try {
-        const response = await fetch(
-            `https://api.themoviedb.org/3/search/${type}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`
-        );
-        const data = await response.json();
-        return data.results || [];
-    } catch(e) {
-        console.error('TMDB search error:', e);
-        return [];
-    }
-}
-
-function extractYear(dateString) {
-    return dateString ? dateString.split('-')[0] : '';
-}
-
-// Media Modal Handlers
-els.closeMediaModal.onclick = () => els.mediaModal.classList.remove('active');
 els.mediaModal.onclick = (e) => {
-    if (e.target === els.mediaModal) els.mediaModal.classList.remove('active');
-};
-
-// Search on Enter key
-els.mediaSearchInput.onkeypress = (e) => {
-    if (e.key === 'Enter') {
-        els.mediaSearchBtn.click();
+    if (e.target === els.mediaModal) {
+        els.mediaModal.classList.remove('active');
     }
 };
 
-// Media Search
+// TMDB search
 els.mediaSearchBtn.onclick = async () => {
     const query = els.mediaSearchInput.value.trim();
-    if (!query) return;
+    const mediaType = els.mediaTypeSelect.value; // 'movie' or 'tv'
     
-    const type = els.mediaTypeSelect.value;
-    els.mediaSearchBtn.disabled = true;
-    els.mediaSearchBtn.textContent = 'Searching...';
+    if (!query) {
+        showStatus(els.mediaStatus, 'error', 'Please enter a search query');
+        return;
+    }
     
     try {
-        const results = await searchTMDB(query, type);
+        showStatus(els.mediaStatus, 'loading', 'Searching...');
         
-        if (results.length === 0) {
-            els.mediaSearchResults.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">No results found</div>';
-        } else {
-            els.mediaSearchResults.innerHTML = '';
-            
-            results.slice(0, 12).forEach(item => {
-                if (!item.poster_path) return; // Skip if no poster
-                
-                const card = document.createElement('div');
-                card.className = 'media-search-result';
-                card.innerHTML = `
-                    <img src="${TMDB_IMAGE_BASE}${item.poster_path}" alt="${item.title || item.name}">
-                    <div class="media-search-result-info">
-                        <div class="media-search-result-title">${item.title || item.name}</div>
-                        <div class="media-search-result-year">${extractYear(item.release_date || item.first_air_date)}</div>
-                    </div>
-                `;
-                
-                card.onclick = () => addMediaToProfile(item, type);
-                els.mediaSearchResults.appendChild(card);
-            });
+        const response = await fetch(
+            `https://api.themoviedb.org/3/search/${mediaType}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`
+        );
+        
+        if (!response.ok) {
+            throw new Error('Search failed');
         }
-    } catch(e) {
-        console.error('Search error:', e);
-        els.mediaSearchResults.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #e74c3c;">Error searching. Please try again.</div>';
+        
+        const data = await response.json();
+        
+        if (data.results.length === 0) {
+            els.mediaSearchResults.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">No results found</div>';
+            showStatus(els.mediaStatus, 'error', 'No results found');
+            return;
+        }
+        
+        // Display results
+        els.mediaSearchResults.innerHTML = '';
+        
+        data.results.slice(0, 12).forEach(item => {
+            if (!item.poster_path) return; // Skip items without poster
+            
+            const card = document.createElement('div');
+            card.className = 'media-search-result';
+            card.innerHTML = `
+                <img src="${TMDB_IMAGE_BASE}${item.poster_path}" alt="${item.title || item.name}">
+                <div class="media-search-result-info">
+                    <div class="media-search-result-title">${item.title || item.name}</div>
+                    <div class="media-search-result-year">${(item.release_date || item.first_air_date || '').substring(0, 4)}</div>
+                </div>
+            `;
+            
+            card.onclick = () => {
+                addMediaCard({
+                    id: `${mediaType}_${item.id}`,
+                    title: item.title || item.name,
+                    year: (item.release_date || item.first_air_date || '').substring(0, 4),
+                    rating: item.vote_average || 0,
+                    image: `${TMDB_IMAGE_BASE}${item.poster_path}`,
+                    type: mediaType
+                });
+            };
+            
+            els.mediaSearchResults.appendChild(card);
+        });
+        
+        showStatus(els.mediaStatus, 'success', `Found ${data.results.length} results`);
+        setTimeout(() => els.mediaStatus.style.display = 'none', 2000);
+        
+    } catch (error) {
+        console.error('Media search error:', error);
+        showStatus(els.mediaStatus, 'error', 'Search failed');
     }
-    
-    els.mediaSearchBtn.disabled = false;
-    els.mediaSearchBtn.textContent = 'Search';
 };
 
-// Add media to profile
-function addMediaToProfile(item, type) {
-    const maxCards = 16;
-    
-    if (currentMediaCards.length >= maxCards) {
-        showStatus(els.mediaStatus, 'warning', `Maximum ${maxCards} cards allowed`);
-        return;
-    }
-    
+// Add media card
+function addMediaCard(media) {
     // Check if already added
-    if (currentMediaCards.some(c => c.id === String(item.id))) {
-        showStatus(els.mediaStatus, 'warning', 'Already added!');
+    if (currentMediaCards.some(card => card.id === media.id)) {
+        showStatus(els.mediaStatus, 'error', 'Already added!');
         return;
     }
     
-    const mediaCard = {
-        id: String(item.id),
-        type: type,
-        title: item.title || item.name,
-        image: `${TMDB_IMAGE_BASE}${item.poster_path}`,
-        year: extractYear(item.release_date || item.first_air_date),
-        rating: item.vote_average || 0,
-        order: currentMediaCards.length
-    };
+    // Check limit
+    if (currentMediaCards.length >= 12) {
+        showStatus(els.mediaStatus, 'error', 'Maximum 12 cards reached!');
+        return;
+    }
     
-    currentMediaCards.push(mediaCard);
-    renderMediaCards();
+    currentMediaCards.push(media);
+    renderMediaCards(true); // true = editing mode
+    
+    // Close modal
     els.mediaModal.classList.remove('active');
+    showStatus(els.mediaStatus, 'success', 'Added!');
 }
 
 // Remove media card
-function removeMediaCard(cardId) {
-    currentMediaCards = currentMediaCards.filter(c => c.id !== cardId);
-    // Reorder
-    currentMediaCards.forEach((card, i) => card.order = i);
-    renderMediaCards();
+function removeMediaCard(mediaId) {
+    currentMediaCards = currentMediaCards.filter(card => card.id !== mediaId);
+    renderMediaCards(true); // true = editing mode
 }
 
-// Render media cards in edit/view mode
-function renderMediaCards(isEditMode = false) {
-    // Use edit container if on create/edit page, otherwise use view container
+// Render media cards
+function renderMediaCards(isEditMode) {
+    // Determine which container to use
     const isOnCreatePage = pages.create.classList.contains('active');
     const container = isOnCreatePage ? els.editMediaCardsContainer : els.mediaCardsContainer;
     
-    console.log('renderMediaCards called:', {
-        isOnCreatePage,
-        isEditMode,
+    console.log('Rendering media cards:', {
+        isEditMode: isEditMode,
+        isOnCreatePage: isOnCreatePage,
         containerExists: !!container,
         currentMediaCardsCount: currentMediaCards.length,
         containerDisplay: container ? window.getComputedStyle(container).display : 'N/A',
