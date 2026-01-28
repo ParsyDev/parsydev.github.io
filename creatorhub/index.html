@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="icon" type="image/x-icon" href="creator_hub_icon.png">
     <title>Creator Hub</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -28,7 +29,10 @@
     <!-- Browse Page -->
     <div class="page active" id="browsePage">
         <div class="browse-container">
-            <div class="browse-header">All Users</div>
+            <div class="browse-header">
+                <span>All Users</span>
+                <button class="refresh-btn" id="refreshBtn" title="Refresh profiles from server">↻</button>
+            </div>
             <div class="search-container">
                 <div class="search-box">
                     <input type="text" id="profileSearch" placeholder="Search profiles by name...">
@@ -243,7 +247,16 @@
         </div>
     </div>
 
+    <!-- Core Scripts - ORDER MATTERS! -->
+    <!-- 1. Load crypto/cache systems FIRST -->
+    <script src="crypto-helper.js"></script>
+    <script src="cache-manager.js"></script>
     <script src="cropper.js"></script>
+    
+    <!-- 2. Load main app (depends on crypto) -->
     <script src="app.js"></script>
+    
+    <!-- 3. Load auth system extensions (extends app.js) -->
+    <script src="auth-system.js"></script>
 </body>
 </html>

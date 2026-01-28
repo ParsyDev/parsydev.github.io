@@ -34,6 +34,7 @@ const menu = {
 const els = {
     grid: document.getElementById('profilesGrid'),
     profileSearch: document.getElementById('profileSearch'),
+    refreshBtn: document.getElementById('refreshBtn'),
     name: document.getElementById('profileName'),
     pass: document.getElementById('profilePassword'),
     description: document.getElementById('profileDescription'),
@@ -123,6 +124,29 @@ menu.browse.onclick = () => {
     showPage('browse');
     loadAllProfiles();
 };
+
+// Refresh button handler
+if (els.refreshBtn) {
+    els.refreshBtn.onclick = async () => {
+        els.refreshBtn.classList.add('refreshing');
+        els.refreshBtn.disabled = true;
+        
+        // Clear ALL cache
+        if (typeof cacheManager !== 'undefined') {
+            cacheManager.clear();
+            console.log('🗑️ Cache cleared');
+        }
+        
+        // Reload profiles from server
+        await loadAllProfiles();
+        
+        // Reset button
+        els.refreshBtn.classList.remove('refreshing');
+        els.refreshBtn.disabled = false;
+        
+        console.log('✅ Profiles refreshed from server');
+    };
+}
 
 menu.create.onclick = () => {
     showPage('create');
@@ -574,7 +598,34 @@ els.loginBtn.onclick = async () => {
     try {
         const profile = await loadProfile(profileId);
         
-        if (profile.password !== password) {
+        // Check if profile uses encryption
+        const useCrypto = typeof cryptoHelper !== 'undefined';
+        let passwordValid = false;
+        
+        if (profile.encrypted && profile.passwordHash) {
+            // NEW ENCRYPTED FORMAT
+            if (!useCrypto) {
+                showStatus(els.loginStatus, 'error', '⚠️ Encryption support not loaded!');
+                els.loginBtn.disabled = false;
+                return;
+            }
+            
+            console.log('🔐 Verifying encrypted profile');
+            const inputHash = await cryptoHelper.hashPassword(password);
+            passwordValid = (inputHash === profile.passwordHash);
+            
+        } else if (profile.password) {
+            // OLD PLAINTEXT FORMAT (backwards compatibility)
+            console.log('⚠️ Using plaintext password verification');
+            passwordValid = (profile.password === password);
+            
+        } else {
+            showStatus(els.loginStatus, 'error', '❌ Profile data corrupted!');
+            els.loginBtn.disabled = false;
+            return;
+        }
+        
+        if (!passwordValid) {
             showStatus(els.loginStatus, 'error', '❌ Incorrect password!');
             els.loginBtn.disabled = false;
             return;
@@ -582,7 +633,8 @@ els.loginBtn.onclick = async () => {
         
         currentUser = {
             name: profile.name,
-            id: profileId
+            id: profileId,
+            encrypted: profile.encrypted || false
         };
         
         editingProfileId = profileId;
@@ -619,7 +671,12 @@ els.loginBtn.onclick = async () => {
         menu.login.style.display = 'none';
         menu.logout.style.display = 'block';
         
-        showStatus(els.loginStatus, 'success', '✅ Logged in!');
+        // Show encryption status
+        if (profile.encrypted) {
+            showStatus(els.loginStatus, 'success', '✅ Logged in!');
+        } else {
+            showStatus(els.loginStatus, 'success', '✅ Logged in! ⚠️ Not encrypted');
+        }
         
         setTimeout(() => {
             els.loginModal.classList.remove('active');
@@ -627,6 +684,7 @@ els.loginBtn.onclick = async () => {
         }, 1000);
         
     } catch(e) {
+        console.error('Login error:', e);
         showStatus(els.loginStatus, 'error', 'Error: ' + e.message);
     }
     
@@ -636,7 +694,21 @@ els.loginBtn.onclick = async () => {
 function loadProfileForEdit(profile) {
     els.createHeader.textContent = 'Edit Your Profile';
     els.name.value = profile.name;
-    els.pass.value = profile.password;
+    
+    // Handle password field based on profile type
+    if (profile.encrypted && profile.passwordHash) {
+        // Encrypted profile - can't show password
+        els.pass.value = '';
+        els.pass.placeholder = 'Enter your password to update';
+    } else if (profile.password) {
+        // Plaintext profile - show existing password
+        els.pass.value = profile.password;
+        els.pass.placeholder = 'Password';
+    } else {
+        els.pass.value = '';
+        els.pass.placeholder = 'Password';
+    }
+    
     els.description.value = profile.description || '';
     els.stream.value = profile.streamUrl || '';
     els.youtubeUrl.value = profile.youtubeUrl || '';
@@ -732,6 +804,9 @@ function resetCreateForm() {
     els.create.style.display = 'block';
     els.update.style.display = 'none';
     editingProfileId = null;
+    
+    // Render empty media cards container with + button
+    renderMediaCards();
 }
 
 // Image handling with new cropper
@@ -854,28 +929,81 @@ els.create.onclick = async () => {
     els.create.disabled = true;
     showStatus(els.createStatus, 'success', 'Creating profile...');
     
-    const profileData = {
-        name: name,
-        password: password,
-        description: description,
-        imageUrl: imageCrops.profile.url,
-        profileCrop: imageCrops.profile.crop,
-        bannerUrl: imageCrops.banner.url,
-        bannerCrop: imageCrops.banner.crop,
-        backgroundUrl: imageCrops.background.url,
-        backgroundCrop: imageCrops.background.crop,
-        streamUrl: stream,
-        youtubeUrl: youtubeUrl,
-        twitchUrl: twitchUrl,
-        cardStyle: els.cardStyle.value,
-        cardColor: els.cardStyle.value === 'custom' ? els.cardColorHex.value : null,
-        cardColorGradient: els.cardStyle.value === 'custom' ? els.cardColorGradientHex.value : null,
-        fontColor: els.cardStyle.value === 'custom' ? els.fontColorHex.value : null,
-        mediaCards: currentMediaCards,
-        createdAt: new Date().toISOString()
-    };
-    
     try {
+        // Check if crypto helper is available (auth-system.js loaded)
+        const useCrypto = typeof cryptoHelper !== 'undefined';
+        
+        let profileData;
+        
+        if (useCrypto) {
+            // NEW ENCRYPTED FORMAT
+            
+            // Public data (visible to everyone)
+            const publicData = {
+                name: name,
+                description: description,
+                imageUrl: imageCrops.profile.url,
+                profileCrop: imageCrops.profile.crop,
+                bannerUrl: imageCrops.banner.url,
+                bannerCrop: imageCrops.banner.crop,
+                backgroundUrl: imageCrops.background.url,
+                backgroundCrop: imageCrops.background.crop,
+                streamUrl: stream,
+                youtubeUrl: youtubeUrl,
+                twitchUrl: twitchUrl,
+                cardStyle: els.cardStyle.value,
+                cardColor: els.cardStyle.value === 'custom' ? els.cardColorHex.value : null,
+                cardColorGradient: els.cardStyle.value === 'custom' ? els.cardColorGradientHex.value : null,
+                fontColor: els.cardStyle.value === 'custom' ? els.fontColorHex.value : null,
+                mediaCards: currentMediaCards,
+                createdAt: new Date().toISOString(),
+                encrypted: true // Flag to indicate this profile uses encryption
+            };
+            
+            // Private data (encrypted with password)
+            const privateData = {
+                // Add any private fields here in the future
+                // email: '',
+                // notes: ''
+            };
+            
+            // Hash password and encrypt private data
+            const passwordHash = await cryptoHelper.hashPassword(password);
+            const encryptedPrivateData = await cryptoHelper.encrypt(password, privateData);
+            
+            profileData = {
+                ...publicData,
+                passwordHash: passwordHash,
+                encryptedData: encryptedPrivateData
+            };
+            
+        } else {
+            // OLD PLAINTEXT FORMAT (backwards compatibility)
+            console.log('⚠️ Creating plaintext profile (auth-system.js not loaded)');
+            
+            profileData = {
+                name: name,
+                password: password, // ⚠️ Plaintext password
+                description: description,
+                imageUrl: imageCrops.profile.url,
+                profileCrop: imageCrops.profile.crop,
+                bannerUrl: imageCrops.banner.url,
+                bannerCrop: imageCrops.banner.crop,
+                backgroundUrl: imageCrops.background.url,
+                backgroundCrop: imageCrops.background.crop,
+                streamUrl: stream,
+                youtubeUrl: youtubeUrl,
+                twitchUrl: twitchUrl,
+                cardStyle: els.cardStyle.value,
+                cardColor: els.cardStyle.value === 'custom' ? els.cardColorHex.value : null,
+                cardColorGradient: els.cardStyle.value === 'custom' ? els.cardColorGradientHex.value : null,
+                fontColor: els.cardStyle.value === 'custom' ? els.fontColorHex.value : null,
+                mediaCards: currentMediaCards,
+                createdAt: new Date().toISOString(),
+                encrypted: false
+            };
+        }
+        
         const response = await fetch(`${API_URL}/profile`, {
             method: 'POST',
             headers: {
@@ -898,7 +1026,15 @@ els.create.onclick = async () => {
         if (result.id) {
             registry[name] = result.id;
             await saveRegistry();
-            showStatus(els.createStatus, 'success', `✅ Profile created! ID: ${result.id}`);
+            
+            // Invalidate cache so new profile appears immediately
+            if (typeof cacheManager !== 'undefined') {
+                cacheManager.delete('registry');
+                cacheManager.delete(`profile_${result.id}`);
+                console.log('💾 Cache invalidated for new profile');
+            }
+            
+            showStatus(els.createStatus, 'success', `✅ Profile created!`);
             
             setTimeout(() => {
                 showPage('browse');
@@ -934,29 +1070,98 @@ els.update.onclick = async () => {
     showStatus(els.createStatus, 'success', 'Updating profile...');
     
     try {
-        // Load current profile to preserve mediaCards
+        // Load current profile
         const currentProfile = await loadProfile(editingProfileId);
         
-        const profileData = {
-            name: name,
-            password: password,
-            description: description,
-            imageUrl: imageCrops.profile.url,
-            profileCrop: imageCrops.profile.crop,
-            bannerUrl: imageCrops.banner.url,
-            bannerCrop: imageCrops.banner.crop,
-            backgroundUrl: imageCrops.background.url,
-            backgroundCrop: imageCrops.background.crop,
-            streamUrl: stream,
-            youtubeUrl: youtubeUrl,
-            twitchUrl: twitchUrl,
-            cardStyle: els.cardStyle.value,
-            cardColor: els.cardStyle.value === 'custom' ? els.cardColorHex.value : null,
-            cardColorGradient: els.cardStyle.value === 'custom' ? els.cardColorGradientHex.value : null,
-            fontColor: els.cardStyle.value === 'custom' ? els.fontColorHex.value : null,
-            mediaCards: currentMediaCards,
-            updatedAt: new Date().toISOString()
-        };
+        // Check if crypto helper is available
+        const useCrypto = typeof cryptoHelper !== 'undefined';
+        
+        let profileData;
+        
+        if (useCrypto) {
+            // NEW ENCRYPTED FORMAT
+            console.log('🔐 Updating with encryption');
+            
+            // If profile is already encrypted, verify password first
+            if (currentProfile.encrypted && currentProfile.passwordHash) {
+                const inputHash = await cryptoHelper.hashPassword(password);
+                if (inputHash !== currentProfile.passwordHash) {
+                    showStatus(els.createStatus, 'error', '❌ Wrong password! Cannot update encrypted profile.');
+                    els.update.disabled = false;
+                    return;
+                }
+            }
+            
+            // Public data
+            const publicData = {
+                name: name,
+                description: description,
+                imageUrl: imageCrops.profile.url,
+                profileCrop: imageCrops.profile.crop,
+                bannerUrl: imageCrops.banner.url,
+                bannerCrop: imageCrops.banner.crop,
+                backgroundUrl: imageCrops.background.url,
+                backgroundCrop: imageCrops.background.crop,
+                streamUrl: stream,
+                youtubeUrl: youtubeUrl,
+                twitchUrl: twitchUrl,
+                cardStyle: els.cardStyle.value,
+                cardColor: els.cardStyle.value === 'custom' ? els.cardColorHex.value : null,
+                cardColorGradient: els.cardStyle.value === 'custom' ? els.cardColorGradientHex.value : null,
+                fontColor: els.cardStyle.value === 'custom' ? els.fontColorHex.value : null,
+                mediaCards: currentMediaCards,
+                updatedAt: new Date().toISOString(),
+                encrypted: true
+            };
+            
+            // Private data (preserve existing or create new)
+            let privateData = {};
+            if (currentProfile.encryptedData) {
+                // Try to decrypt existing private data
+                try {
+                    privateData = await cryptoHelper.decrypt(password, currentProfile.encryptedData);
+                } catch(e) {
+                    console.log('Could not decrypt existing private data, creating new');
+                    privateData = {};
+                }
+            }
+            
+            // Hash password and encrypt private data
+            const passwordHash = await cryptoHelper.hashPassword(password);
+            const encryptedPrivateData = await cryptoHelper.encrypt(password, privateData);
+            
+            profileData = {
+                ...publicData,
+                passwordHash: passwordHash,
+                encryptedData: encryptedPrivateData
+            };
+            
+        } else {
+            // OLD PLAINTEXT FORMAT (backwards compatibility)
+            console.log('⚠️ Updating with plaintext (auth-system.js not loaded)');
+            
+            profileData = {
+                name: name,
+                password: password, // ⚠️ Plaintext password
+                description: description,
+                imageUrl: imageCrops.profile.url,
+                profileCrop: imageCrops.profile.crop,
+                bannerUrl: imageCrops.banner.url,
+                bannerCrop: imageCrops.banner.crop,
+                backgroundUrl: imageCrops.background.url,
+                backgroundCrop: imageCrops.background.crop,
+                streamUrl: stream,
+                youtubeUrl: youtubeUrl,
+                twitchUrl: twitchUrl,
+                cardStyle: els.cardStyle.value,
+                cardColor: els.cardStyle.value === 'custom' ? els.cardColorHex.value : null,
+                cardColorGradient: els.cardStyle.value === 'custom' ? els.cardColorGradientHex.value : null,
+                fontColor: els.cardStyle.value === 'custom' ? els.fontColorHex.value : null,
+                mediaCards: currentMediaCards,
+                updatedAt: new Date().toISOString(),
+                encrypted: false
+            };
+        }
     
         const response = await fetch(`${API_URL}/profile/${editingProfileId}`, {
             method: 'PATCH',
@@ -973,6 +1178,13 @@ els.update.onclick = async () => {
         });
         
         if (response.ok) {
+            // Invalidate cache for this profile
+            if (typeof cacheManager !== 'undefined') {
+                cacheManager.delete(`profile_${editingProfileId}`);
+                cacheManager.delete('registry');
+                console.log('💾 Cache invalidated for updated profile');
+            }
+            
             // Update nav profile pic if present
             if (profileData.imageUrl && profileData.profileCrop) {
                 const crop = profileData.profileCrop;
