@@ -91,10 +91,19 @@ const els = {
 };
 
 // Navigation
-function showPage(pageName) {
+function showPage(pageName, profileId = null, addToHistory = true) {
     Object.values(pages).forEach(p => p.classList.remove('active'));
     pages[pageName].classList.add('active');
     menu.dropdown.classList.remove('active');
+    
+    // Update URL and browser history
+    if (addToHistory) {
+        let url = `#${pageName}`;
+        if (pageName === 'view' && profileId) {
+            url = `#profile/${profileId}`;
+        }
+        window.history.pushState({ page: pageName, profileId: profileId }, '', url);
+    }
     
     // Hide crop UI when switching pages
     if (pageName === 'browse' || pageName === 'view') {
@@ -121,7 +130,7 @@ document.addEventListener('click', (e) => {
 });
 
 menu.browse.onclick = () => {
-    showPage('browse');
+    showPage('browse', null, true);
     loadAllProfiles();
 };
 
@@ -149,7 +158,7 @@ if (els.refreshBtn) {
 }
 
 menu.create.onclick = () => {
-    showPage('create');
+    showPage('create', null, true);
     resetCreateForm();
 };
 
@@ -175,11 +184,11 @@ menu.logout.onclick = () => {
     
     menu.trigger.style.backgroundImage = '';
     menu.trigger.classList.remove('logged-in');
-    menu.myProfile.classList.add('disabled');
+    menu.myProfile.classList.remove('disabled');
     menu.login.style.display = 'block';
     menu.logout.style.display = 'none';
     els.editProfileBtn.style.display = 'none';
-    showPage('browse');
+    showPage('browse', null, true);
     loadAllProfiles();
 };
 
@@ -194,7 +203,7 @@ els.editProfileBtn.onclick = async () => {
         try {
             const profile = await loadProfile(currentUser.id);
             loadProfileForEdit(profile);
-            showPage('create');
+            showPage('create', null, true);
             // Render media cards AFTER switching to create page
             renderMediaCards(true);
         } catch(e) {
@@ -354,19 +363,21 @@ function createProfileCard(profile, id) {
     card.appendChild(img);
     card.appendChild(name);
     
-    card.onclick = () => viewProfile(id);
+    // Make card clickable with proper history support
+    card.style.cursor = 'pointer';
+    card.onclick = () => viewProfile(id, true);
     
     return card;
 }
 
-async function viewProfile(id) {
+async function viewProfile(id, addToHistory = true) {
     try {
         const profile = await loadProfile(id);
         currentViewingProfileId = id;
         displayProfile(profile);
         
         // Show page first
-        showPage('view');
+        showPage('view', id, addToHistory);
         
         // Then check edit button visibility
         if (currentUser && currentUser.id === id) {
@@ -697,9 +708,9 @@ function loadProfileForEdit(profile) {
     
     // Handle password field based on profile type
     if (profile.encrypted && profile.passwordHash) {
-        // Encrypted profile - can't show password
+        // Encrypted profile - password optional if already logged in
         els.pass.value = '';
-        els.pass.placeholder = 'Enter your password to update';
+        els.pass.placeholder = 'Password (optional - leave blank to keep current)';
     } else if (profile.password) {
         // Plaintext profile - show existing password
         els.pass.value = profile.password;
@@ -1037,7 +1048,7 @@ els.create.onclick = async () => {
             showStatus(els.createStatus, 'success', `✅ Profile created!`);
             
             setTimeout(() => {
-                showPage('browse');
+                showPage('browse', null, true);
                 loadAllProfiles();
             }, 2000);
         } else {
@@ -1054,15 +1065,15 @@ els.create.onclick = async () => {
 
 els.update.onclick = async () => {
     const name = els.name.value.trim();
-    const password = els.pass.value.trim();
+    let password = els.pass.value.trim();
     const description = els.description.value.trim();
     const image = els.img.value.trim();
     const stream = els.stream.value.trim();
     const youtubeUrl = els.youtubeUrl.value.trim();
     const twitchUrl = els.twitchUrl.value.trim();
     
-    if (!name || !password) {
-        showStatus(els.createStatus, 'error', 'Name and password required!');
+    if (!name) {
+        showStatus(els.createStatus, 'error', 'Name required!');
         return;
     }
     
@@ -1073,6 +1084,28 @@ els.update.onclick = async () => {
         // Load current profile
         const currentProfile = await loadProfile(editingProfileId);
         
+        // If no password provided, use stored password
+        if (!password) {
+            if (currentProfile.encrypted && currentProfile.passwordHash) {
+                // For encrypted profiles, we need to verify user is logged in
+                if (!currentUser || currentUser.id !== editingProfileId) {
+                    showStatus(els.createStatus, 'error', 'Please enter your password!');
+                    els.update.disabled = false;
+                    return;
+                }
+                // User is logged in, we'll keep the existing hash
+                console.log('✅ Updating without re-entering password (already authenticated)');
+            } else if (currentProfile.password) {
+                // Old plaintext format - use stored password
+                password = currentProfile.password;
+                console.log('✅ Using stored plaintext password');
+            } else {
+                showStatus(els.createStatus, 'error', 'Password required!');
+                els.update.disabled = false;
+                return;
+            }
+        }
+        
         // Check if crypto helper is available
         const useCrypto = typeof cryptoHelper !== 'undefined';
         
@@ -1082,8 +1115,8 @@ els.update.onclick = async () => {
             // NEW ENCRYPTED FORMAT
             console.log('🔐 Updating with encryption');
             
-            // If profile is already encrypted, verify password first
-            if (currentProfile.encrypted && currentProfile.passwordHash) {
+            // If password was provided and profile is encrypted, verify it
+            if (password && currentProfile.encrypted && currentProfile.passwordHash) {
                 const inputHash = await cryptoHelper.hashPassword(password);
                 if (inputHash !== currentProfile.passwordHash) {
                     showStatus(els.createStatus, 'error', '❌ Wrong password! Cannot update encrypted profile.');
@@ -1116,8 +1149,8 @@ els.update.onclick = async () => {
             
             // Private data (preserve existing or create new)
             let privateData = {};
-            if (currentProfile.encryptedData) {
-                // Try to decrypt existing private data
+            if (currentProfile.encryptedData && password) {
+                // Try to decrypt existing private data if password provided
                 try {
                     privateData = await cryptoHelper.decrypt(password, currentProfile.encryptedData);
                 } catch(e) {
@@ -1126,9 +1159,15 @@ els.update.onclick = async () => {
                 }
             }
             
-            // Hash password and encrypt private data
-            const passwordHash = await cryptoHelper.hashPassword(password);
-            const encryptedPrivateData = await cryptoHelper.encrypt(password, privateData);
+            // Keep existing password hash if no new password provided
+            let passwordHash = currentProfile.passwordHash;
+            let encryptedPrivateData = currentProfile.encryptedData;
+            
+            // Only re-hash and re-encrypt if password was provided
+            if (password) {
+                passwordHash = await cryptoHelper.hashPassword(password);
+                encryptedPrivateData = await cryptoHelper.encrypt(password, privateData);
+            }
             
             profileData = {
                 ...publicData,
@@ -1199,8 +1238,12 @@ els.update.onclick = async () => {
             
             showStatus(els.createStatus, 'success', '✅ Profile updated!');
             
-            setTimeout(() => {
-                viewProfile(editingProfileId);
+            setTimeout(async () => {
+                // Reload profile fresh from server (not from cache)
+                const updatedProfile = await loadProfile(editingProfileId);
+                displayProfile(updatedProfile);
+                currentMediaCards = updatedProfile.mediaCards || [];
+                showPage('view', editingProfileId, false); // Don't add to history, we're already on this page
             }, 1500);
         } else {
             showStatus(els.createStatus, 'error', 'Failed to update profile');
@@ -1226,6 +1269,85 @@ function showStatus(element, type, message) {
 
 // Initialize
 loadAllProfiles();
+
+// ==================== BROWSER HISTORY SUPPORT ====================
+
+// Handle browser back/forward buttons
+window.addEventListener('popstate', (event) => {
+    console.log('Browser navigation detected', event.state);
+    
+    if (event.state) {
+        if (event.state.page === 'view' && event.state.profileId) {
+            viewProfile(event.state.profileId, false);
+        } else if (event.state.page === 'browse') {
+            showPage('browse', null, false);
+            loadAllProfiles();
+        } else if (event.state.page === 'create') {
+            showPage('create', null, false);
+        }
+    } else {
+        // No state - handle URL hash
+        handleUrlHash();
+    }
+});
+
+// Handle initial URL hash on page load
+function handleUrlHash() {
+    const hash = window.location.hash.slice(1); // Remove #
+    
+    if (!hash || hash === 'browse') {
+        showPage('browse', null, false);
+        loadAllProfiles();
+    } else if (hash === 'create') {
+        showPage('create', null, false);
+    } else if (hash.startsWith('profile/')) {
+        const profileId = hash.split('/')[1];
+        if (profileId) {
+            viewProfile(profileId, false);
+        }
+    } else {
+        // Unknown hash, default to browse
+        showPage('browse', null, false);
+        loadAllProfiles();
+    }
+}
+
+// Set initial history state
+if (!window.history.state) {
+    window.history.replaceState({ page: 'browse', profileId: null }, '', '#browse');
+}
+
+// Check URL on load
+window.addEventListener('DOMContentLoaded', handleUrlHash);
+
+// Also handle URL hash changes manually (for links)
+window.addEventListener('hashchange', handleUrlHash);
+
+// ==================== URL-BASED PROFILE ACCESS ====================
+
+// Allow direct profile access via URL parameter or hash
+// Examples: ?profile=gist_id  or  #profile/gist_id  or  ?username=ProfileName
+const urlParams = new URLSearchParams(window.location.search);
+const directProfileId = urlParams.get('profile');
+const directUsername = urlParams.get('username');
+
+if (directProfileId) {
+    // Direct profile ID provided in URL
+    console.log('Loading profile from URL:', directProfileId);
+    viewProfile(directProfileId, false);
+} else if (directUsername) {
+    // Username provided - need to load registry first
+    console.log('Loading profile by username:', directUsername);
+    loadRegistry().then(() => {
+        if (registry[directUsername]) {
+            viewProfile(registry[directUsername], false);
+        } else {
+            console.error('Profile not found:', directUsername);
+            showPage('browse', null, false);
+            loadAllProfiles();
+        }
+    });
+}
 
 // Card style selection
 document.querySelectorAll('.card-style-option').forEach(option => {
