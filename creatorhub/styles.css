@@ -16,6 +16,7 @@
     --text-primary: #e4e4e7;
     --text-secondary: #a1a1aa;
     --text-muted: #71717a;
+    --text-black: #000000;
     
     --accent-primary: #ffffff;
     --accent-hover: #f4f4f5;
@@ -1029,6 +1030,11 @@ select:focus {
 .close-btn:hover {
     background: var(--border-strong);
     color: var(--text-primary);
+}
+
+.login-btn {
+    background: var(--accent-primary);
+    color: var(--text-black);
 }
 
 input[type="color"] {
