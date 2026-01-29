@@ -28,19 +28,31 @@
 
     <!-- Browse Page -->
     <div class="page active" id="browsePage">
-        <div class="browse-container">
-            <div class="browse-header">
-                <span>All Users</span>
-                <button class="refresh-btn" id="refreshBtn" title="Refresh profiles from server">↻</button>
-            </div>
-            <div class="search-container">
-                <div class="search-box">
-                    <input type="text" id="profileSearch" placeholder="Search profiles by name...">
-                    <span class="search-icon">🔍</span>
+        <div class="browse-wrapper">
+            <div class="browse-container">
+                <div class="browse-header">
+                    <span>All Users</span>
+                    <button class="refresh-btn" id="refreshBtn" title="Refresh profiles from server">↻</button>
+                </div>
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="profileSearch" placeholder="Search profiles by name...">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="profiles-grid" id="profilesGrid">
+                    <div style="text-align:center; padding:40px; color:#999;">Loading...</div>
                 </div>
             </div>
-            <div class="profiles-grid" id="profilesGrid">
-                <div style="text-align:center; padding:40px; color:#999;">Loading...</div>
+            
+            <!-- What's New Sidebar (Desktop only) -->
+            <div class="whats-new-sidebar" id="whatsNewSidebar">
+                <div class="whats-new-header">
+                    <span>What's New</span>
+                </div>
+                <div class="whats-new-content" id="whatsNewContent">
+                    <div style="text-align:center; padding:20px; color:#999; font-size: 13px;">Loading updates...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -73,6 +85,7 @@
                         <div class="drop-zone" id="dropZone">Drop image URL here or paste below</div>
                         <div style="display: flex; gap: 5px;">
                             <input type="text" id="imageUrl" placeholder="Paste image URL" style="flex: 1;">
+                            <button type="button" id="enableCrop" style="width: auto; padding: 8px 15px; background: #3b82f6; margin: 0;">✂️ Crop</button>
                             <button type="button" id="clearImage" style="width: auto; padding: 8px 15px; background: #e74c3c; margin: 0;">✕ Clear</button>
                         </div>
                         
@@ -90,7 +103,10 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="button" id="applyCrop" style="background: #ffffff; color: #18181b; margin-top: 10px; font-weight: 600;">✓ Apply Crop</button>
+                            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                                <button type="button" id="applyCrop" style="background: #ffffff; color: #18181b; flex: 1; font-weight: 600;">✓ Apply Crop</button>
+                                <button type="button" id="cancelCrop" style="background: #71717a; color: white; flex: 1; font-weight: 600;">✕ Cancel</button>
+                            </div>
                         </div>
                     </div>
                     <div class="field">

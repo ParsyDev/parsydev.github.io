@@ -257,32 +257,51 @@ class ImageCropper {
         if (handle === 'top-left') {
             const newWidth = this.cropData.x + this.cropData.width - mouseX;
             const newHeight = this.cropData.y + this.cropData.height - mouseY;
-            if (newWidth > 50 && newHeight > 50) {
+            const newX = mouseX;
+            const newY = mouseY;
+            
+            // Validate bounds
+            if (newWidth > 50 && newHeight > 50 && 
+                newX >= 0 && newY >= 0) {
                 this.cropData.width = newWidth;
                 this.cropData.height = newHeight;
-                this.cropData.x = mouseX;
-                this.cropData.y = mouseY;
+                this.cropData.x = newX;
+                this.cropData.y = newY;
             }
         } else if (handle === 'top-right') {
             const newWidth = mouseX - this.cropData.x;
             const newHeight = this.cropData.y + this.cropData.height - mouseY;
-            if (newWidth > 50 && newHeight > 50) {
+            const newY = mouseY;
+            
+            // Validate bounds
+            if (newWidth > 50 && newHeight > 50 && 
+                this.cropData.x + newWidth <= this.canvas.width &&
+                newY >= 0) {
                 this.cropData.width = newWidth;
                 this.cropData.height = newHeight;
-                this.cropData.y = mouseY;
+                this.cropData.y = newY;
             }
         } else if (handle === 'bottom-left') {
             const newWidth = this.cropData.x + this.cropData.width - mouseX;
             const newHeight = mouseY - this.cropData.y;
-            if (newWidth > 50 && newHeight > 50) {
+            const newX = mouseX;
+            
+            // Validate bounds
+            if (newWidth > 50 && newHeight > 50 && 
+                newX >= 0 &&
+                this.cropData.y + newHeight <= this.canvas.height) {
                 this.cropData.width = newWidth;
                 this.cropData.height = newHeight;
-                this.cropData.x = mouseX;
+                this.cropData.x = newX;
             }
         } else if (handle === 'bottom-right') {
             const newWidth = mouseX - this.cropData.x;
             const newHeight = mouseY - this.cropData.y;
-            if (newWidth > 50 && newHeight > 50) {
+            
+            // Validate bounds
+            if (newWidth > 50 && newHeight > 50 && 
+                this.cropData.x + newWidth <= this.canvas.width &&
+                this.cropData.y + newHeight <= this.canvas.height) {
                 this.cropData.width = newWidth;
                 this.cropData.height = newHeight;
             }

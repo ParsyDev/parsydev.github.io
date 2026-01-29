@@ -296,6 +296,9 @@ async function saveRegistry() {
 async function loadAllProfiles() {
     els.grid.innerHTML = '<div style="text-align:center;padding:40px;color:#999;">Loading...</div>';
     
+    // Load What's New content (non-blocking)
+    loadWhatsNew();
+    
     try {
         await loadRegistry();
         console.log('Registry loaded:', registry);
@@ -850,41 +853,47 @@ els.imageType.onchange = () => {
     // Update the input field
     els.img.value = imageCrops[currentImageType].url || '';
     
-    // Load the image if URL exists
-    if (imageCrops[currentImageType].url) {
-        console.log(`Loading ${currentImageType} image:`, imageCrops[currentImageType].url);
-        cropper.loadImage(imageCrops[currentImageType].url);
-        
-        // Show crop UI immediately (cropper will hide it on error)
-        els.cropCont.classList.add('active');
-        
-        // Apply saved crop data after a short delay (wait for image to load)
-        setTimeout(() => {
-            if (cropper.imageLoaded && imageCrops[currentImageType].crop) {
-                cropper.applyCropData(imageCrops[currentImageType].crop);
-                console.log(`Applied saved crop for ${currentImageType}`);
-            }
-        }, 100);
-    } else {
-        console.log(`No URL for ${currentImageType}, hiding crop UI`);
-        els.cropCont.classList.remove('active');
-    }
+    // Hide crop UI when switching types - user must manually enable it
+    els.cropCont.classList.remove('active');
 };
 
-// Image URL input
+// Image URL input - Don't auto-show crop UI
 els.img.oninput = (e) => {
     const url = e.target.value.trim();
     console.log(`📝 Image URL changed for ${currentImageType}:`, url ? url.substring(0, 50) + '...' : 'empty');
     
     if (url) {
         imageCrops[currentImageType].url = url;
-        cropper.loadImage(url);
-        els.cropCont.classList.add('active');
+        // Don't automatically show crop UI - user must click "Crop" button
     } else {
         imageCrops[currentImageType].url = '';
         els.cropCont.classList.remove('active');
     }
 };
+
+// Enable Crop button
+const enableCropBtn = document.getElementById('enableCrop');
+if (enableCropBtn) {
+    enableCropBtn.onclick = () => {
+        const url = imageCrops[currentImageType].url;
+        if (url) {
+            cropper.loadImage(url);
+            els.cropCont.classList.add('active');
+        } else {
+            alert('Please enter an image URL first!');
+        }
+    };
+}
+
+// Cancel Crop button
+const cancelCropBtn = document.getElementById('cancelCrop');
+if (cancelCropBtn) {
+    cancelCropBtn.onclick = () => {
+        els.cropCont.classList.remove('active');
+        // Keep the image URL but remove crop data
+        imageCrops[currentImageType].crop = null;
+    };
+}
 
 // Clear image button
 els.clearImage.onclick = () => {
@@ -902,6 +911,8 @@ els.applyCrop.onclick = () => {
         imageCrops[currentImageType].crop = cropData;
         console.log(`Crop saved for ${currentImageType}:`, cropData);
         alert(`✓ ${currentImageType.charAt(0).toUpperCase() + currentImageType.slice(1)} crop applied!`);
+        // Close crop UI after applying
+        els.cropCont.classList.remove('active');
     }
 };
 
@@ -923,8 +934,7 @@ els.drop.ondrop = (e) => {
     if (text) {
         els.img.value = text;
         imageCrops[currentImageType].url = text;
-        cropper.loadImage(text);
-        els.cropCont.classList.add('active');
+        // Don't auto-show crop - user must click "Crop" button
     }
 };
 
@@ -935,8 +945,7 @@ document.addEventListener('paste', (e) => {
             const url = els.img.value.trim();
             if (url) {
                 imageCrops[currentImageType].url = url;
-                cropper.loadImage(url);
-                els.cropCont.classList.add('active');
+                // Don't auto-show crop - user must click "Crop" button
             }
         }, 10);
     }
@@ -1501,20 +1510,12 @@ function loadProfileForEdit(profile) {
         currentImageType = 'profile';
         els.imageType.value = 'profile';
         els.img.value = imageCrops.profile.url;
-        cropper.loadImage(imageCrops.profile.url);
-        if (imageCrops.profile.crop) {
-            setTimeout(() => cropper.applyCropData(imageCrops.profile.crop), 100);
-        }
-        els.cropCont.classList.add('active');
+        // Don't auto-show crop UI - user must click "Crop" button
     } else if (imageCrops.banner.url) {
         currentImageType = 'banner';
         els.imageType.value = 'banner';
         els.img.value = imageCrops.banner.url;
-        cropper.loadImage(imageCrops.banner.url);
-        if (imageCrops.banner.crop) {
-            setTimeout(() => cropper.applyCropData(imageCrops.banner.crop), 100);
-        }
-        els.cropCont.classList.add('active');
+        // Don't auto-show crop UI - user must click "Crop" button
     }
     
     // Load card style
@@ -2087,3 +2088,151 @@ els.customSocialUrl.onkeypress = (e) => {
     if (e.key === 'Enter') addCustomSocialLink();
 };
 
+
+// ==================== WHAT'S NEW SIDEBAR ====================
+async function loadWhatsNew() {
+    const whatsNewContent = document.getElementById('whatsNewContent');
+    if (!whatsNewContent) return;
+    
+    // Check if on mobile/tablet (hide sidebar)
+    if (window.innerWidth <= 1200) {
+        return;
+    }
+    
+    try {
+        // Fetch the What's New gist
+        const response = await fetch('https://api.github.com/gists/3372c722a7f69ad6c62e0a4b2b3a878d');
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch What\'s New');
+        }
+        
+        const gist = await response.json();
+        
+        // Get the content from any file in the gist (support any filename)
+        let markdownContent = '';
+        const files = Object.keys(gist.files);
+        
+        if (files.length > 0) {
+            // Use the first file found
+            const firstFile = files[0];
+            markdownContent = gist.files[firstFile].content;
+            console.log(`✅ Loaded What's New from: ${firstFile}`);
+        } else {
+            throw new Error('No files found in gist');
+        }
+        
+        // Simple markdown to HTML converter
+        const htmlContent = simpleMarkdownToHTML(markdownContent);
+        
+        whatsNewContent.innerHTML = htmlContent;
+        
+        console.log('✅ What\'s New loaded successfully');
+        
+    } catch (error) {
+        console.error('Failed to load What\'s New:', error);
+        whatsNewContent.innerHTML = `
+            <div style="text-align:center; padding:20px; color:#999; font-size: 13px;">
+                Failed to load updates.<br>
+                <a href="https://gist.github.com/ParsyDev/3372c722a7f69ad6c62e0a4b2b3a878d" target="_blank" style="color: var(--accent-primary); text-decoration: underline; margin-top: 8px; display: inline-block;">View on GitHub</a>
+            </div>
+        `;
+    }
+}
+
+// Simple markdown to HTML converter
+function simpleMarkdownToHTML(markdown) {
+    let html = markdown;
+    
+    // Headers
+    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h2>$1</h2>'); // Treat # as h2
+    
+    // Bold
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Italic
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Code inline
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    
+    // Links
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+    
+    // Horizontal rules
+    html = html.replace(/^---$/gim, '<hr>');
+    html = html.replace(/^\*\*\*$/gim, '<hr>');
+    
+    // Lists (simple)
+    html = html.replace(/^\- (.*$)/gim, '<li>$1</li>');
+    html = html.replace(/^\* (.*$)/gim, '<li>$1</li>');
+    
+    // Wrap consecutive <li> in <ul>
+    html = html.replace(/(<li>.*<\/li>\n?)+/g, function(match) {
+        return '<ul>' + match + '</ul>';
+    });
+    
+    // Line breaks to paragraphs
+    const lines = html.split('\n');
+    let inList = false;
+    let result = [];
+    let currentParagraph = '';
+    
+    for (let line of lines) {
+        line = line.trim();
+        
+        // Skip empty lines
+        if (!line) {
+            if (currentParagraph && !inList) {
+                result.push('<p>' + currentParagraph + '</p>');
+                currentParagraph = '';
+            }
+            continue;
+        }
+        
+        // Check if it's a header, list, or hr
+        if (line.startsWith('<h') || line.startsWith('<ul') || line.startsWith('</ul') || 
+            line.startsWith('<hr') || line.startsWith('<li')) {
+            if (currentParagraph) {
+                result.push('<p>' + currentParagraph + '</p>');
+                currentParagraph = '';
+            }
+            result.push(line);
+            inList = line.startsWith('<ul') || (inList && !line.startsWith('</ul'));
+        } else {
+            // Regular text
+            if (!inList) {
+                if (currentParagraph) {
+                    currentParagraph += ' ' + line;
+                } else {
+                    currentParagraph = line;
+                }
+            } else {
+                result.push(line);
+            }
+        }
+    }
+    
+    // Add any remaining paragraph
+    if (currentParagraph) {
+        result.push('<p>' + currentParagraph + '</p>');
+    }
+    
+    return result.join('\n');
+}
+
+// Reload What's New when window is resized
+let resizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        const whatsNewSidebar = document.getElementById('whatsNewSidebar');
+        if (whatsNewSidebar) {
+            if (window.innerWidth > 1200 && !whatsNewSidebar.querySelector('.whats-new-content').innerHTML.includes('What')) {
+                loadWhatsNew();
+            }
+        }
+    }, 250);
+});
