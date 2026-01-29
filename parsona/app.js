@@ -195,6 +195,10 @@ if (els.refreshBtn) {
 menu.create.onclick = () => {
     showPage('create', null, true);
     resetCreateForm();
+    // Explicitly render media cards after form reset completes
+    setTimeout(() => {
+        renderMediaCards(true);
+    }, 100);
 };
 
 menu.myProfile.onclick = () => {
@@ -1150,7 +1154,7 @@ els.create.onclick = async () => {
     }
     
     try {
-        // Create gist
+        // Create gist (PRIVATE for security)
         const response = await fetch(`${API_URL}/profile`, {
             method: 'POST',
             headers: {
@@ -1163,7 +1167,7 @@ els.create.onclick = async () => {
                     }
                 },
                 description: `Parsona Profile: ${name}`,
-                public: true
+                public: false // 🔒 PRIVATE GIST - Only accessible through worker
             })
         });
         
@@ -1450,7 +1454,12 @@ function resetCreateForm() {
     
     // Reset media cards
     currentMediaCards = [];
-    els.editMediaCardsContainer.innerHTML = '';
+    
+    // IMPORTANT: Render empty media cards to show the "+" button
+    // We need to do this after a small delay to ensure the container is visible
+    setTimeout(() => {
+        renderMediaCards(true);
+    }, 50);
     
     // Reset buttons
     els.create.style.display = 'block';
@@ -1790,7 +1799,7 @@ els.mediaSearchBtn.onclick = async () => {
                         id: `game_${game.id}`,
                         title: game.name,
                         year: releaseYear || '',
-                        rating: game.rating ? (game.rating / 10) : 0,
+                        rating: game.rating ? (game.rating / 10).toFixed(1) : 0,
                         image: coverUrl,
                         type: 'game'
                     });
