@@ -254,16 +254,17 @@
             <div class="modal-header">Add Favorite Media</div>
             <div class="modal-body">
                 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <input type="text" id="mediaSearchInput" placeholder="Search movies or TV shows..." style="flex: 1;">
+                    <input type="text" id="mediaSearchInput" placeholder="Search movies, TV shows, or games..." style="flex: 1;">
                     <select id="mediaTypeSelect" style="width: 120px;">
                         <option value="movie">Movies</option>
                         <option value="tv">TV Shows</option>
+                        <option value="game">🎮 Games</option>
                     </select>
-                    <button id="mediaSearchBtn" style="width: auto; padding: 8px 20px; margin: 0;">Search</button>
+                    <button class="login-btn" id="mediaSearchBtn" style="width: auto; padding: 8px 20px; margin: 0;">Search</button>
                 </div>
                 <div id="mediaSearchResults" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
                     <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
-                        Search for movies or TV shows to add to your profile
+                        Search for movies, TV shows, or games to add to your profile
                     </div>
                 </div>
                 <button class="close-btn" id="closeMediaModal">Close</button>

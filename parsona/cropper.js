@@ -101,16 +101,36 @@ class ImageCropper {
     }
     
     loadImage(url) {
+        // Cancel any previous load attempts
+        if (this.image) {
+            this.image.onload = null;
+            this.image.onerror = null;
+            this.image.src = ''; // Clear source
+        }
+        
         this.imageLoaded = false;
         this.loadAttempts = 0;
+        this.currentLoadUrl = url; // Track which URL we're loading
         this.attemptLoadImage(url);
     }
     
     attemptLoadImage(url) {
+        // Check if this is still the URL we want to load
+        if (this.currentLoadUrl !== url) {
+            console.log('Load cancelled - different URL requested');
+            return;
+        }
+        
         this.image.crossOrigin = "anonymous";
         
         this.image.onload = () => {
-            console.log('Image loaded successfully');
+            // Double-check we're still loading the right URL
+            if (this.currentLoadUrl !== url) {
+                console.log('Image loaded but URL changed, ignoring');
+                return;
+            }
+            
+            console.log('✅ Image loaded successfully:', url);
             this.imageLoaded = true;
             this.loadAttempts = 0;
             this.drawImage();
@@ -118,6 +138,12 @@ class ImageCropper {
         };
         
         this.image.onerror = () => {
+            // Check if this is still the URL we want to load
+            if (this.currentLoadUrl !== url) {
+                console.log('Error ignored - different URL requested');
+                return;
+            }
+            
             this.loadAttempts++;
             console.error(`Failed to load image (attempt ${this.loadAttempts}/${this.maxLoadAttempts})`);
             
@@ -125,13 +151,23 @@ class ImageCropper {
                 // Retry after a short delay
                 console.log('Retrying image load...');
                 setTimeout(() => {
-                    this.image.src = url;
+                    // Only retry if URL hasn't changed
+                    if (this.currentLoadUrl === url) {
+                        this.image.src = url;
+                    }
                 }, 500 * this.loadAttempts);
             } else {
                 // Only show error after all attempts failed
-                console.error('All image load attempts failed');
-                alert('Failed to load image after multiple attempts. Please check:\n\n1. The URL is correct\n2. The image is publicly accessible\n3. CORS is enabled on the server\n4. Try a different image host (imgur, imgbb, etc.)');
+                console.error('❌ All image load attempts failed for:', url);
                 this.imageLoaded = false;
+                
+                // Hide crop container on error
+                const cropContainer = document.getElementById('cropContainer');
+                if (cropContainer) {
+                    cropContainer.classList.remove('active');
+                }
+                
+                alert('Failed to load image. Please check:\n\n1. The URL is correct and publicly accessible\n2. Image format is supported (jpg, png, gif, webp)\n3. CORS is enabled on the image host\n\nTry using: imgur.com, imgbb.com, or i.ibb.co');
             }
         };
         

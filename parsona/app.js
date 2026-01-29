@@ -2,6 +2,12 @@ const API_URL = 'https://creator-hub-api.emdejiku.workers.dev';
 const TMDB_API_KEY = 'ef368b77a32d9d65464c5470b20971fa'; // TMDB API key
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 
+// IGDB/Twitch API for Games
+const IGDB_CLIENT_ID = 'q1rk5rddrlc194tidqsvmqyoyansmz';
+const IGDB_CLIENT_SECRET = '1pf0p21tznnncas2fi9ftwo08xxobq';
+let igdbAccessToken = null;
+let igdbTokenExpiry = 0;
+
 const REG = '5d51e42426b9f95c110b7c92e4ac7bfe';
 let registry = {};
 let currentImageType = 'profile'; // Track which image we're editing
@@ -358,15 +364,15 @@ function createProfileCard(profile, id) {
     if (profile.imageUrl) {
         try {
             if (profile.profileCrop && profile.profileCrop.width > 0) {
-                // New format
+                // New format - correct crop display
                 const crop = profile.profileCrop;
-                const scale = 100 / (crop.width * 100);
-                const offsetX = -(crop.x * 100) * scale;
-                const offsetY = -(crop.y * 100) * scale;
+                const scale = 1 / crop.width;
+                const posX = -crop.x / crop.width * 100;
+                const posY = -crop.y / crop.height * 100;
                 
                 img.style.backgroundImage = `url(${profile.imageUrl})`;
                 img.style.backgroundSize = `${scale * 100}%`;
-                img.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
+                img.style.backgroundPosition = `${posX}% ${posY}%`;
             } else if (profile.cropData) {
                 // Old format (backwards compatibility)
                 const scale = profile.cropData.zoom / 100;
@@ -439,15 +445,13 @@ function displayProfile(profile) {
     // Display banner image
     if (profile.bannerUrl && profile.bannerCrop) {
         const crop = profile.bannerCrop;
-        // Scale: Make the crop width fill 100% of container
-        const scale = 100 / (crop.width * 100); // Convert to percentage
-        // Position: Move image so crop area is visible (negative offset)
-        const offsetX = -(crop.x * 100) * scale;
-        const offsetY = -(crop.y * 100) * scale;
+        const scale = 1 / crop.width;
+        const posX = -crop.x / crop.width * 100;
+        const posY = -crop.y / crop.height * 100;
         
         els.viewBannerImg.style.backgroundImage = `url(${profile.bannerUrl})`;
         els.viewBannerImg.style.backgroundSize = `${scale * 100}%`;
-        els.viewBannerImg.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
+        els.viewBannerImg.style.backgroundPosition = `${posX}% ${posY}%`;
     } else {
         els.viewBannerImg.style.backgroundImage = '';
     }
@@ -456,13 +460,13 @@ function displayProfile(profile) {
     if (els.siteBackground) {
         if (profile.backgroundUrl && profile.backgroundCrop) {
             const crop = profile.backgroundCrop;
-            const scale = 100 / (crop.width * 100);
-            const offsetX = -(crop.x * 100) * scale;
-            const offsetY = -(crop.y * 100) * scale;
+            const scale = 1 / crop.width;
+            const posX = -crop.x / crop.width * 100;
+            const posY = -crop.y / crop.height * 100;
             
             els.siteBackground.style.backgroundImage = `url(${profile.backgroundUrl})`;
             els.siteBackground.style.backgroundSize = `${scale * 100}%`;
-            els.siteBackground.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
+            els.siteBackground.style.backgroundPosition = `${posX}% ${posY}%`;
         } else {
             els.siteBackground.style.backgroundImage = '';
         }
@@ -511,6 +515,8 @@ function displayProfile(profile) {
     // Display custom social links
     if (els.customSocialLinksDisplay) {
         els.customSocialLinksDisplay.innerHTML = '';
+        // Use 'display: contents' to make children direct children of parent
+        els.customSocialLinksDisplay.style.display = 'contents';
         
         if (profile.customSocialLinks && profile.customSocialLinks.length > 0) {
             profile.customSocialLinks.forEach(link => {
@@ -533,8 +539,7 @@ function displayProfile(profile) {
                 img.style.height = '48px';
                 img.style.borderRadius = '8px';
                 img.style.objectFit = 'contain';
-                img.style.background = 'white';
-                img.style.padding = '4px';
+                // Don't add white background - let the icon's natural appearance show
                 
                 img.onerror = function() {
                     // Fallback to Clearbit if Google fails
@@ -548,7 +553,8 @@ function displayProfile(profile) {
                             svg.setAttribute('width', '48');
                             svg.setAttribute('height', '48');
                             svg.setAttribute('viewBox', '0 0 24 24');
-                            svg.setAttribute('fill', '#999');
+                            svg.setAttribute('fill', 'currentColor');
+                            svg.style.color = '#a1a1aa'; // Match theme color
                             svg.innerHTML = '<path d="M3.9,12C3.9,10.29 5.29,8.9 7,8.9H11V7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H11V15.1H7C5.29,15.1 3.9,13.71 3.9,12M8,13H16V11H8V13M17,7H13V8.9H17C18.71,8.9 20.1,10.29 20.1,12C20.1,13.71 18.71,15.1 17,15.1H13V17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7Z"/>';
                             linkEl.insertBefore(svg, this);
                         };
@@ -640,15 +646,24 @@ function displayProfile(profile) {
     // Display profile picture
     if (profile.imageUrl) {
         if (profile.profileCrop) {
-            // New format
+            // New format - correct crop display
             const crop = profile.profileCrop;
-            const scale = 100 / (crop.width * 100);
-            const offsetX = -(crop.x * 100) * scale;
-            const offsetY = -(crop.y * 100) * scale;
+            
+            // How much to scale up the image so the crop area fills the container
+            // If crop.width is 0.5 (50% of image), we need to scale to 200% to make it fill
+            const scale = 1 / crop.width;
+            
+            // Position the image so the crop area is visible
+            // If crop.x is 0.25 (starts at 25% of image), and crop.width is 0.5,
+            // we want to show from 25% to 75% of the original image
+            const posX = -crop.x / crop.width * 100;
+            const posY = -crop.y / crop.height * 100;
             
             els.viewImg.style.backgroundImage = `url(${profile.imageUrl})`;
             els.viewImg.style.backgroundSize = `${scale * 100}%`;
-            els.viewImg.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
+            els.viewImg.style.backgroundPosition = `${posX}% ${posY}%`;
+            
+            console.log('🖼️ Profile crop display:', { scale, posX, posY, crop });
         } else if (profile.cropData) {
             // Old format (backwards compatibility)
             const scale = profile.cropData.zoom / 100;
@@ -826,18 +841,28 @@ els.loginModal.onclick = (e) => {
 // Image crop system
 els.imageType.onchange = () => {
     currentImageType = els.imageType.value;
+    console.log(`📸 Switched to ${currentImageType} image type`);
+    
+    // Update the input field
+    els.img.value = imageCrops[currentImageType].url || '';
+    
     // Load the image if URL exists
     if (imageCrops[currentImageType].url) {
-        els.img.value = imageCrops[currentImageType].url;
+        console.log(`Loading ${currentImageType} image:`, imageCrops[currentImageType].url);
         cropper.loadImage(imageCrops[currentImageType].url);
+        
+        // Show crop UI immediately (cropper will hide it on error)
         els.cropCont.classList.add('active');
         
-        // Apply saved crop data if exists
-        if (imageCrops[currentImageType].crop) {
-            cropper.applyCropData(imageCrops[currentImageType].crop);
-        }
+        // Apply saved crop data after a short delay (wait for image to load)
+        setTimeout(() => {
+            if (cropper.imageLoaded && imageCrops[currentImageType].crop) {
+                cropper.applyCropData(imageCrops[currentImageType].crop);
+                console.log(`Applied saved crop for ${currentImageType}`);
+            }
+        }, 100);
     } else {
-        els.img.value = '';
+        console.log(`No URL for ${currentImageType}, hiding crop UI`);
         els.cropCont.classList.remove('active');
     }
 };
@@ -845,11 +870,14 @@ els.imageType.onchange = () => {
 // Image URL input
 els.img.oninput = (e) => {
     const url = e.target.value.trim();
+    console.log(`📝 Image URL changed for ${currentImageType}:`, url ? url.substring(0, 50) + '...' : 'empty');
+    
     if (url) {
         imageCrops[currentImageType].url = url;
         cropper.loadImage(url);
         els.cropCont.classList.add('active');
     } else {
+        imageCrops[currentImageType].url = '';
         els.cropCont.classList.remove('active');
     }
 };
@@ -931,15 +959,15 @@ async function restoreLoginState() {
             // Update UI
             if (profile.imageUrl) {
                 if (profile.profileCrop) {
-                    // New format
+                    // New format - correct crop display
                     const crop = profile.profileCrop;
-                    const scale = 100 / (crop.width * 100);
-                    const offsetX = -(crop.x * 100) * scale;
-                    const offsetY = -(crop.y * 100) * scale;
+                    const scale = 1 / crop.width;
+                    const posX = -crop.x / crop.width * 100;
+                    const posY = -crop.y / crop.height * 100;
                     
                     menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
                     menu.trigger.style.backgroundSize = `${scale * 100}%`;
-                    menu.trigger.style.backgroundPosition = `${offsetX}% ${offsetY}%`;
+                    menu.trigger.style.backgroundPosition = `${posX}% ${posY}%`;
                 } else if (profile.cropData) {
                     // Old format (backwards compatibility)
                     const scale = profile.cropData.zoom / 100;
@@ -1615,10 +1643,95 @@ els.mediaModal.onclick = (e) => {
     }
 };
 
-// TMDB search
+// ==================== IGDB/TWITCH API FOR GAMES ====================
+
+// Get IGDB Access Token (Twitch OAuth)
+async function getIGDBToken() {
+    // Return cached token if still valid
+    if (igdbAccessToken && Date.now() < igdbTokenExpiry) {
+        console.log('✅ Using cached IGDB token');
+        return igdbAccessToken;
+    }
+    
+    console.log('🔑 Getting new IGDB token...');
+    
+    try {
+        const response = await fetch('https://id.twitch.tv/oauth2/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                client_id: IGDB_CLIENT_ID,
+                client_secret: IGDB_CLIENT_SECRET,
+                grant_type: 'client_credentials'
+            })
+        });
+        
+        console.log('📥 Token Response Status:', response.status);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Token Error:', errorText);
+            alert(`Failed to get IGDB token (${response.status}). Check credentials!`);
+            return null;
+        }
+        
+        const data = await response.json();
+        igdbAccessToken = data.access_token;
+        igdbTokenExpiry = Date.now() + (data.expires_in * 1000) - 60000; // Refresh 1min before expiry
+        
+        console.log('✅ IGDB token obtained successfully!');
+        console.log('Token expires in:', data.expires_in, 'seconds');
+        return igdbAccessToken;
+    } catch(e) {
+        console.error('❌ IGDB token error:', e);
+        alert('Failed to get IGDB token: ' + e.message);
+        return null;
+    }
+}
+
+// Search IGDB for games (via Cloudflare proxy)
+async function searchIGDB(query) {
+    try {
+        console.log('🎮 Searching IGDB for:', query);
+        console.log('📤 Using Cloudflare proxy...');
+        
+        const response = await fetch(`${API_URL}/igdb/search`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query: query,
+                client_id: IGDB_CLIENT_ID,
+                client_secret: IGDB_CLIENT_SECRET
+            })
+        });
+        
+        console.log('📥 Proxy Response Status:', response.status);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ IGDB Proxy Error:', errorText);
+            alert(`IGDB Proxy Error (${response.status}): ${errorText.substring(0, 200)}`);
+            return [];
+        }
+        
+        const data = await response.json();
+        console.log('✅ IGDB results:', data);
+        return data || [];
+    } catch(e) {
+        console.error('❌ IGDB search error:', e);
+        alert('IGDB Search failed. Make sure Cloudflare Worker has /igdb/search endpoint!\n\nError: ' + e.message);
+        return [];
+    }
+}
+
+// Media search (TMDB + IGDB)
 els.mediaSearchBtn.onclick = async () => {
     const query = els.mediaSearchInput.value.trim();
-    const mediaType = els.mediaTypeSelect.value; // 'movie' or 'tv'
+    const mediaType = els.mediaTypeSelect.value; // 'movie', 'tv', or 'game'
     
     if (!query) {
         showStatus(els.mediaStatus, 'error', 'Please enter a search query');
@@ -1628,54 +1741,118 @@ els.mediaSearchBtn.onclick = async () => {
     try {
         showStatus(els.mediaStatus, 'loading', 'Searching...');
         
-        const response = await fetch(
-            `https://api.themoviedb.org/3/search/${mediaType}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`
-        );
+        let results = [];
         
-        if (!response.ok) {
-            throw new Error('Search failed');
+        // Search based on type
+        if (mediaType === 'game') {
+            // IGDB/Twitch Games
+            results = await searchIGDB(query);
+            
+            if (results.length === 0) {
+                els.mediaSearchResults.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">No games found</div>';
+                showStatus(els.mediaStatus, 'error', 'No results found');
+                return;
+            }
+            
+            // Display game results
+            els.mediaSearchResults.innerHTML = '';
+            
+            results.slice(0, 12).forEach(game => {
+                // Get cover image URL (IGDB uses special format)
+                let coverUrl = '';
+                if (game.cover && game.cover.url) {
+                    // Replace thumbnail with bigger image
+                    coverUrl = game.cover.url.replace('t_thumb', 't_cover_big');
+                    // Ensure https
+                    if (coverUrl.startsWith('//')) {
+                        coverUrl = 'https:' + coverUrl;
+                    }
+                }
+                
+                if (!coverUrl) return; // Skip games without cover
+                
+                const releaseYear = game.first_release_date 
+                    ? new Date(game.first_release_date * 1000).getFullYear() 
+                    : '';
+                
+                const card = document.createElement('div');
+                card.className = 'media-search-result';
+                card.innerHTML = `
+                    <img src="${coverUrl}" alt="${game.name}">
+                    <div class="media-search-result-info">
+                        <div class="media-search-result-title">${game.name}</div>
+                        <div class="media-search-result-year">${releaseYear || 'TBA'}</div>
+                    </div>
+                `;
+                
+                card.onclick = () => {
+                    addMediaCard({
+                        id: `game_${game.id}`,
+                        title: game.name,
+                        year: releaseYear || '',
+                        rating: game.rating ? (game.rating / 10) : 0,
+                        image: coverUrl,
+                        type: 'game'
+                    });
+                };
+                
+                els.mediaSearchResults.appendChild(card);
+            });
+            
+            showStatus(els.mediaStatus, 'success', `Found ${results.length} games`);
+            setTimeout(() => els.mediaStatus.style.display = 'none', 2000);
+            
+        } else {
+            // TMDB Movies/TV
+            const response = await fetch(
+                `https://api.themoviedb.org/3/search/${mediaType}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`
+            );
+            
+            if (!response.ok) {
+                throw new Error('Search failed');
+            }
+            
+            const data = await response.json();
+            
+            if (data.results.length === 0) {
+                els.mediaSearchResults.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">No results found</div>';
+                showStatus(els.mediaStatus, 'error', 'No results found');
+                return;
+            }
+            
+            // Display results
+            els.mediaSearchResults.innerHTML = '';
+            
+            data.results.slice(0, 12).forEach(item => {
+                if (!item.poster_path) return; // Skip items without poster
+                
+                const card = document.createElement('div');
+                card.className = 'media-search-result';
+                card.innerHTML = `
+                    <img src="${TMDB_IMAGE_BASE}${item.poster_path}" alt="${item.title || item.name}">
+                    <div class="media-search-result-info">
+                        <div class="media-search-result-title">${item.title || item.name}</div>
+                        <div class="media-search-result-year">${(item.release_date || item.first_air_date || '').substring(0, 4)}</div>
+                    </div>
+                `;
+                
+                card.onclick = () => {
+                    addMediaCard({
+                        id: `${mediaType}_${item.id}`,
+                        title: item.title || item.name,
+                        year: (item.release_date || item.first_air_date || '').substring(0, 4),
+                        rating: item.vote_average || 0,
+                        image: `${TMDB_IMAGE_BASE}${item.poster_path}`,
+                        type: mediaType
+                    });
+                };
+                
+                els.mediaSearchResults.appendChild(card);
+            });
+            
+            showStatus(els.mediaStatus, 'success', `Found ${data.results.length} results`);
+            setTimeout(() => els.mediaStatus.style.display = 'none', 2000);
         }
-        
-        const data = await response.json();
-        
-        if (data.results.length === 0) {
-            els.mediaSearchResults.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">No results found</div>';
-            showStatus(els.mediaStatus, 'error', 'No results found');
-            return;
-        }
-        
-        // Display results
-        els.mediaSearchResults.innerHTML = '';
-        
-        data.results.slice(0, 12).forEach(item => {
-            if (!item.poster_path) return; // Skip items without poster
-            
-            const card = document.createElement('div');
-            card.className = 'media-search-result';
-            card.innerHTML = `
-                <img src="${TMDB_IMAGE_BASE}${item.poster_path}" alt="${item.title || item.name}">
-                <div class="media-search-result-info">
-                    <div class="media-search-result-title">${item.title || item.name}</div>
-                    <div class="media-search-result-year">${(item.release_date || item.first_air_date || '').substring(0, 4)}</div>
-                </div>
-            `;
-            
-            card.onclick = () => {
-                addMediaCard({
-                    id: `${mediaType}_${item.id}`,
-                    title: item.title || item.name,
-                    year: (item.release_date || item.first_air_date || '').substring(0, 4),
-                    rating: item.vote_average || 0,
-                    image: `${TMDB_IMAGE_BASE}${item.poster_path}`,
-                    type: mediaType
-                });
-            };
-            
-            els.mediaSearchResults.appendChild(card);
-        });
-        
-        showStatus(els.mediaStatus, 'success', `Found ${data.results.length} results`);
-        setTimeout(() => els.mediaStatus.style.display = 'none', 2000);
         
     } catch (error) {
         console.error('Media search error:', error);
@@ -1739,13 +1916,17 @@ function renderMediaCards(isEditMode) {
     currentMediaCards.forEach(card => {
         const cardEl = document.createElement('div');
         cardEl.className = 'media-card';
+        
+        // Handle rating as both number and string (for backward compatibility)
+        const rating = typeof card.rating === 'number' ? card.rating : parseFloat(card.rating) || 0;
+        
         cardEl.innerHTML = `
             <img src="${card.image}" alt="${card.title}">
             ${isEditMode || isOnCreatePage ? '<div class="media-card-remove">×</div>' : ''}
             <div class="media-card-overlay">
                 <div class="media-card-title">${card.title}</div>
                 <div class="media-card-year">${card.year}</div>
-                <div class="media-card-rating">⭐ ${card.rating.toFixed(1)}</div>
+                <div class="media-card-rating">⭐ ${rating.toFixed(1)}</div>
             </div>
         `;
         
