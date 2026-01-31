@@ -373,9 +373,14 @@ function createProfileCard(profile, id) {
             if (profile.profileCrop && profile.profileCrop.width > 0) {
                 // New format - correct crop display
                 const crop = profile.profileCrop;
+                
+                // Scale the image so the cropped portion fills the container
                 const scale = 1 / crop.width;
-                const posX = -crop.x / crop.width * 100;
-                const posY = -crop.y / crop.height * 100;
+                
+                // Calculate position to show the cropped area
+                // We need to offset by the crop position, scaled by how much we're zooming
+                const posX = (crop.x / (1 - crop.width)) * 100;
+                const posY = (crop.y / (1 - crop.height)) * 100;
                 
                 img.style.backgroundImage = `url(${profile.imageUrl})`;
                 img.style.backgroundSize = `${scale * 100}%`;
@@ -657,14 +662,13 @@ function displayProfile(profile) {
             const crop = profile.profileCrop;
             
             // How much to scale up the image so the crop area fills the container
-            // If crop.width is 0.5 (50% of image), we need to scale to 200% to make it fill
+            // Scale the image so the cropped portion fills the container
             const scale = 1 / crop.width;
             
-            // Position the image so the crop area is visible
-            // If crop.x is 0.25 (starts at 25% of image), and crop.width is 0.5,
-            // we want to show from 25% to 75% of the original image
-            const posX = -crop.x / crop.width * 100;
-            const posY = -crop.y / crop.height * 100;
+            // Calculate position to show the cropped area
+            // We need to offset by the crop position, scaled by how much we're zooming
+            const posX = (crop.x / (1 - crop.width)) * 100;
+            const posY = (crop.y / (1 - crop.height)) * 100;
             
             els.viewImg.style.backgroundImage = `url(${profile.imageUrl})`;
             els.viewImg.style.backgroundSize = `${scale * 100}%`;
@@ -975,8 +979,8 @@ async function restoreLoginState() {
                     // New format - correct crop display
                     const crop = profile.profileCrop;
                     const scale = 1 / crop.width;
-                    const posX = -crop.x / crop.width * 100;
-                    const posY = -crop.y / crop.height * 100;
+                    const posX = (crop.x / (1 - crop.width)) * 100;
+                    const posY = (crop.y / (1 - crop.height)) * 100;
                     
                     menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
                     menu.trigger.style.backgroundSize = `${scale * 100}%`;
