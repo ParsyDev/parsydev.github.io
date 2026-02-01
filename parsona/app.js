@@ -486,17 +486,20 @@ function createProfileCard(profile, id) {
     genderField.appendChild(genderLabel);
     genderField.appendChild(genderValue);
     
-    // ORIENTATION field  
-    const orientationField = document.createElement('div');
-    orientationField.className = 'profile-card-field';
-    const orientationLabel = document.createElement('div');
-    orientationLabel.className = 'profile-card-field-label';
-    orientationLabel.textContent = 'ORIENTATION';
-    const orientationValue = document.createElement('div');
-    orientationValue.className = 'profile-card-field-value';
-    orientationValue.textContent = profile.orientation || '—';
-    orientationField.appendChild(orientationLabel);
-    orientationField.appendChild(orientationValue);
+    // ORIENTATION field (only show if has value)
+    if (profile.orientation) {
+        const orientationField = document.createElement('div');
+        orientationField.className = 'profile-card-field';
+        const orientationLabel = document.createElement('div');
+        orientationLabel.className = 'profile-card-field-label';
+        orientationLabel.textContent = 'ORIENTATION';
+        const orientationValue = document.createElement('div');
+        orientationValue.className = 'profile-card-field-value';
+        orientationValue.textContent = profile.orientation;
+        orientationField.appendChild(orientationLabel);
+        orientationField.appendChild(orientationValue);
+        info.appendChild(orientationField);
+    }
     
     // MOOD field
     const moodField = document.createElement('div');
@@ -506,14 +509,20 @@ function createProfileCard(profile, id) {
     moodLabel.textContent = 'MOOD';
     const moodValue = document.createElement('div');
     moodValue.className = 'profile-card-field-value';
-    moodValue.textContent = profile.mood || '😐 Neutral';
+    // Extract just the text label, no emoji
+    let moodText = profile.mood || 'Meh';
+    if (moodText.includes('Very Sad')) moodText = 'Depressed';
+    else if (moodText.includes('Sad')) moodText = 'Sad';
+    else if (moodText.includes('Neutral')) moodText = 'Meh';
+    else if (moodText.includes('Happy') && !moodText.includes('Very')) moodText = 'Happy';
+    else if (moodText.includes('Very Happy')) moodText = 'Happy';
+    moodValue.textContent = moodText;
     moodField.appendChild(moodLabel);
     moodField.appendChild(moodValue);
     
     info.appendChild(nameField);
     info.appendChild(countryField);
     info.appendChild(genderField);
-    info.appendChild(orientationField);
     info.appendChild(moodField);
     
     // Add DOB if available
@@ -578,10 +587,39 @@ async function viewProfile(id, addToHistory = true) {
         const profile = await loadProfile(id);
         currentViewingProfileId = id;
         
-        // Set profile ID in the ID card header
+        // Set profile ID in the ID card header (front and back)
         const profileIdEl = document.getElementById('viewProfileId');
+        const profileIdBackEl = document.getElementById('viewProfileIdBack');
+        const shortId = id.substring(0, 8).toUpperCase();
         if (profileIdEl) {
-            profileIdEl.textContent = id.substring(0, 8).toUpperCase();
+            profileIdEl.textContent = shortId;
+        }
+        if (profileIdBackEl) {
+            profileIdBackEl.textContent = id; // Full ID on back
+        }
+        
+        // Display signature on back of card
+        const signatureDisplay = document.getElementById('signatureDisplay');
+        if (signatureDisplay) {
+            if (profile.signature) {
+                signatureDisplay.innerHTML = `<img src="${profile.signature}" alt="Signature" style="max-width: 100%; max-height: 100%; object-fit: contain; position: relative; z-index: 100;">`;
+            } else {
+                signatureDisplay.innerHTML = '<div class="no-signature">No signature</div>';
+            }
+        }
+        
+        // Copy background to back of card
+        const idCardBgBack = document.getElementById('viewIdCardBgBack');
+        if (profile.backgroundUrl && profile.backgroundCrop && idCardBgBack) {
+            const crop = profile.backgroundCrop;
+            const scale = 1 / crop.width;
+            const posX = -crop.x / crop.width * 100;
+            const posY = -crop.y / crop.height * 100;
+            idCardBgBack.style.backgroundImage = `url("${profile.backgroundUrl}")`;
+            idCardBgBack.style.backgroundSize = `${scale * 100}%`;
+            idCardBgBack.style.backgroundPosition = `${posX}% ${posY}%`;
+        } else {
+            if (idCardBgBack) idCardBgBack.style.backgroundImage = 'none';
         }
         
         displayProfile(profile);
@@ -610,8 +648,14 @@ function displayProfile(profile) {
     const genderEl = document.getElementById('viewProfileGender');
     if (genderEl) genderEl.textContent = profile.gender || '—';
     
+    const orientationField = document.getElementById('viewProfileOrientationField');
     const orientationEl = document.getElementById('viewProfileOrientation');
-    if (orientationEl) orientationEl.textContent = profile.orientation || '—';
+    if (profile.orientation && profile.orientation.trim()) {
+        if (orientationField) orientationField.style.display = '';
+        if (orientationEl) orientationEl.textContent = profile.orientation;
+    } else {
+        if (orientationField) orientationField.style.display = 'none';
+    }
     
     const dobField = document.getElementById('viewProfileDOBField');
     const dobEl = document.getElementById('viewProfileDOB');
@@ -623,7 +667,7 @@ function displayProfile(profile) {
     }
     
     const moodEl = document.getElementById('viewProfileMood');
-    if (moodEl) moodEl.textContent = profile.mood || '😐 Neutral';
+    if (moodEl) moodEl.textContent = profile.mood || '😐 Meh';
     
     // Display partner link
     const partnerField = document.getElementById('viewProfilePartnerField');
@@ -1308,7 +1352,7 @@ els.create.onclick = async () => {
     const dob = document.getElementById('profileDOB').value;
     const moodIndex = parseInt(document.getElementById('profileMood').value);
     const moodStates = ['😭', '😞', '😐', '🙂', '😄'];
-    const moodLabels = ['Very Sad', 'Sad', 'Neutral', 'Happy', 'Very Happy'];
+    const moodLabels = ['Depressed', 'Sad', 'Meh', 'Happy', 'Happy'];
     const mood = `${moodStates[moodIndex]} ${moodLabels[moodIndex]}`;
     const partnerId = document.getElementById('profilePartner').value.trim();
     
@@ -1353,6 +1397,7 @@ els.create.onclick = async () => {
         dob: dob,
         mood: mood,
         partnerId: partnerId,
+        signature: getSignature(), // Add signature
         imageUrl: imageCrops.profile.url,
         profileCrop: imageCrops.profile.crop,
         bannerUrl: imageCrops.banner.url,
@@ -1483,7 +1528,7 @@ els.update.onclick = async () => {
     const dob = document.getElementById('profileDOB').value;
     const moodIndex = parseInt(document.getElementById('profileMood').value);
     const moodStates = ['😭', '😞', '😐', '🙂', '😄'];
-    const moodLabels = ['Very Sad', 'Sad', 'Neutral', 'Happy', 'Very Happy'];
+    const moodLabels = ['Depressed', 'Sad', 'Meh', 'Happy', 'Happy'];
     const mood = `${moodStates[moodIndex]} ${moodLabels[moodIndex]}`;
     const partnerId = document.getElementById('profilePartner').value.trim();
     
@@ -1525,6 +1570,7 @@ els.update.onclick = async () => {
         dob: dob,
         mood: mood,
         partnerId: partnerId,
+        signature: getSignature(), // Add signature
         imageUrl: imageCrops.profile.url,
         profileCrop: imageCrops.profile.crop,
         bannerUrl: imageCrops.banner.url,
@@ -1717,6 +1763,11 @@ function resetCreateForm() {
     // Reset media cards
     currentMediaCards = [];
     
+    // Reset signature
+    if (signatureCtx && signatureCanvas) {
+        signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+    }
+    
     // IMPORTANT: Render empty media cards to show the "+" button
     // We need to do this after a small delay to ensure the container is visible
     setTimeout(() => {
@@ -1750,7 +1801,7 @@ function loadProfileForEdit(profile) {
     // Load mood - convert from saved format back to slider value
     if (profile.mood) {
         const moodStates = ['😭', '😞', '😐', '🙂', '😄'];
-        const moodLabels = ['Very Sad', 'Sad', 'Neutral', 'Happy', 'Very Happy'];
+        const moodLabels = ['Depressed', 'Sad', 'Meh', 'Happy', 'Happy'];
         let moodIndex = 2; // default neutral
         
         for (let i = 0; i < moodStates.length; i++) {
@@ -1768,6 +1819,16 @@ function loadProfileForEdit(profile) {
     // Load custom social links
     currentCustomSocialLinks = profile.customSocialLinks || [];
     renderCustomSocialLinks();
+    
+    // Load signature
+    if (profile.signature) {
+        loadSignature(profile.signature);
+    } else {
+        // Clear signature canvas if no signature
+        if (signatureCtx && signatureCanvas) {
+            signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+        }
+    }
     
     // Load images
     imageCrops.profile = {
@@ -2520,11 +2581,11 @@ const moodEmoji = document.getElementById('moodEmoji');
 const moodLabel = document.getElementById('moodLabel');
 
 const moodStates = [
-    { emoji: '😭', label: 'Very Sad' },
+    { emoji: '😭', label: 'Depressed' },
     { emoji: '😞', label: 'Sad' },
-    { emoji: '😐', label: 'Neutral' },
+    { emoji: '😐', label: 'Meh' },
     { emoji: '🙂', label: 'Happy' },
-    { emoji: '😄', label: 'Very Happy' }
+    { emoji: '😄', label: 'Happy' }
 ];
 
 if (moodSlider && moodEmoji && moodLabel) {
@@ -2534,3 +2595,151 @@ if (moodSlider && moodEmoji && moodLabel) {
         moodLabel.textContent = moodStates[index].label;
     });
 }
+
+// ============================================
+// SIGNATURE CANVAS
+// ============================================
+const signatureCanvas = document.getElementById('signatureCanvas');
+const clearSignatureBtn = document.getElementById('clearSignature');
+let signatureCtx = null;
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+let currentSignature = null;
+
+if (signatureCanvas) {
+    signatureCtx = signatureCanvas.getContext('2d');
+    signatureCtx.strokeStyle = '#000';
+    signatureCtx.lineWidth = 4;
+    signatureCtx.lineCap = 'round';
+    signatureCtx.lineJoin = 'round';
+    
+    // Mouse events
+    signatureCanvas.addEventListener('mousedown', startDrawing);
+    signatureCanvas.addEventListener('mousemove', draw);
+    signatureCanvas.addEventListener('mouseup', stopDrawing);
+    signatureCanvas.addEventListener('mouseout', stopDrawing);
+    
+    // Touch events
+    signatureCanvas.addEventListener('touchstart', handleTouchStart);
+    signatureCanvas.addEventListener('touchmove', handleTouchMove);
+    signatureCanvas.addEventListener('touchend', stopDrawing);
+    
+    function startDrawing(e) {
+        isDrawing = true;
+        const rect = signatureCanvas.getBoundingClientRect();
+        const scaleX = signatureCanvas.width / rect.width;
+        const scaleY = signatureCanvas.height / rect.height;
+        lastX = (e.clientX - rect.left) * scaleX;
+        lastY = (e.clientY - rect.top) * scaleY;
+    }
+    
+    function draw(e) {
+        if (!isDrawing) return;
+        
+        const rect = signatureCanvas.getBoundingClientRect();
+        const scaleX = signatureCanvas.width / rect.width;
+        const scaleY = signatureCanvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+        
+        signatureCtx.beginPath();
+        signatureCtx.moveTo(lastX, lastY);
+        signatureCtx.lineTo(x, y);
+        signatureCtx.stroke();
+        
+        lastX = x;
+        lastY = y;
+    }
+    
+    function handleTouchStart(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = signatureCanvas.getBoundingClientRect();
+        const scaleX = signatureCanvas.width / rect.width;
+        const scaleY = signatureCanvas.height / rect.height;
+        isDrawing = true;
+        lastX = (touch.clientX - rect.left) * scaleX;
+        lastY = (touch.clientY - rect.top) * scaleY;
+    }
+    
+    function handleTouchMove(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        
+        const touch = e.touches[0];
+        const rect = signatureCanvas.getBoundingClientRect();
+        const scaleX = signatureCanvas.width / rect.width;
+        const scaleY = signatureCanvas.height / rect.height;
+        const x = (touch.clientX - rect.left) * scaleX;
+        const y = (touch.clientY - rect.top) * scaleY;
+        
+        signatureCtx.beginPath();
+        signatureCtx.moveTo(lastX, lastY);
+        signatureCtx.lineTo(x, y);
+        signatureCtx.stroke();
+        
+        lastX = x;
+        lastY = y;
+    }
+    
+    function stopDrawing() {
+        isDrawing = false;
+    }
+}
+
+if (clearSignatureBtn) {
+    clearSignatureBtn.addEventListener('click', () => {
+        if (signatureCtx) {
+            signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            currentSignature = null;
+        }
+    });
+}
+
+// Get signature as base64
+function getSignature() {
+    if (!signatureCanvas) return null;
+    
+    // Check if canvas is blank
+    const blank = document.createElement('canvas');
+    blank.width = signatureCanvas.width;
+    blank.height = signatureCanvas.height;
+    
+    if (signatureCanvas.toDataURL() === blank.toDataURL()) {
+        return null; // Canvas is blank
+    }
+    
+    return signatureCanvas.toDataURL('image/png');
+}
+
+// Load signature into canvas
+function loadSignature(signatureData) {
+    if (!signatureCanvas || !signatureData) return;
+    
+    const img = new Image();
+    img.onload = function() {
+        signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+        signatureCtx.drawImage(img, 0, 0);
+    };
+    img.src = signatureData;
+    currentSignature = signatureData;
+}
+
+// ============================================
+// CARD FLIP FUNCTIONALITY
+// ============================================
+const cardFlipper = document.getElementById('cardFlipper');
+
+if (cardFlipper) {
+    cardFlipper.addEventListener('click', function(e) {
+        // Don't flip if clicking on a link
+        if (e.target.tagName === 'A' || e.target.closest('a')) {
+            return;
+        }
+        this.classList.toggle('flipped');
+    });
+}
+
+console.log('✅ Signature and card flip functionality loaded!');
+
