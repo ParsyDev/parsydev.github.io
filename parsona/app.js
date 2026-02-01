@@ -364,6 +364,44 @@ function createProfileCard(profile, id) {
     const card = document.createElement('div');
     card.className = 'profile-card';
     
+    // Set banner as background with opacity
+    if (profile.bannerUrl) {
+        const bgElement = document.createElement('div');
+        bgElement.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url(${profile.bannerUrl});
+            background-size: cover;
+            background-position: center;
+            opacity: 0.2;
+            z-index: 0;
+        `;
+        card.appendChild(bgElement);
+    }
+    
+    // Header with "ID CARD" and profile ID
+    const header = document.createElement('div');
+    header.className = 'profile-card-header';
+    
+    const headerTitle = document.createElement('div');
+    headerTitle.className = 'profile-card-header-title';
+    headerTitle.textContent = 'ID CARD';
+    
+    const headerId = document.createElement('div');
+    headerId.className = 'profile-card-header-id';
+    headerId.textContent = id.substring(0, 8).toUpperCase();
+    
+    header.appendChild(headerTitle);
+    header.appendChild(headerId);
+    card.appendChild(header);
+    
+    // Body with image and info
+    const body = document.createElement('div');
+    body.className = 'profile-card-body';
+    
     const img = document.createElement('div');
     img.className = 'profile-card-img';
     
@@ -408,12 +446,125 @@ function createProfileCard(profile, id) {
         }
     }
     
-    const name = document.createElement('div');
-    name.className = 'profile-card-name';
-    name.textContent = profile.name;
+    // Info section with fields
+    const info = document.createElement('div');
+    info.className = 'profile-card-info';
     
-    card.appendChild(img);
-    card.appendChild(name);
+    // NAME field
+    const nameField = document.createElement('div');
+    nameField.className = 'profile-card-field full-width';
+    const nameLabel = document.createElement('div');
+    nameLabel.className = 'profile-card-field-label';
+    nameLabel.textContent = 'NAME';
+    const nameValue = document.createElement('div');
+    nameValue.className = 'profile-card-name';
+    nameValue.textContent = profile.name;
+    nameField.appendChild(nameLabel);
+    nameField.appendChild(nameValue);
+    
+    // COUNTRY field
+    const countryField = document.createElement('div');
+    countryField.className = 'profile-card-field';
+    const countryLabel = document.createElement('div');
+    countryLabel.className = 'profile-card-field-label';
+    countryLabel.textContent = 'COUNTRY';
+    const countryValue = document.createElement('div');
+    countryValue.className = 'profile-card-field-value';
+    countryValue.textContent = profile.country || '—';
+    countryField.appendChild(countryLabel);
+    countryField.appendChild(countryValue);
+    
+    // GENDER field
+    const genderField = document.createElement('div');
+    genderField.className = 'profile-card-field';
+    const genderLabel = document.createElement('div');
+    genderLabel.className = 'profile-card-field-label';
+    genderLabel.textContent = 'GENDER';
+    const genderValue = document.createElement('div');
+    genderValue.className = 'profile-card-field-value';
+    genderValue.textContent = profile.gender || '—';
+    genderField.appendChild(genderLabel);
+    genderField.appendChild(genderValue);
+    
+    // ORIENTATION field  
+    const orientationField = document.createElement('div');
+    orientationField.className = 'profile-card-field';
+    const orientationLabel = document.createElement('div');
+    orientationLabel.className = 'profile-card-field-label';
+    orientationLabel.textContent = 'ORIENTATION';
+    const orientationValue = document.createElement('div');
+    orientationValue.className = 'profile-card-field-value';
+    orientationValue.textContent = profile.orientation || '—';
+    orientationField.appendChild(orientationLabel);
+    orientationField.appendChild(orientationValue);
+    
+    // MOOD field
+    const moodField = document.createElement('div');
+    moodField.className = 'profile-card-field';
+    const moodLabel = document.createElement('div');
+    moodLabel.className = 'profile-card-field-label';
+    moodLabel.textContent = 'MOOD';
+    const moodValue = document.createElement('div');
+    moodValue.className = 'profile-card-field-value';
+    moodValue.textContent = profile.mood || '😐 Neutral';
+    moodField.appendChild(moodLabel);
+    moodField.appendChild(moodValue);
+    
+    info.appendChild(nameField);
+    info.appendChild(countryField);
+    info.appendChild(genderField);
+    info.appendChild(orientationField);
+    info.appendChild(moodField);
+    
+    // Add DOB if available
+    if (profile.dob) {
+        const dobField = document.createElement('div');
+        dobField.className = 'profile-card-field';
+        const dobLabel = document.createElement('div');
+        dobLabel.className = 'profile-card-field-label';
+        dobLabel.textContent = 'DATE OF BIRTH';
+        const dobValue = document.createElement('div');
+        dobValue.className = 'profile-card-field-value';
+        dobValue.textContent = new Date(profile.dob).toLocaleDateString();
+        dobField.appendChild(dobLabel);
+        dobField.appendChild(dobValue);
+        info.appendChild(dobField);
+    }
+    
+    // Add Partner if available
+    if (profile.partnerId) {
+        const partnerField = document.createElement('div');
+        partnerField.className = 'profile-card-field';
+        const partnerLabel = document.createElement('div');
+        partnerLabel.className = 'profile-card-field-label';
+        partnerLabel.textContent = 'PARTNER';
+        const partnerValue = document.createElement('div');
+        partnerValue.className = 'profile-card-field-value';
+        partnerValue.style.cssText = 'color: var(--accent-primary); cursor: pointer;';
+        partnerValue.textContent = '🔗 Loading...';
+        partnerField.appendChild(partnerLabel);
+        partnerField.appendChild(partnerValue);
+        info.appendChild(partnerField);
+        
+        // Fetch partner name async
+        loadProfile(profile.partnerId).then(partnerProfile => {
+            if (partnerProfile) {
+                partnerValue.textContent = '🔗 ' + partnerProfile.name;
+            }
+        }).catch(() => {
+            partnerValue.textContent = '🔗 Unknown';
+        });
+        
+        // Make partner clickable
+        partnerValue.onclick = (e) => {
+            e.stopPropagation();
+            viewProfile(profile.partnerId, true);
+        };
+    }
+    
+    body.appendChild(img);
+    body.appendChild(info);
+    card.appendChild(body);
     
     // Make card clickable with proper history support
     card.style.cursor = 'pointer';
@@ -426,6 +577,13 @@ async function viewProfile(id, addToHistory = true) {
     try {
         const profile = await loadProfile(id);
         currentViewingProfileId = id;
+        
+        // Set profile ID in the ID card header
+        const profileIdEl = document.getElementById('viewProfileId');
+        if (profileIdEl) {
+            profileIdEl.textContent = id.substring(0, 8).toUpperCase();
+        }
+        
         displayProfile(profile);
         
         // Show page first
@@ -444,6 +602,51 @@ async function viewProfile(id, addToHistory = true) {
 
 function displayProfile(profile) {
     els.viewName.textContent = profile.name;
+    
+    // Display new fields
+    const countryEl = document.getElementById('viewProfileCountry');
+    if (countryEl) countryEl.textContent = profile.country || '—';
+    
+    const genderEl = document.getElementById('viewProfileGender');
+    if (genderEl) genderEl.textContent = profile.gender || '—';
+    
+    const orientationEl = document.getElementById('viewProfileOrientation');
+    if (orientationEl) orientationEl.textContent = profile.orientation || '—';
+    
+    const dobField = document.getElementById('viewProfileDOBField');
+    const dobEl = document.getElementById('viewProfileDOB');
+    if (profile.dob && dobEl) {
+        dobEl.textContent = new Date(profile.dob).toLocaleDateString();
+        if (dobField) dobField.style.display = 'flex';
+    } else {
+        if (dobField) dobField.style.display = 'none';
+    }
+    
+    const moodEl = document.getElementById('viewProfileMood');
+    if (moodEl) moodEl.textContent = profile.mood || '😐 Neutral';
+    
+    // Display partner link
+    const partnerField = document.getElementById('viewProfilePartnerField');
+    const partnerLink = document.getElementById('viewProfilePartnerLink');
+    const partnerName = document.getElementById('viewProfilePartnerName');
+    if (profile.partnerId && partnerLink) {
+        // Try to fetch partner's name
+        loadProfile(profile.partnerId).then(partnerProfile => {
+            if (partnerName && partnerProfile) {
+                partnerName.textContent = partnerProfile.name;
+            }
+        }).catch(() => {
+            if (partnerName) partnerName.textContent = 'Unknown Partner';
+        });
+        
+        partnerLink.onclick = (e) => {
+            e.preventDefault();
+            viewProfile(profile.partnerId, true);
+        };
+        if (partnerField) partnerField.style.display = 'flex';
+    } else {
+        if (partnerField) partnerField.style.display = 'none';
+    }
     
     // Display description if available (preserving line breaks)
     if (profile.description && profile.description.trim()) {
@@ -464,8 +667,20 @@ function displayProfile(profile) {
         els.viewBannerImg.style.backgroundImage = `url(${profile.bannerUrl})`;
         els.viewBannerImg.style.backgroundSize = `${scale * 100}%`;
         els.viewBannerImg.style.backgroundPosition = `${posX}% ${posY}%`;
+        
+        // Also set ID card background
+        const idCardBg = document.getElementById('viewIdCardBg');
+        if (idCardBg) {
+            idCardBg.style.backgroundImage = `url(${profile.bannerUrl})`;
+            idCardBg.style.backgroundSize = 'cover';
+            idCardBg.style.backgroundPosition = 'center';
+        }
     } else {
         els.viewBannerImg.style.backgroundImage = '';
+        const idCardBg = document.getElementById('viewIdCardBg');
+        if (idCardBg) {
+            idCardBg.style.backgroundImage = '';
+        }
     }
     
     // Display background image (only if element exists)
@@ -1086,6 +1301,17 @@ els.create.onclick = async () => {
     const twitchUrl = els.twitchUrl.value.trim();
     const instagramUrl = els.instagramUrl.value.trim();
     
+    // Get new fields
+    const country = document.getElementById('profileCountry').value.trim();
+    const gender = document.getElementById('profileGender').value;
+    const orientation = document.getElementById('profileOrientation').value;
+    const dob = document.getElementById('profileDOB').value;
+    const moodIndex = parseInt(document.getElementById('profileMood').value);
+    const moodStates = ['😭', '😞', '😐', '🙂', '😄'];
+    const moodLabels = ['Very Sad', 'Sad', 'Neutral', 'Happy', 'Very Happy'];
+    const mood = `${moodStates[moodIndex]} ${moodLabels[moodIndex]}`;
+    const partnerId = document.getElementById('profilePartner').value.trim();
+    
     if (!name) {
         showStatus(els.createStatus, 'error', 'Name is required!');
         return;
@@ -1121,6 +1347,12 @@ els.create.onclick = async () => {
     const publicData = {
         name: name,
         description: description,
+        country: country,
+        gender: gender,
+        orientation: orientation,
+        dob: dob,
+        mood: mood,
+        partnerId: partnerId,
         imageUrl: imageCrops.profile.url,
         profileCrop: imageCrops.profile.crop,
         bannerUrl: imageCrops.banner.url,
@@ -1244,6 +1476,17 @@ els.update.onclick = async () => {
     const twitchUrl = els.twitchUrl.value.trim();
     const instagramUrl = els.instagramUrl.value.trim();
     
+    // Get new fields
+    const country = document.getElementById('profileCountry').value.trim();
+    const gender = document.getElementById('profileGender').value;
+    const orientation = document.getElementById('profileOrientation').value;
+    const dob = document.getElementById('profileDOB').value;
+    const moodIndex = parseInt(document.getElementById('profileMood').value);
+    const moodStates = ['😭', '😞', '😐', '🙂', '😄'];
+    const moodLabels = ['Very Sad', 'Sad', 'Neutral', 'Happy', 'Very Happy'];
+    const mood = `${moodStates[moodIndex]} ${moodLabels[moodIndex]}`;
+    const partnerId = document.getElementById('profilePartner').value.trim();
+    
     if (!name) {
         showStatus(els.createStatus, 'error', 'Name is required!');
         return;
@@ -1276,6 +1519,12 @@ els.update.onclick = async () => {
     const publicData = {
         name: name,
         description: description,
+        country: country,
+        gender: gender,
+        orientation: orientation,
+        dob: dob,
+        mood: mood,
+        partnerId: partnerId,
         imageUrl: imageCrops.profile.url,
         profileCrop: imageCrops.profile.crop,
         bannerUrl: imageCrops.banner.url,
@@ -1490,6 +1739,31 @@ function loadProfileForEdit(profile) {
     els.youtubeUrl.value = profile.youtubeUrl || '';
     els.twitchUrl.value = profile.twitchUrl || '';
     els.instagramUrl.value = profile.instagramUrl || '';
+    
+    // Load new fields
+    document.getElementById('profileCountry').value = profile.country || '';
+    document.getElementById('profileGender').value = profile.gender || '';
+    document.getElementById('profileOrientation').value = profile.orientation || '';
+    document.getElementById('profileDOB').value = profile.dob || '';
+    document.getElementById('profilePartner').value = profile.partnerId || '';
+    
+    // Load mood - convert from saved format back to slider value
+    if (profile.mood) {
+        const moodStates = ['😭', '😞', '😐', '🙂', '😄'];
+        const moodLabels = ['Very Sad', 'Sad', 'Neutral', 'Happy', 'Very Happy'];
+        let moodIndex = 2; // default neutral
+        
+        for (let i = 0; i < moodStates.length; i++) {
+            if (profile.mood.includes(moodStates[i])) {
+                moodIndex = i;
+                break;
+            }
+        }
+        
+        document.getElementById('profileMood').value = moodIndex;
+        document.getElementById('moodEmoji').textContent = moodStates[moodIndex];
+        document.getElementById('moodLabel').textContent = moodLabels[moodIndex];
+    }
     
     // Load custom social links
     currentCustomSocialLinks = profile.customSocialLinks || [];
@@ -2240,3 +2514,23 @@ window.addEventListener('resize', () => {
         }
     }, 250);
 });
+// Mood slider functionality
+const moodSlider = document.getElementById('profileMood');
+const moodEmoji = document.getElementById('moodEmoji');
+const moodLabel = document.getElementById('moodLabel');
+
+const moodStates = [
+    { emoji: '😭', label: 'Very Sad' },
+    { emoji: '😞', label: 'Sad' },
+    { emoji: '😐', label: 'Neutral' },
+    { emoji: '🙂', label: 'Happy' },
+    { emoji: '😄', label: 'Very Happy' }
+];
+
+if (moodSlider && moodEmoji && moodLabel) {
+    moodSlider.addEventListener('input', function() {
+        const index = parseInt(this.value);
+        moodEmoji.textContent = moodStates[index].emoji;
+        moodLabel.textContent = moodStates[index].label;
+    });
+}
