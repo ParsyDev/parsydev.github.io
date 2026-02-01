@@ -75,6 +75,63 @@
                         <label>Description</label>
                         <textarea id="profileDescription" placeholder="Tell us about yourself..." rows="4"></textarea>
                     </div>
+                    
+                    <!-- New Profile Fields -->
+                    <div class="field">
+                        <label>Country</label>
+                        <input type="text" id="profileCountry" placeholder="e.g., Germany, USA, Japan">
+                    </div>
+                    <div class="field">
+                        <label>Gender</label>
+                        <select id="profileGender">
+                            <option value="">Select...</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Orientation (optional)</label>
+                        <select id="profileOrientation">
+                            <option value="">Select...</option>
+                            <option value="Straight">Straight</option>
+                            <option value="Gay">Gay</option>
+                            <option value="Lesbian">Lesbian</option>
+                            <option value="Bisexual">Bisexual</option>
+                            <option value="Pansexual">Pansexual</option>
+                            <option value="Asexual">Asexual</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Date of Birth (optional)</label>
+                        <input type="date" id="profileDOB" placeholder="YYYY-MM-DD">
+                    </div>
+                    <div class="field">
+                        <label>Mood</label>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 24px;" id="moodEmoji">😐</span>
+                            <input type="range" id="profileMood" min="0" max="4" value="2" step="1" style="flex: 1; cursor: pointer;">
+                            <span style="font-size: 12px; color: var(--text-muted); min-width: 60px;" id="moodLabel">Meh</span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Partner's Profile ID (optional)</label>
+                        <input type="text" id="profilePartner" placeholder="Paste their profile ID here">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">💑 Link to your partner's profile</div>
+                    </div>
+                    
+                    <div class="field">
+                        <label>Signature</label>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">✍️ Draw your signature (it will appear on the back of your ID card)</div>
+                        <div class="signature-canvas-container">
+                            <canvas id="signatureCanvas" width="500" height="150"></canvas>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                            <button type="button" id="clearSignature" style="width: auto; padding: 8px 15px; background: #e74c3c; margin: 0; font-size: 13px;">Clear Signature</button>
+                            <span style="font-size: 11px; color: var(--text-muted); align-self: center;">Draw with mouse or touch</span>
+                        </div>
+                    </div>
+                    
                     <div class="field">
                         <label>Profile Images</label>
                         <select id="imageType" style="margin-bottom: 10px;">
@@ -192,8 +249,74 @@
             <div class="profile-container">
                 <div class="profile-header" id="viewBannerImg"></div>
                 <div class="profile-content" id="viewProfileContent">
-                    <div class="profile-img" id="viewProfileImg"></div>
-                    <div class="profile-name" id="viewProfileName">Profile Name</div>
+                    <!-- ID Card with Flip -->
+                    <div class="profile-id-card-container">
+                        <div class="profile-id-card-flipper" id="cardFlipper">
+                            <!-- Front of Card -->
+                            <div class="profile-id-card card-front">
+                                <div class="profile-id-card-bg" id="viewIdCardBg"></div>
+                                <div class="profile-card-header">
+                                    <div class="profile-card-header-title">ID CARD</div>
+                                    <div class="profile-card-header-id" id="viewProfileId">00000000</div>
+                                </div>
+                                <div class="profile-card-body">
+                                    <div class="profile-img" id="viewProfileImg"></div>
+                                    <div class="profile-card-info">
+                                        <div class="profile-card-field full-width">
+                                            <div class="profile-card-field-label">NAME</div>
+                                            <div class="profile-card-name" id="viewProfileName">Profile Name</div>
+                                        </div>
+                                        <div class="profile-card-field">
+                                            <div class="profile-card-field-label">COUNTRY</div>
+                                            <div class="profile-card-field-value" id="viewProfileCountry">—</div>
+                                        </div>
+                                        <div class="profile-card-field">
+                                            <div class="profile-card-field-label">GENDER</div>
+                                            <div class="profile-card-field-value" id="viewProfileGender">—</div>
+                                        </div>
+                                        <div class="profile-card-field" id="viewProfileOrientationField">
+                                            <div class="profile-card-field-label">ORIENTATION</div>
+                                            <div class="profile-card-field-value" id="viewProfileOrientation">—</div>
+                                        </div>
+                                        <div class="profile-card-field">
+                                            <div class="profile-card-field-label">MOOD</div>
+                                            <div class="profile-card-field-value" id="viewProfileMood">😐 Meh</div>
+                                        </div>
+                                        <div class="profile-card-field" id="viewProfileDOBField" style="display: none;">
+                                            <div class="profile-card-field-label">DATE OF BIRTH</div>
+                                            <div class="profile-card-field-value" id="viewProfileDOB">—</div>
+                                        </div>
+                                        <div class="profile-card-field" id="viewProfilePartnerField" style="display: none;">
+                                            <div class="profile-card-field-label">PARTNER</div>
+                                            <div class="profile-card-field-value">
+                                                <a href="#" id="viewProfilePartnerLink" style="color: var(--accent-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                                    🔗 <span id="viewProfilePartnerName">Loading...</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-flip-hint">Click to flip</div>
+                            </div>
+                            
+                            <!-- Back of Card -->
+                            <div class="profile-id-card card-back">
+                                <div class="profile-id-card-bg" id="viewIdCardBgBack"></div>
+                                <div class="card-back-header">
+                                    <div class="card-back-title">USER ID</div>
+                                    <div class="card-back-id" id="viewProfileIdBack">00000000</div>
+                                </div>
+                                <div class="card-back-body">
+                                    <div class="signature-label">Signature</div>
+                                    <div class="signature-display" id="signatureDisplay">
+                                        <div class="no-signature">No signature</div>
+                                    </div>
+                                </div>
+                                <div class="card-flip-hint">Click to flip back</div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="profile-bio" id="viewProfileBio" style="display: none;"></div>
                     <div class="profile-description" id="viewProfileDescription" style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-left: 3px solid #333; color: #555; font-size: 14px; line-height: 1.6; white-space: pre-wrap; display: none;"></div>
                     <div class="profile-stats">
@@ -233,7 +356,7 @@
                         <div style="font-size: 17px; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid rgba(0,0,0,0.1);">
                             Favorite Media
                         </div>
-                        <div id="mediaCardsContainer" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start; justify-content: center;">
+                        <div id="mediaCardsContainer" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start; justify-content: flex-start;">
                             <!-- Media cards will be populated here -->
                             <div id="addMediaCard" class="add-media-card" style="display: none;">
                                 <div style="font-size: 40px; color: #999;">+</div>

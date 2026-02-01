@@ -364,6 +364,44 @@ function createProfileCard(profile, id) {
     const card = document.createElement('div');
     card.className = 'profile-card';
     
+    // Set banner as background with opacity
+    if (profile.bannerUrl) {
+        const bgElement = document.createElement('div');
+        bgElement.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url(${profile.bannerUrl});
+            background-size: cover;
+            background-position: center;
+            opacity: 0.2;
+            z-index: 0;
+        `;
+        card.appendChild(bgElement);
+    }
+    
+    // Header with "ID CARD" and profile ID
+    const header = document.createElement('div');
+    header.className = 'profile-card-header';
+    
+    const headerTitle = document.createElement('div');
+    headerTitle.className = 'profile-card-header-title';
+    headerTitle.textContent = 'ID CARD';
+    
+    const headerId = document.createElement('div');
+    headerId.className = 'profile-card-header-id';
+    headerId.textContent = id.substring(0, 8).toUpperCase();
+    
+    header.appendChild(headerTitle);
+    header.appendChild(headerId);
+    card.appendChild(header);
+    
+    // Body with image and info
+    const body = document.createElement('div');
+    body.className = 'profile-card-body';
+    
     const img = document.createElement('div');
     img.className = 'profile-card-img';
     
@@ -408,12 +446,134 @@ function createProfileCard(profile, id) {
         }
     }
     
-    const name = document.createElement('div');
-    name.className = 'profile-card-name';
-    name.textContent = profile.name;
+    // Info section with fields
+    const info = document.createElement('div');
+    info.className = 'profile-card-info';
     
-    card.appendChild(img);
-    card.appendChild(name);
+    // NAME field
+    const nameField = document.createElement('div');
+    nameField.className = 'profile-card-field full-width';
+    const nameLabel = document.createElement('div');
+    nameLabel.className = 'profile-card-field-label';
+    nameLabel.textContent = 'NAME';
+    const nameValue = document.createElement('div');
+    nameValue.className = 'profile-card-name';
+    nameValue.textContent = profile.name;
+    nameField.appendChild(nameLabel);
+    nameField.appendChild(nameValue);
+    
+    // COUNTRY field
+    const countryField = document.createElement('div');
+    countryField.className = 'profile-card-field';
+    const countryLabel = document.createElement('div');
+    countryLabel.className = 'profile-card-field-label';
+    countryLabel.textContent = 'COUNTRY';
+    const countryValue = document.createElement('div');
+    countryValue.className = 'profile-card-field-value';
+    countryValue.textContent = profile.country || '—';
+    countryField.appendChild(countryLabel);
+    countryField.appendChild(countryValue);
+    
+    // GENDER field
+    const genderField = document.createElement('div');
+    genderField.className = 'profile-card-field';
+    const genderLabel = document.createElement('div');
+    genderLabel.className = 'profile-card-field-label';
+    genderLabel.textContent = 'GENDER';
+    const genderValue = document.createElement('div');
+    genderValue.className = 'profile-card-field-value';
+    genderValue.textContent = profile.gender || '—';
+    genderField.appendChild(genderLabel);
+    genderField.appendChild(genderValue);
+    
+    // ORIENTATION field (only show if has value)
+    if (profile.orientation) {
+        const orientationField = document.createElement('div');
+        orientationField.className = 'profile-card-field';
+        const orientationLabel = document.createElement('div');
+        orientationLabel.className = 'profile-card-field-label';
+        orientationLabel.textContent = 'ORIENTATION';
+        const orientationValue = document.createElement('div');
+        orientationValue.className = 'profile-card-field-value';
+        orientationValue.textContent = profile.orientation;
+        orientationField.appendChild(orientationLabel);
+        orientationField.appendChild(orientationValue);
+        info.appendChild(orientationField);
+    }
+    
+    // MOOD field
+    const moodField = document.createElement('div');
+    moodField.className = 'profile-card-field';
+    const moodLabel = document.createElement('div');
+    moodLabel.className = 'profile-card-field-label';
+    moodLabel.textContent = 'MOOD';
+    const moodValue = document.createElement('div');
+    moodValue.className = 'profile-card-field-value';
+    // Extract just the text label, no emoji
+    let moodText = profile.mood || 'Meh';
+    if (moodText.includes('Very Sad')) moodText = 'Depressed';
+    else if (moodText.includes('Sad')) moodText = 'Sad';
+    else if (moodText.includes('Neutral')) moodText = 'Meh';
+    else if (moodText.includes('Happy') && !moodText.includes('Very')) moodText = 'Happy';
+    else if (moodText.includes('Very Happy')) moodText = 'Happy';
+    moodValue.textContent = moodText;
+    moodField.appendChild(moodLabel);
+    moodField.appendChild(moodValue);
+    
+    info.appendChild(nameField);
+    info.appendChild(countryField);
+    info.appendChild(genderField);
+    info.appendChild(moodField);
+    
+    // Add DOB if available
+    if (profile.dob) {
+        const dobField = document.createElement('div');
+        dobField.className = 'profile-card-field';
+        const dobLabel = document.createElement('div');
+        dobLabel.className = 'profile-card-field-label';
+        dobLabel.textContent = 'DATE OF BIRTH';
+        const dobValue = document.createElement('div');
+        dobValue.className = 'profile-card-field-value';
+        dobValue.textContent = new Date(profile.dob).toLocaleDateString();
+        dobField.appendChild(dobLabel);
+        dobField.appendChild(dobValue);
+        info.appendChild(dobField);
+    }
+    
+    // Add Partner if available
+    if (profile.partnerId) {
+        const partnerField = document.createElement('div');
+        partnerField.className = 'profile-card-field';
+        const partnerLabel = document.createElement('div');
+        partnerLabel.className = 'profile-card-field-label';
+        partnerLabel.textContent = 'PARTNER';
+        const partnerValue = document.createElement('div');
+        partnerValue.className = 'profile-card-field-value';
+        partnerValue.style.cssText = 'color: var(--accent-primary); cursor: pointer;';
+        partnerValue.textContent = '🔗 Loading...';
+        partnerField.appendChild(partnerLabel);
+        partnerField.appendChild(partnerValue);
+        info.appendChild(partnerField);
+        
+        // Fetch partner name async
+        loadProfile(profile.partnerId).then(partnerProfile => {
+            if (partnerProfile) {
+                partnerValue.textContent = '🔗 ' + partnerProfile.name;
+            }
+        }).catch(() => {
+            partnerValue.textContent = '🔗 Unknown';
+        });
+        
+        // Make partner clickable
+        partnerValue.onclick = (e) => {
+            e.stopPropagation();
+            viewProfile(profile.partnerId, true);
+        };
+    }
+    
+    body.appendChild(img);
+    body.appendChild(info);
+    card.appendChild(body);
     
     // Make card clickable with proper history support
     card.style.cursor = 'pointer';
@@ -426,6 +586,42 @@ async function viewProfile(id, addToHistory = true) {
     try {
         const profile = await loadProfile(id);
         currentViewingProfileId = id;
+        
+        // Set profile ID in the ID card header (front and back)
+        const profileIdEl = document.getElementById('viewProfileId');
+        const profileIdBackEl = document.getElementById('viewProfileIdBack');
+        const shortId = id.substring(0, 8).toUpperCase();
+        if (profileIdEl) {
+            profileIdEl.textContent = shortId;
+        }
+        if (profileIdBackEl) {
+            profileIdBackEl.textContent = id; // Full ID on back
+        }
+        
+        // Display signature on back of card
+        const signatureDisplay = document.getElementById('signatureDisplay');
+        if (signatureDisplay) {
+            if (profile.signature) {
+                signatureDisplay.innerHTML = `<img src="${profile.signature}" alt="Signature" style="max-width: 100%; max-height: 100%; object-fit: contain; position: relative; z-index: 100;">`;
+            } else {
+                signatureDisplay.innerHTML = '<div class="no-signature">No signature</div>';
+            }
+        }
+        
+        // Copy background to back of card
+        const idCardBgBack = document.getElementById('viewIdCardBgBack');
+        if (profile.backgroundUrl && profile.backgroundCrop && idCardBgBack) {
+            const crop = profile.backgroundCrop;
+            const scale = 1 / crop.width;
+            const posX = -crop.x / crop.width * 100;
+            const posY = -crop.y / crop.height * 100;
+            idCardBgBack.style.backgroundImage = `url("${profile.backgroundUrl}")`;
+            idCardBgBack.style.backgroundSize = `${scale * 100}%`;
+            idCardBgBack.style.backgroundPosition = `${posX}% ${posY}%`;
+        } else {
+            if (idCardBgBack) idCardBgBack.style.backgroundImage = 'none';
+        }
+        
         displayProfile(profile);
         
         // Show page first
@@ -444,6 +640,57 @@ async function viewProfile(id, addToHistory = true) {
 
 function displayProfile(profile) {
     els.viewName.textContent = profile.name;
+    
+    // Display new fields
+    const countryEl = document.getElementById('viewProfileCountry');
+    if (countryEl) countryEl.textContent = profile.country || '—';
+    
+    const genderEl = document.getElementById('viewProfileGender');
+    if (genderEl) genderEl.textContent = profile.gender || '—';
+    
+    const orientationField = document.getElementById('viewProfileOrientationField');
+    const orientationEl = document.getElementById('viewProfileOrientation');
+    if (profile.orientation && profile.orientation.trim()) {
+        if (orientationField) orientationField.style.display = '';
+        if (orientationEl) orientationEl.textContent = profile.orientation;
+    } else {
+        if (orientationField) orientationField.style.display = 'none';
+    }
+    
+    const dobField = document.getElementById('viewProfileDOBField');
+    const dobEl = document.getElementById('viewProfileDOB');
+    if (profile.dob && dobEl) {
+        dobEl.textContent = new Date(profile.dob).toLocaleDateString();
+        if (dobField) dobField.style.display = 'flex';
+    } else {
+        if (dobField) dobField.style.display = 'none';
+    }
+    
+    const moodEl = document.getElementById('viewProfileMood');
+    if (moodEl) moodEl.textContent = profile.mood || '😐 Meh';
+    
+    // Display partner link
+    const partnerField = document.getElementById('viewProfilePartnerField');
+    const partnerLink = document.getElementById('viewProfilePartnerLink');
+    const partnerName = document.getElementById('viewProfilePartnerName');
+    if (profile.partnerId && partnerLink) {
+        // Try to fetch partner's name
+        loadProfile(profile.partnerId).then(partnerProfile => {
+            if (partnerName && partnerProfile) {
+                partnerName.textContent = partnerProfile.name;
+            }
+        }).catch(() => {
+            if (partnerName) partnerName.textContent = 'Unknown Partner';
+        });
+        
+        partnerLink.onclick = (e) => {
+            e.preventDefault();
+            viewProfile(profile.partnerId, true);
+        };
+        if (partnerField) partnerField.style.display = 'flex';
+    } else {
+        if (partnerField) partnerField.style.display = 'none';
+    }
     
     // Display description if available (preserving line breaks)
     if (profile.description && profile.description.trim()) {
@@ -464,8 +711,20 @@ function displayProfile(profile) {
         els.viewBannerImg.style.backgroundImage = `url(${profile.bannerUrl})`;
         els.viewBannerImg.style.backgroundSize = `${scale * 100}%`;
         els.viewBannerImg.style.backgroundPosition = `${posX}% ${posY}%`;
+        
+        // Also set ID card background
+        const idCardBg = document.getElementById('viewIdCardBg');
+        if (idCardBg) {
+            idCardBg.style.backgroundImage = `url(${profile.bannerUrl})`;
+            idCardBg.style.backgroundSize = 'cover';
+            idCardBg.style.backgroundPosition = 'center';
+        }
     } else {
         els.viewBannerImg.style.backgroundImage = '';
+        const idCardBg = document.getElementById('viewIdCardBg');
+        if (idCardBg) {
+            idCardBg.style.backgroundImage = '';
+        }
     }
     
     // Display background image (only if element exists)
@@ -1086,6 +1345,17 @@ els.create.onclick = async () => {
     const twitchUrl = els.twitchUrl.value.trim();
     const instagramUrl = els.instagramUrl.value.trim();
     
+    // Get new fields
+    const country = document.getElementById('profileCountry').value.trim();
+    const gender = document.getElementById('profileGender').value;
+    const orientation = document.getElementById('profileOrientation').value;
+    const dob = document.getElementById('profileDOB').value;
+    const moodIndex = parseInt(document.getElementById('profileMood').value);
+    const moodStates = ['😭', '😞', '😐', '🙂', '😄'];
+    const moodLabels = ['Depressed', 'Sad', 'Meh', 'Happy', 'Happy'];
+    const mood = `${moodStates[moodIndex]} ${moodLabels[moodIndex]}`;
+    const partnerId = document.getElementById('profilePartner').value.trim();
+    
     if (!name) {
         showStatus(els.createStatus, 'error', 'Name is required!');
         return;
@@ -1121,6 +1391,13 @@ els.create.onclick = async () => {
     const publicData = {
         name: name,
         description: description,
+        country: country,
+        gender: gender,
+        orientation: orientation,
+        dob: dob,
+        mood: mood,
+        partnerId: partnerId,
+        signature: getSignature(), // Add signature
         imageUrl: imageCrops.profile.url,
         profileCrop: imageCrops.profile.crop,
         bannerUrl: imageCrops.banner.url,
@@ -1244,6 +1521,17 @@ els.update.onclick = async () => {
     const twitchUrl = els.twitchUrl.value.trim();
     const instagramUrl = els.instagramUrl.value.trim();
     
+    // Get new fields
+    const country = document.getElementById('profileCountry').value.trim();
+    const gender = document.getElementById('profileGender').value;
+    const orientation = document.getElementById('profileOrientation').value;
+    const dob = document.getElementById('profileDOB').value;
+    const moodIndex = parseInt(document.getElementById('profileMood').value);
+    const moodStates = ['😭', '😞', '😐', '🙂', '😄'];
+    const moodLabels = ['Depressed', 'Sad', 'Meh', 'Happy', 'Happy'];
+    const mood = `${moodStates[moodIndex]} ${moodLabels[moodIndex]}`;
+    const partnerId = document.getElementById('profilePartner').value.trim();
+    
     if (!name) {
         showStatus(els.createStatus, 'error', 'Name is required!');
         return;
@@ -1276,6 +1564,13 @@ els.update.onclick = async () => {
     const publicData = {
         name: name,
         description: description,
+        country: country,
+        gender: gender,
+        orientation: orientation,
+        dob: dob,
+        mood: mood,
+        partnerId: partnerId,
+        signature: getSignature(), // Add signature
         imageUrl: imageCrops.profile.url,
         profileCrop: imageCrops.profile.crop,
         bannerUrl: imageCrops.banner.url,
@@ -1468,6 +1763,11 @@ function resetCreateForm() {
     // Reset media cards
     currentMediaCards = [];
     
+    // Reset signature
+    if (signatureCtx && signatureCanvas) {
+        signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+    }
+    
     // IMPORTANT: Render empty media cards to show the "+" button
     // We need to do this after a small delay to ensure the container is visible
     setTimeout(() => {
@@ -1491,9 +1791,44 @@ function loadProfileForEdit(profile) {
     els.twitchUrl.value = profile.twitchUrl || '';
     els.instagramUrl.value = profile.instagramUrl || '';
     
+    // Load new fields
+    document.getElementById('profileCountry').value = profile.country || '';
+    document.getElementById('profileGender').value = profile.gender || '';
+    document.getElementById('profileOrientation').value = profile.orientation || '';
+    document.getElementById('profileDOB').value = profile.dob || '';
+    document.getElementById('profilePartner').value = profile.partnerId || '';
+    
+    // Load mood - convert from saved format back to slider value
+    if (profile.mood) {
+        const moodStates = ['😭', '😞', '😐', '🙂', '😄'];
+        const moodLabels = ['Depressed', 'Sad', 'Meh', 'Happy', 'Happy'];
+        let moodIndex = 2; // default neutral
+        
+        for (let i = 0; i < moodStates.length; i++) {
+            if (profile.mood.includes(moodStates[i])) {
+                moodIndex = i;
+                break;
+            }
+        }
+        
+        document.getElementById('profileMood').value = moodIndex;
+        document.getElementById('moodEmoji').textContent = moodStates[moodIndex];
+        document.getElementById('moodLabel').textContent = moodLabels[moodIndex];
+    }
+    
     // Load custom social links
     currentCustomSocialLinks = profile.customSocialLinks || [];
     renderCustomSocialLinks();
+    
+    // Load signature
+    if (profile.signature) {
+        loadSignature(profile.signature);
+    } else {
+        // Clear signature canvas if no signature
+        if (signatureCtx && signatureCanvas) {
+            signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+        }
+    }
     
     // Load images
     imageCrops.profile = {
@@ -2240,3 +2575,171 @@ window.addEventListener('resize', () => {
         }
     }, 250);
 });
+// Mood slider functionality
+const moodSlider = document.getElementById('profileMood');
+const moodEmoji = document.getElementById('moodEmoji');
+const moodLabel = document.getElementById('moodLabel');
+
+const moodStates = [
+    { emoji: '😭', label: 'Depressed' },
+    { emoji: '😞', label: 'Sad' },
+    { emoji: '😐', label: 'Meh' },
+    { emoji: '🙂', label: 'Happy' },
+    { emoji: '😄', label: 'Happy' }
+];
+
+if (moodSlider && moodEmoji && moodLabel) {
+    moodSlider.addEventListener('input', function() {
+        const index = parseInt(this.value);
+        moodEmoji.textContent = moodStates[index].emoji;
+        moodLabel.textContent = moodStates[index].label;
+    });
+}
+
+// ============================================
+// SIGNATURE CANVAS
+// ============================================
+const signatureCanvas = document.getElementById('signatureCanvas');
+const clearSignatureBtn = document.getElementById('clearSignature');
+let signatureCtx = null;
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+let currentSignature = null;
+
+if (signatureCanvas) {
+    signatureCtx = signatureCanvas.getContext('2d');
+    signatureCtx.strokeStyle = '#000';
+    signatureCtx.lineWidth = 4;
+    signatureCtx.lineCap = 'round';
+    signatureCtx.lineJoin = 'round';
+    
+    // Mouse events
+    signatureCanvas.addEventListener('mousedown', startDrawing);
+    signatureCanvas.addEventListener('mousemove', draw);
+    signatureCanvas.addEventListener('mouseup', stopDrawing);
+    signatureCanvas.addEventListener('mouseout', stopDrawing);
+    
+    // Touch events
+    signatureCanvas.addEventListener('touchstart', handleTouchStart);
+    signatureCanvas.addEventListener('touchmove', handleTouchMove);
+    signatureCanvas.addEventListener('touchend', stopDrawing);
+    
+    function startDrawing(e) {
+        isDrawing = true;
+        const rect = signatureCanvas.getBoundingClientRect();
+        const scaleX = signatureCanvas.width / rect.width;
+        const scaleY = signatureCanvas.height / rect.height;
+        lastX = (e.clientX - rect.left) * scaleX;
+        lastY = (e.clientY - rect.top) * scaleY;
+    }
+    
+    function draw(e) {
+        if (!isDrawing) return;
+        
+        const rect = signatureCanvas.getBoundingClientRect();
+        const scaleX = signatureCanvas.width / rect.width;
+        const scaleY = signatureCanvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+        
+        signatureCtx.beginPath();
+        signatureCtx.moveTo(lastX, lastY);
+        signatureCtx.lineTo(x, y);
+        signatureCtx.stroke();
+        
+        lastX = x;
+        lastY = y;
+    }
+    
+    function handleTouchStart(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = signatureCanvas.getBoundingClientRect();
+        const scaleX = signatureCanvas.width / rect.width;
+        const scaleY = signatureCanvas.height / rect.height;
+        isDrawing = true;
+        lastX = (touch.clientX - rect.left) * scaleX;
+        lastY = (touch.clientY - rect.top) * scaleY;
+    }
+    
+    function handleTouchMove(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        
+        const touch = e.touches[0];
+        const rect = signatureCanvas.getBoundingClientRect();
+        const scaleX = signatureCanvas.width / rect.width;
+        const scaleY = signatureCanvas.height / rect.height;
+        const x = (touch.clientX - rect.left) * scaleX;
+        const y = (touch.clientY - rect.top) * scaleY;
+        
+        signatureCtx.beginPath();
+        signatureCtx.moveTo(lastX, lastY);
+        signatureCtx.lineTo(x, y);
+        signatureCtx.stroke();
+        
+        lastX = x;
+        lastY = y;
+    }
+    
+    function stopDrawing() {
+        isDrawing = false;
+    }
+}
+
+if (clearSignatureBtn) {
+    clearSignatureBtn.addEventListener('click', () => {
+        if (signatureCtx) {
+            signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            currentSignature = null;
+        }
+    });
+}
+
+// Get signature as base64
+function getSignature() {
+    if (!signatureCanvas) return null;
+    
+    // Check if canvas is blank
+    const blank = document.createElement('canvas');
+    blank.width = signatureCanvas.width;
+    blank.height = signatureCanvas.height;
+    
+    if (signatureCanvas.toDataURL() === blank.toDataURL()) {
+        return null; // Canvas is blank
+    }
+    
+    return signatureCanvas.toDataURL('image/png');
+}
+
+// Load signature into canvas
+function loadSignature(signatureData) {
+    if (!signatureCanvas || !signatureData) return;
+    
+    const img = new Image();
+    img.onload = function() {
+        signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+        signatureCtx.drawImage(img, 0, 0);
+    };
+    img.src = signatureData;
+    currentSignature = signatureData;
+}
+
+// ============================================
+// CARD FLIP FUNCTIONALITY
+// ============================================
+const cardFlipper = document.getElementById('cardFlipper');
+
+if (cardFlipper) {
+    cardFlipper.addEventListener('click', function(e) {
+        // Don't flip if clicking on a link
+        if (e.target.tagName === 'A' || e.target.closest('a')) {
+            return;
+        }
+        this.classList.toggle('flipped');
+    });
+}
+
+console.log('✅ Signature and card flip functionality loaded!');
+
