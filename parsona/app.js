@@ -49,8 +49,6 @@ const els = {
     imageType: document.getElementById('imageType'),
     clearImage: document.getElementById('clearImage'),
     stream: document.getElementById('streamUrl'),
-    youtubeUrl: document.getElementById('youtubeUrl'),
-    twitchUrl: document.getElementById('twitchUrl'),
     instagramUrl: document.getElementById('instagramUrl'),
     customSocialLinksContainer: document.getElementById('customSocialLinksContainer'),
     customSocialModal: document.getElementById('customSocialModal'),
@@ -486,21 +484,6 @@ function createProfileCard(profile, id) {
     genderField.appendChild(genderLabel);
     genderField.appendChild(genderValue);
     
-    // ORIENTATION field (only show if has value)
-    if (profile.orientation) {
-        const orientationField = document.createElement('div');
-        orientationField.className = 'profile-card-field';
-        const orientationLabel = document.createElement('div');
-        orientationLabel.className = 'profile-card-field-label';
-        orientationLabel.textContent = 'ORIENTATION';
-        const orientationValue = document.createElement('div');
-        orientationValue.className = 'profile-card-field-value';
-        orientationValue.textContent = profile.orientation;
-        orientationField.appendChild(orientationLabel);
-        orientationField.appendChild(orientationValue);
-        info.appendChild(orientationField);
-    }
-    
     // MOOD field
     const moodField = document.createElement('div');
     moodField.className = 'profile-card-field';
@@ -520,9 +503,26 @@ function createProfileCard(profile, id) {
     moodField.appendChild(moodLabel);
     moodField.appendChild(moodValue);
     
+    // Append fields in CORRECT order
     info.appendChild(nameField);
     info.appendChild(countryField);
     info.appendChild(genderField);
+    
+    // ORIENTATION field (only show if has value) - ADD AFTER GENDER
+    if (profile.orientation) {
+        const orientationField = document.createElement('div');
+        orientationField.className = 'profile-card-field';
+        const orientationLabel = document.createElement('div');
+        orientationLabel.className = 'profile-card-field-label';
+        orientationLabel.textContent = 'ORIENTATION';
+        const orientationValue = document.createElement('div');
+        orientationValue.className = 'profile-card-field-value';
+        orientationValue.textContent = profile.orientation;
+        orientationField.appendChild(orientationLabel);
+        orientationField.appendChild(orientationValue);
+        info.appendChild(orientationField);
+    }
+    
     info.appendChild(moodField);
     
     // Add DOB if available
@@ -759,29 +759,42 @@ function displayProfile(profile) {
         }
     }
     
-    if (profile.youtubeUrl && profile.youtubeUrl.trim()) {
-        els.youtubeLink.href = profile.youtubeUrl;
-        els.youtubeLink.style.display = 'flex';
-        hasSocialLinks = true;
-    } else {
-        els.youtubeLink.style.display = 'none';
-    }
     
-    if (profile.twitchUrl && profile.twitchUrl.trim()) {
-        els.twitchLink.href = profile.twitchUrl;
-        els.twitchLink.style.display = 'flex';
-        hasSocialLinks = true;
-    } else {
-        els.twitchLink.style.display = 'none';
-    }
-    
+    // Only show Instagram from the built-in social links
     if (profile.instagramUrl && profile.instagramUrl.trim()) {
         els.instagramLink.href = profile.instagramUrl;
         els.instagramLink.style.display = 'flex';
+        els.instagramLink.style.flexDirection = 'column';
+        els.instagramLink.style.alignItems = 'center';
+        els.instagramLink.style.gap = '8px';
+        els.instagramLink.style.padding = '12px';
+        els.instagramLink.style.borderRadius = '12px';
+        els.instagramLink.style.background = 'linear-gradient(135deg, rgba(254, 213, 118, 0.1), rgba(244, 113, 51, 0.1), rgba(211, 66, 164, 0.1))';
+        els.instagramLink.style.transition = 'all 0.3s ease';
+        els.instagramLink.style.border = '2px solid transparent';
         hasSocialLinks = true;
+        
+        // Enhanced hover effect
+        els.instagramLink.onmouseover = function() {
+            this.style.transform = 'translateY(-5px) scale(1.05)';
+            this.style.background = 'linear-gradient(135deg, rgba(254, 213, 118, 0.15), rgba(244, 113, 51, 0.15), rgba(211, 66, 164, 0.15))';
+            this.style.border = '2px solid rgba(244, 113, 51, 0.3)';
+            this.style.boxShadow = '0 8px 16px rgba(211, 66, 164, 0.2)';
+        };
+        els.instagramLink.onmouseout = function() {
+            this.style.transform = 'translateY(0) scale(1)';
+            this.style.background = 'linear-gradient(135deg, rgba(254, 213, 118, 0.1), rgba(244, 113, 51, 0.1), rgba(211, 66, 164, 0.1))';
+            this.style.border = '2px solid transparent';
+            this.style.boxShadow = 'none';
+        };
     } else {
         els.instagramLink.style.display = 'none';
     }
+    
+    // Hide YouTube and Twitch - use custom social links instead
+    if (els.youtubeLink) els.youtubeLink.style.display = 'none';
+    if (els.twitchLink) els.twitchLink.style.display = 'none';
+
     
     // Display custom social links
     if (els.customSocialLinksDisplay) {
@@ -795,12 +808,17 @@ function displayProfile(profile) {
                 linkEl.href = link.url;
                 linkEl.target = '_blank';
                 linkEl.title = link.name || link.url;
+                linkEl.className = 'custom-social-link';
                 linkEl.style.display = 'flex';
                 linkEl.style.flexDirection = 'column';
                 linkEl.style.alignItems = 'center';
                 linkEl.style.textDecoration = 'none';
-                linkEl.style.transition = 'transform 0.2s, opacity 0.2s';
-                linkEl.style.gap = '5px';
+                linkEl.style.transition = 'all 0.3s ease';
+                linkEl.style.gap = '8px';
+                linkEl.style.padding = '12px';
+                linkEl.style.borderRadius = '12px';
+                linkEl.style.background = 'rgba(161, 161, 170, 0.1)';
+                linkEl.style.border = '2px solid transparent';
                 
                 const faviconUrl = getFaviconUrl(link.url);
                 const img = document.createElement('img');
@@ -810,7 +828,7 @@ function displayProfile(profile) {
                 img.style.height = '48px';
                 img.style.borderRadius = '8px';
                 img.style.objectFit = 'contain';
-                // Don't add white background - let the icon's natural appearance show
+                img.style.transition = 'transform 0.3s ease';
                 
                 img.onerror = function() {
                     // Fallback to Clearbit if Google fails
@@ -836,13 +854,18 @@ function displayProfile(profile) {
                 
                 linkEl.appendChild(img);
                 
+                // Enhanced hover effect
                 linkEl.onmouseover = function() {
-                    this.style.transform = 'scale(1.15)';
-                    this.style.opacity = '0.8';
+                    this.style.transform = 'translateY(-5px) scale(1.05)';
+                    this.style.background = 'rgba(161, 161, 170, 0.15)';
+                    this.style.border = '2px solid rgba(161, 161, 170, 0.3)';
+                    this.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.15)';
                 };
                 linkEl.onmouseout = function() {
-                    this.style.transform = 'scale(1)';
-                    this.style.opacity = '1';
+                    this.style.transform = 'translateY(0) scale(1)';
+                    this.style.background = 'rgba(161, 161, 170, 0.1)';
+                    this.style.border = '2px solid transparent';
+                    this.style.boxShadow = 'none';
                 };
                 
                 els.customSocialLinksDisplay.appendChild(linkEl);
@@ -1341,8 +1364,6 @@ els.create.onclick = async () => {
     const password = els.pass.value.trim();
     const description = els.description.value.trim(); // Keep line breaks
     const streamUrl = els.stream.value.trim();
-    const youtubeUrl = els.youtubeUrl.value.trim();
-    const twitchUrl = els.twitchUrl.value.trim();
     const instagramUrl = els.instagramUrl.value.trim();
     
     // Get new fields
@@ -1405,8 +1426,6 @@ els.create.onclick = async () => {
         backgroundUrl: imageCrops.background.url,
         backgroundCrop: imageCrops.background.crop,
         streamUrl: streamUrl,
-        youtubeUrl: youtubeUrl,
-        twitchUrl: twitchUrl,
         instagramUrl: instagramUrl,
         customSocialLinks: currentCustomSocialLinks,
         cardStyle: cardStyle,
@@ -1517,8 +1536,6 @@ els.update.onclick = async () => {
     const password = els.pass.value.trim();
     const description = els.description.value.trim(); // Keep line breaks
     const streamUrl = els.stream.value.trim();
-    const youtubeUrl = els.youtubeUrl.value.trim();
-    const twitchUrl = els.twitchUrl.value.trim();
     const instagramUrl = els.instagramUrl.value.trim();
     
     // Get new fields
@@ -1578,8 +1595,6 @@ els.update.onclick = async () => {
         backgroundUrl: imageCrops.background.url,
         backgroundCrop: imageCrops.background.crop,
         streamUrl: streamUrl,
-        youtubeUrl: youtubeUrl,
-        twitchUrl: twitchUrl,
         instagramUrl: instagramUrl,
         customSocialLinks: currentCustomSocialLinks,
         cardStyle: cardStyle,
@@ -1787,8 +1802,6 @@ function loadProfileForEdit(profile) {
     els.pass.value = ''; // Don't fill password
     els.description.value = profile.description || '';
     els.stream.value = profile.streamUrl || '';
-    els.youtubeUrl.value = profile.youtubeUrl || '';
-    els.twitchUrl.value = profile.twitchUrl || '';
     els.instagramUrl.value = profile.instagramUrl || '';
     
     // Load new fields

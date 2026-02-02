@@ -1010,9 +1010,10 @@ button:disabled {
 .social-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 30px;
+    gap: 20px;
     align-items: center;
     justify-content: center;
+    padding: 10px 0;
 }
 
 .social-links a,
@@ -1021,13 +1022,25 @@ button:disabled {
     flex-direction: column;
     align-items: center;
     text-decoration: none;
-    transition: transform 0.2s, opacity 0.2s;
-    gap: 5px;
+    transition: all 0.3s ease;
+    gap: 8px;
+    cursor: pointer;
 }
 
-.social-links a:hover {
-    transform: scale(1.15);
-    opacity: 0.8;
+.social-links a svg {
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.social-links a:hover svg {
+    filter: brightness(1.1);
+}
+
+.custom-social-link {
+    position: relative;
+}
+
+.custom-social-link img {
+    transition: transform 0.3s ease;
 }
 
 .stream {
