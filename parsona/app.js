@@ -49,7 +49,6 @@ const els = {
     imageType: document.getElementById('imageType'),
     clearImage: document.getElementById('clearImage'),
     stream: document.getElementById('streamUrl'),
-    instagramUrl: document.getElementById('instagramUrl'),
     customSocialLinksContainer: document.getElementById('customSocialLinksContainer'),
     customSocialModal: document.getElementById('customSocialModal'),
     customSocialUrl: document.getElementById('customSocialUrl'),
@@ -193,9 +192,10 @@ if (els.refreshBtn) {
 menu.create.onclick = () => {
     showPage('create', null, true);
     resetCreateForm();
-    // Explicitly render media cards after form reset completes
+    // Explicitly render media cards and social links after form reset completes
     setTimeout(() => {
         renderMediaCards(true);
+        renderCustomSocialLinks();
     }, 100);
 };
 
@@ -1360,11 +1360,17 @@ els.fontColorHex.oninput = (e) => {
 
 // Create profile
 els.create.onclick = async () => {
+    // Check if terms are agreed to
+    const agreeToTerms = document.getElementById('agreeToTerms');
+    if (agreeToTerms && !agreeToTerms.checked) {
+        showStatus(els.createStatus, 'error', '⚠️ You must agree to the Terms of Service & Privacy Policy to create a profile.');
+        return;
+    }
+    
     const name = els.name.value.trim();
     const password = els.pass.value.trim();
     const description = els.description.value.trim(); // Keep line breaks
     const streamUrl = els.stream.value.trim();
-    const instagramUrl = els.instagramUrl.value.trim();
     
     // Get new fields
     const country = document.getElementById('profileCountry').value.trim();
@@ -1426,14 +1432,14 @@ els.create.onclick = async () => {
         backgroundUrl: imageCrops.background.url,
         backgroundCrop: imageCrops.background.crop,
         streamUrl: streamUrl,
-        instagramUrl: instagramUrl,
         customSocialLinks: currentCustomSocialLinks,
         cardStyle: cardStyle,
         cardColor: cardColor,
         cardColorGradient: cardColorGradient,
         fontColor: fontColor,
         mediaCards: currentMediaCards,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        termsAgreedAt: new Date().toISOString() // Record when user agreed to terms
     };
     
     let profileData;
@@ -1536,7 +1542,6 @@ els.update.onclick = async () => {
     const password = els.pass.value.trim();
     const description = els.description.value.trim(); // Keep line breaks
     const streamUrl = els.stream.value.trim();
-    const instagramUrl = els.instagramUrl.value.trim();
     
     // Get new fields
     const country = document.getElementById('profileCountry').value.trim();
@@ -1595,7 +1600,6 @@ els.update.onclick = async () => {
         backgroundUrl: imageCrops.background.url,
         backgroundCrop: imageCrops.background.crop,
         streamUrl: streamUrl,
-        instagramUrl: instagramUrl,
         customSocialLinks: currentCustomSocialLinks,
         cardStyle: cardStyle,
         cardColor: cardColor,
@@ -1751,9 +1755,6 @@ function resetCreateForm() {
     els.description.value = '';
     els.img.value = '';
     els.stream.value = '';
-    els.youtubeUrl.value = '';
-    els.twitchUrl.value = '';
-    els.instagramUrl.value = '';
     
     // Reset custom social links
     currentCustomSocialLinks = [];
@@ -1795,6 +1796,13 @@ function resetCreateForm() {
     els.createHeader.textContent = 'Create Profile';
     
     editingProfileId = null;
+    
+    // Reset terms checkbox
+    const agreeToTerms = document.getElementById('agreeToTerms');
+    if (agreeToTerms) {
+        agreeToTerms.checked = false;
+    }
+    updateTermsFieldVisibility();
 }
 
 function loadProfileForEdit(profile) {
@@ -1802,7 +1810,6 @@ function loadProfileForEdit(profile) {
     els.pass.value = ''; // Don't fill password
     els.description.value = profile.description || '';
     els.stream.value = profile.streamUrl || '';
-    els.instagramUrl.value = profile.instagramUrl || '';
     
     // Load new fields
     document.getElementById('profileCountry').value = profile.country || '';
@@ -1889,6 +1896,7 @@ function loadProfileForEdit(profile) {
     
     // Load media cards
     currentMediaCards = profile.mediaCards || [];
+    renderMediaCards(true); // Render in edit mode
     
     // Switch buttons
     els.create.style.display = 'none';
@@ -1896,6 +1904,9 @@ function loadProfileForEdit(profile) {
     els.createHeader.textContent = 'Edit Profile';
     
     editingProfileId = currentUser.id;
+    
+    // Hide terms checkbox when editing
+    updateTermsFieldVisibility();
 }
 
 // Stream embed URL converter
@@ -2755,4 +2766,77 @@ if (cardFlipper) {
 }
 
 console.log('✅ Signature and card flip functionality loaded!');
+
+// ============================================
+// TERMS AND PRIVACY MODAL
+// ============================================
+const termsModal = document.getElementById('termsModal');
+const openTermsModalBtn = document.getElementById('openTermsModal');
+const closeTermsModalBtn = document.getElementById('closeTermsModal');
+const impressumModal = document.getElementById('impressumModal');
+const openImpressumModalBtn = document.getElementById('openImpressumModal');
+const closeImpressumModalBtn = document.getElementById('closeImpressumModal');
+
+if (openTermsModalBtn && termsModal) {
+    openTermsModalBtn.onclick = (e) => {
+        e.preventDefault();
+        termsModal.classList.add('active');
+    };
+}
+
+if (closeTermsModalBtn && termsModal) {
+    closeTermsModalBtn.onclick = () => {
+        termsModal.classList.remove('active');
+    };
+}
+
+// Close modal when clicking outside
+if (termsModal) {
+    termsModal.onclick = (e) => {
+        if (e.target === termsModal) {
+            termsModal.classList.remove('active');
+        }
+    };
+}
+
+// Impressum modal handlers
+if (openImpressumModalBtn && impressumModal) {
+    openImpressumModalBtn.onclick = (e) => {
+        e.preventDefault();
+        // Close terms modal and open impressum modal
+        if (termsModal) {
+            termsModal.classList.remove('active');
+        }
+        impressumModal.classList.add('active');
+    };
+}
+
+if (closeImpressumModalBtn && impressumModal) {
+    closeImpressumModalBtn.onclick = () => {
+        impressumModal.classList.remove('active');
+    };
+}
+
+// Close impressum modal when clicking outside
+if (impressumModal) {
+    impressumModal.onclick = (e) => {
+        if (e.target === impressumModal) {
+            impressumModal.classList.remove('active');
+        }
+    };
+}
+
+// Hide terms checkbox when editing (not creating)
+function updateTermsFieldVisibility() {
+    const termsField = document.getElementById('termsAgreementField');
+    if (termsField) {
+        if (editingProfileId) {
+            termsField.style.display = 'none';
+        } else {
+            termsField.style.display = 'block';
+        }
+    }
+}
+
+console.log('✅ Terms and Privacy modal loaded!');
 

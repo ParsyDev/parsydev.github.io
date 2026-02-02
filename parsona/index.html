@@ -99,6 +99,7 @@
                             <option value="Bisexual">Bisexual</option>
                             <option value="Pansexual">Pansexual</option>
                             <option value="Asexual">Asexual</option>
+                            <option value="Transgender">Transgender</option>
                             <option value="Other">Other</option>
                         </select>
                     </div>
@@ -207,14 +208,8 @@
                     </div>
                     <div class="field">
                         <label>🔗 Social Media Links</label>
-                        <div style="margin-bottom: 15px;">
-                            <div>
-                                <label style="font-size: 11px; color: #666;">Instagram Profile</label>
-                                <input type="text" id="instagramUrl" placeholder="Instagram URL" style="margin-top: 3px;">
-                            </div>
-                        </div>
-                        <div style="margin-top: 20px;">
-                            <label style="font-size: 13px; color: #666; margin-bottom: 10px; display: block;">Other Social Media (YouTube, Twitch, etc.)</label>
+                        <div style="margin-top: 10px;">
+                            <label style="font-size: 13px; color: #666; margin-bottom: 10px; display: block;">Add Social Media (Instagram, YouTube, Twitch, etc.)</label>
                             <div id="customSocialLinksContainer" style="display: flex; flex-wrap: wrap; gap: 10px; min-height: 60px; align-items: flex-start;">
                                 <!-- Custom social links will be shown here during edit -->
                             </div>
@@ -226,6 +221,17 @@
                             <!-- Media cards will be shown here during edit -->
                         </div>
                     </div>
+                    
+                    <!-- Terms and Privacy Agreement -->
+                    <div class="field" id="termsAgreementField">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+                            <input type="checkbox" id="agreeToTerms" style="width: 20px; height: 20px; cursor: pointer;">
+                            <span style="font-size: 13px;">
+                                I agree to the <a href="#" id="openTermsModal" style="color: var(--accent-primary); text-decoration: underline;">Terms of Service & Privacy Policy</a>
+                            </span>
+                        </label>
+                    </div>
+                    
                     <button id="createProfile">✨ Create Profile</button>
                     <button id="updateProfile" style="display:none; background:#e67e22;">Update Profile</button>
                     <div class="status" id="createStatus"></div>
@@ -420,16 +426,296 @@
         </div>
     </div>
 
-    <!-- Core Scripts - ORDER MATTERS! -->
-    <!-- 1. Load crypto/cache systems FIRST -->
+    <!-- Terms and Privacy Policy Modal -->
+    <div class="modal" id="termsModal">
+        <div class="modal-content" style="max-width: 800px; max-height: 85vh; overflow-y: auto;">
+            <div class="modal-header">Terms of Service & Privacy Policy</div>
+            <div class="modal-body" style="text-align: left; line-height: 1.6;">
+                
+                <!-- TERMS OF SERVICE -->
+                <h3 style="margin-top: 0; color: var(--accent-primary);">1. Terms of Service</h3>
+                
+                <h4 style="margin-top: 15px; color: var(--text-primary);">1.1 Acceptance of Terms</h4>
+                <p>By creating a profile on Parsona, you agree to these Terms of Service. If you do not agree, please do not use this service.</p>
+                
+                <h4 style="margin-top: 15px; color: var(--text-primary);">1.2 Service Description</h4>
+                <p>Parsona is a profile creation and sharing platform. The service is provided free of charge and "as is" without warranties of any kind.</p>
+                
+                <h4 style="margin-top: 15px; color: var(--text-primary);">1.3 User Obligations and Content Responsibility</h4>
+                <p><strong>You are solely responsible for all content you upload to your profile.</strong> By using Parsona, you agree to:</p>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    <li><strong>Not post illegal content:</strong> You must not upload, share, or link to content that violates German law or the laws of your jurisdiction, including but not limited to: defamatory content, hate speech, incitement to violence, child sexual abuse material, copyright-infringing content, or content that violates personal rights of others.</li>
+                    <li><strong>Not impersonate others:</strong> You must not create fake profiles or impersonate other individuals.</li>
+                    <li><strong>Not abuse the service:</strong> You must not attempt to hack, disrupt, or abuse the service or upload malicious code.</li>
+                    <li><strong>Respect others' rights:</strong> Ensure all images, text, and links you provide do not violate third-party rights (copyright, trademark, privacy rights, etc.).</li>
+                </ul>
+                
+                <h4 style="margin-top: 15px; color: var(--text-primary);">1.4 Liability for User Content (§§ 7-10 DDG)</h4>
+                <p><strong>Important: We are a hosting provider under German law and are NOT liable for user-generated content.</strong></p>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    <li>According to § 7 para. 1 DDG (Digital Services Act, formerly TMG), we are responsible for our own content on this platform.</li>
+                    <li><strong>According to §§ 8-10 DDG, we are NOT obliged to monitor user content or proactively investigate illegal activity.</strong></li>
+                    <li>We are only liable for user content if we have actual knowledge of illegal activity and fail to remove it.</li>
+                    <li>If we become aware of illegal content (through reports or otherwise), we will remove or block access to it immediately.</li>
+                    <li><strong>You, as the user, are primarily liable for your own content, not us.</strong></li>
+                </ul>
+                
+                <h4 style="margin-top: 15px; color: var(--text-primary);">1.5 Reporting Illegal Content</h4>
+                <p>If you believe content on Parsona violates the law or your rights, please report it to: <a href="/cdn-cgi/l/email-protection#e6968794959f96948f908792a6818b878f8ac885898b" style="color: var(--accent-primary);"><span class="__cf_email__" data-cfemail="cebeafbcbdb7bebca7b8afba8ea9a3afa7a2e0ada1a3">[email&#160;protected]</span></a></p>
+                <p>We will investigate and take appropriate action in accordance with German law.</p>
+                
+                <h4 style="margin-top: 15px; color: var(--text-primary);">1.6 Our Rights</h4>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    <li>We reserve the right to remove profiles that violate these terms or applicable laws.</li>
+                    <li>We may modify, suspend, or discontinue the service at any time without prior notice.</li>
+                    <li>We are not liable for any damages arising from your use of Parsona.</li>
+                    <li>We do not guarantee the availability, accuracy, or security of the service.</li>
+                </ul>
+                
+                <h4 style="margin-top: 15px; color: var(--text-primary);">1.7 Limitation of Liability</h4>
+                <p><strong>To the maximum extent permitted by law:</strong></p>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    <li>Parsona is provided "as is" and "as available" without any warranties, express or implied.</li>
+                    <li>We are not liable for indirect, incidental, consequential, or punitive damages.</li>
+                    <li>We are not liable for loss of data, loss of profits, or business interruption.</li>
+                    <li>Our total liability to you for any claim shall not exceed €0 (zero euros), as this is a free service.</li>
+                    <li>These limitations apply to the fullest extent permitted by German law.</li>
+                </ul>
+                
+                <h4 style="margin-top: 15px; color: var(--text-primary);">1.8 Indemnification</h4>
+                <p><strong>You agree to indemnify and hold harmless Marian Dreher (the operator) from any claims, damages, losses, or expenses (including legal fees) arising from:</strong></p>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    <li>Your violation of these terms</li>
+                    <li>Your violation of any law or third-party rights</li>
+                    <li>Content you upload to your profile</li>
+                    <li>Your use of the service</li>
+                </ul>
+                
+                <hr style="margin: 25px 0; border: none; border-top: 1px solid #333;">
+                
+                <!-- PRIVACY POLICY (DATENSCHUTZERKLÄRUNG) -->
+                <h3 style="color: var(--accent-primary);">2. Privacy Policy (Datenschutzerklärung)</h3>
+                
+                <h4 style="margin-top: 15px; color: var(--text-primary);">2.1 Responsible Party (Verantwortlicher)</h4>
+                <p>
+                    <strong>Marian Dreher</strong><br>
+                    Bernäckerstraße 28<br>
+                    73252 Lenningen, Germany<br>
+                    Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2c5c4d5e5f555c5e455a4d586c4b414d4540024f4341">[email&#160;protected]</a>
+                </p>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">2.2 What Data We Collect</h4>
+                <p><strong>Data you provide when creating a profile:</strong></p>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    <li>Profile name, description, country, gender, orientation, date of birth, mood</li>
+                    <li>Profile images (via URLs you provide)</li>
+                    <li>Social media links</li>
+                    <li>Password (stored as cryptographic hash only)</li>
+                    <li>Optional private data (encrypted with your password)</li>
+                </ul>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">2.3 Legal Basis for Processing (Art. 6 GDPR)</h4>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    <li><strong>Contract performance (Art. 6(1)(b) GDPR):</strong> Processing your profile data is necessary to provide the service you requested.</li>
+                    <li><strong>Consent (Art. 6(1)(a) GDPR):</strong> For any optional features or data processing, we ask for your explicit consent.</li>
+                </ul>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">2.4 Where Your Data is Stored</h4>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    <li>All profile data is stored in <strong>private GitHub gists</strong> (GitHub, Inc., USA).</li>
+                    <li>GitHub acts as our data processor. GitHub complies with GDPR through Standard Contractual Clauses.</li>
+                    <li>Your password is never stored in plain text—only a cryptographic hash (SHA-256).</li>
+                    <li>Private data fields are encrypted with AES-256 encryption using your password as the key.</li>
+                </ul>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">2.5 Public vs. Private Data</h4>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    <li><strong>Public Data:</strong> Your profile information (name, description, images, social links, etc.) is intentionally displayed publicly so others can view your profile. This is the core purpose of the service.</li>
+                    <li><strong>Private Data:</strong> Any data marked as private is encrypted with your password. <strong>We cannot read your encrypted private data—mathematically impossible without your password.</strong></li>
+                </ul>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">2.6 We CANNOT Read Your Private Data</h4>
+                <p style="background: rgba(255, 165, 0, 0.1); padding: 15px; border-left: 4px solid orange; border-radius: 4px;">
+                    <strong>⚠️ Zero-Knowledge Encryption:</strong><br>
+                    Your password is used to encrypt private data on YOUR device (in your browser) before it's ever sent to our servers. We never see your password or unencrypted private data. Even if we wanted to read your private data, we mathematically cannot—we don't have the decryption key (your password). This is called "zero-knowledge encryption" and means your private data is truly private.
+                </p>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">2.6a What We Can and Cannot See</h4>
+                <p style="font-size: 13px;"><strong>What we CAN see (public data):</strong></p>
+                <ul style="margin: 5px 0; padding-left: 25px; font-size: 13px;">
+                    <li>Profile name, description, country, gender, etc. (everything displayed on your public profile)</li>
+                    <li>Image URLs (the links you provide, not the images themselves)</li>
+                    <li>Social media links</li>
+                    <li>Password hash (one-way encrypted, cannot be reversed)</li>
+                </ul>
+                <p style="font-size: 13px; margin-top: 10px;"><strong>What we CANNOT see (encrypted data):</strong></p>
+                <ul style="margin: 5px 0; padding-left: 25px; font-size: 13px;">
+                    <li>Your actual password</li>
+                    <li>Any data marked as "private" in your profile</li>
+                    <li>The unencrypted content of encrypted fields</li>
+                </ul>
+                <p style="font-size: 13px; margin-top: 10px;">
+                    <strong>We do NOT:</strong>
+                </p>
+                <ul style="margin: 5px 0; padding-left: 25px; font-size: 13px;">
+                    <li>Monitor or read your profile content (we may only see it if viewing your public profile like any other user)</li>
+                    <li>Analyze, mine, or process your content for any purpose other than displaying it</li>
+                    <li>Use your data for advertising, marketing, or profiling</li>
+                    <li>Share your data with third parties (except GitHub as our hosting provider)</li>
+                    <li>Track your activity or use cookies/analytics</li>
+                </ul>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">2.8 Data Retention</h4>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    <li>Your profile data is stored until you delete your profile.</li>
+                    <li>You can delete your profile at any time by logging in.</li>
+                    <li>Deleted profiles are removed from GitHub gists permanently.</li>
+                    <li>We do not retain backups of deleted profiles.</li>
+                </ul>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">2.9 Your Rights (GDPR Art. 15-22)</h4>
+                <p>You have the following rights:</p>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    <li><strong>Right of access (Art. 15):</strong> Request a copy of all your personal data.</li>
+                    <li><strong>Right to rectification (Art. 16):</strong> Correct inaccurate data (you can edit your profile).</li>
+                    <li><strong>Right to erasure (Art. 17):</strong> Delete your profile and all associated data.</li>
+                    <li><strong>Right to data portability (Art. 20):</strong> Receive your data in a structured, machine-readable format.</li>
+                    <li><strong>Right to object (Art. 21):</strong> Object to certain types of data processing.</li>
+                    <li><strong>Right to withdraw consent:</strong> You can withdraw consent at any time by deleting your profile.</li>
+                </ul>
+                <p>To exercise these rights, contact: <a href="/cdn-cgi/l/email-protection#14647566676d64667d627560547379757d783a777b79" style="color: var(--accent-primary);"><span class="__cf_email__" data-cfemail="36465744454f46445f40574276515b575f5a1855595b">[email&#160;protected]</span></a></p>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">2.10 Right to Complaint</h4>
+                <p>You have the right to file a complaint with a data protection supervisory authority:</p>
+                <p>
+                    <strong>Der Landesbeauftragte für den Datenschutz und die Informationsfreiheit Baden-Württemberg</strong><br>
+                    Lautenschlagerstraße 20<br>
+                    70173 Stuttgart, Germany<br>
+                    Website: <a href="https://www.baden-wuerttemberg.datenschutz.de" target="_blank" style="color: var(--accent-primary);">www.baden-wuerttemberg.datenschutz.de</a>
+                </p>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">2.11 Third-Party Services</h4>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    <li><strong>GitHub:</strong> We use GitHub as our data storage provider. See <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement" target="_blank" style="color: var(--accent-primary);">GitHub's Privacy Policy</a>.</li>
+                    <li><strong>External Media:</strong> Images and media you link to may be hosted on third-party services you control. We are not responsible for these external services.</li>
+                </ul>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">2.12 Security</h4>
+                <ul style="margin: 10px 0; padding-left: 25px;">
+                    <li>We use industry-standard encryption (AES-256) for private data.</li>
+                    <li>All encryption/decryption happens in your browser (client-side).</li>
+                    <li>Your password and unencrypted private data never leave your device.</li>
+                    <li>GitHub gists are private and not publicly accessible.</li>
+                    <li><strong>Important:</strong> If you lose your password, we cannot recover your encrypted data.</li>
+                </ul>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">2.13 No Cookies, Analytics, or Tracking</h4>
+                <p>Parsona does not use cookies, analytics, tracking pixels, or any tracking technologies. We only store the data you explicitly provide when creating your profile. We do not track your browsing behavior or collect any data beyond what you submit in your profile.</p>
+                
+                <p style="margin-top: 25px; font-size: 12px; color: var(--text-muted);">
+                    Last updated: February 2, 2026
+                </p>
+                
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #333; text-align: center;">
+                    <a href="#" id="openImpressumModal" style="color: var(--accent-primary); text-decoration: underline; font-size: 13px;">Impressum (Legal Notice)</a>
+                </div>
+                
+                <button class="close-btn" id="closeTermsModal" style="margin-top: 15px;">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Impressum Modal -->
+    <div class="modal" id="impressumModal">
+        <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">Impressum (Legal Notice)</div>
+            <div class="modal-body" style="text-align: left; line-height: 1.6;">
+                <h4 style="margin-top: 0; color: var(--text-primary);">Provider Identification according to § 5 DDG</h4>
+                <p>
+                    <strong>Marian Dreher</strong><br>
+                    Bernäckerstraße 28<br>
+                    76571 Gaggenau<br>
+                    Germany
+                </p>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">Contact</h4>
+                <p>
+                    Email: <a href="/cdn-cgi/l/email-protection#d4a4b5a6a7ada4a6bda2b5a094b3b9b5bdb8fab7bbb9" style="color: var(--accent-primary);"><span class="__cf_email__" data-cfemail="47372635343e37352e31263307202a262e2b6924282a">[email&#160;protected]</span></a>
+                </p>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">Person Responsible for Content</h4>
+                <p>
+                    According to § 55 Abs. 2 RStV:<br>
+                    Marian Dreher<br>
+                    Address as above
+                </p>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">Nature of Service</h4>
+                <p style="font-size: 13px;">
+                    Parsona is a <strong>hosting service provider</strong> according to § 2 Nr. 1 DDG and Art. 3 lit. g (iii) EU Digital Services Act (DSA). We provide technical infrastructure enabling users to create and store their own profile content. <strong>We do not create, select, modify, or control user-generated content in any way.</strong>
+                </p>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">Liability for Own Content</h4>
+                <p style="font-size: 13px;">
+                    According to § 7 para. 1 DDG (Digital Services Act, formerly TMG), we as a service provider are responsible for our own content on these pages (website interface, these legal texts, etc.) under general law. However, we are not obligated to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity (§§ 8-10 DDG).
+                </p>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">Liability for User-Generated Content (§ 10 DDG, Art. 6 DSA)</h4>
+                <p style="font-size: 13px;">
+                    <strong>WE DO NOT MONITOR, REVIEW, OR CONTROL USER CONTENT.</strong> As a hosting provider, we are exempt from liability for user-generated content stored on our platform unless we have actual knowledge of illegal activity or content and fail to act expeditiously to remove it.
+                </p>
+                <p style="font-size: 13px; margin-top: 10px;">
+                    <strong>Important:</strong> All profile content (text, images, links, etc.) is created, uploaded, and controlled exclusively by individual users. <strong>Users are solely and fully responsible for their own content.</strong> We do not review, approve, endorse, or take responsibility for any user profiles or user-generated content.
+                </p>
+                <p style="font-size: 13px; margin-top: 10px;">
+                    We are not liable for any damages arising from user-generated content, including but not limited to defamation, copyright infringement, violation of personality rights, or other illegal content uploaded by users.
+                </p>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">⚠️ Report Illegal Content (Notice and Takedown)</h4>
+                <p style="font-size: 13px;">
+                    If you believe any profile contains illegal content or violates your rights, please report it immediately to:
+                </p>
+                <p style="font-size: 13px; margin-top: 5px;">
+                    📧 Email: <a href="/cdn-cgi/l/email-protection#c1b1a0b3b2b8b1b3a8b7a0b581a6aca0a8adefa2aeacfeb2b4a3aba4a2b5fc82aeafb5a4afb5e4f3f193a4b1aeb3b5e4f3f1ece4f3f191a0b3b2aeafa0" style="color: var(--accent-primary); font-weight: bold;"><span class="__cf_email__" data-cfemail="3f4f5e4d4c464f4d56495e4b7f58525e5653115c5052">[email&#160;protected]</span></a>
+                </p>
+                <p style="font-size: 13px; margin-top: 10px;">
+                    <strong>Please include in your report:</strong>
+                </p>
+                <ul style="margin: 10px 0; padding-left: 25px; font-size: 13px;">
+                    <li>Exact URL/Profile ID of the content</li>
+                    <li>Clear description of the illegal content or rights violation</li>
+                    <li>Legal basis for your complaint (which law/right is violated)</li>
+                    <li>Your contact information for follow-up</li>
+                    <li>If applicable: evidence of your rights (e.g., copyright ownership)</li>
+                </ul>
+                <p style="font-size: 13px;">
+                    We will review your report and take appropriate action promptly, including removal of illegal content. False or abusive reports may have legal consequences for the reporter.
+                </p>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">Liability for Links</h4>
+                <p style="font-size: 13px;">
+                    Our platform contains links to external third-party websites (provided by users in their profiles) over whose content we have no influence. Therefore, we cannot assume any liability for this third-party content. The respective provider or operator of the linked pages is always responsible for the content of those pages. We have no control over external content linked by users.
+                </p>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">Copyright</h4>
+                <p style="font-size: 13px;">
+                    Users are responsible for ensuring that content they upload does not violate copyright or other intellectual property rights. We respect copyright and will remove infringing content upon notification.
+                </p>
+                
+                <h4 style="margin-top: 20px; color: var(--text-primary);">Dispute Resolution</h4>
+                <p style="font-size: 13px;">
+                    The European Commission provides a platform for online dispute resolution (ODR): <a href="https://ec.europa.eu/consumers/odr" target="_blank" style="color: var(--accent-primary);">https://ec.europa.eu/consumers/odr</a><br>
+                    We are not willing or obligated to participate in dispute resolution proceedings before a consumer arbitration board.</p>
+                
+                <button class="close-btn" id="closeImpressumModal" style="margin-top: 15px;">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script src="crypto-helper.js"></script>
     <script src="cache-manager.js"></script>
-    <script src="cropper.js"></script>
-    
-    <!-- 2. Load main app (depends on crypto) -->
     <script src="app.js"></script>
-    
-    <!-- 3. Load auth system extensions (extends app.js) -->
+    <script src="cropper.js"></script>
     <script src="auth-system.js"></script>
 </body>
 </html>
