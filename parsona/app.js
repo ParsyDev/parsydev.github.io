@@ -702,28 +702,43 @@ function displayProfile(profile) {
     }
     
     // Display banner image
-    if (profile.bannerUrl && profile.bannerCrop) {
-        const crop = profile.bannerCrop;
-        const scale = 1 / crop.width;
-        const posX = -crop.x / crop.width * 100;
-        const posY = -crop.y / crop.height * 100;
+    if (profile.bannerUrl) {
+        // Ensure URL is properly formatted
+        const bannerUrl = profile.bannerUrl.trim();
         
-        els.viewBannerImg.style.backgroundImage = `url(${profile.bannerUrl})`;
-        els.viewBannerImg.style.backgroundSize = `${scale * 100}%`;
-        els.viewBannerImg.style.backgroundPosition = `${posX}% ${posY}%`;
+        // Check if we have valid crop data (not null, not empty object)
+        const hasValidCrop = profile.bannerCrop && 
+                            profile.bannerCrop.width !== undefined && 
+                            profile.bannerCrop.width > 0;
+        
+        if (hasValidCrop) {
+            // Apply crop if available - using same formula as profile image
+            const crop = profile.bannerCrop;
+            
+            // Scale the image so the cropped portion fills the container
+            const scale = 1 / crop.width;
+            
+            // Calculate position to show the cropped area
+            const posX = (crop.x / (1 - crop.width)) * 100;
+            const posY = (crop.y / (1 - crop.height)) * 100;
+            
+            // Use 'background' shorthand to override CSS gradient
+            els.viewBannerImg.style.background = `url("${bannerUrl}") ${posX}% ${posY}% / ${scale * 100}% no-repeat`;
+        } else {
+            // No valid crop data - display full image
+            els.viewBannerImg.style.background = `url("${bannerUrl}") center / cover no-repeat`;
+        }
         
         // Also set ID card background
         const idCardBg = document.getElementById('viewIdCardBg');
         if (idCardBg) {
-            idCardBg.style.backgroundImage = `url(${profile.bannerUrl})`;
-            idCardBg.style.backgroundSize = 'cover';
-            idCardBg.style.backgroundPosition = 'center';
+            idCardBg.style.background = `url("${bannerUrl}") center / cover no-repeat`;
         }
     } else {
-        els.viewBannerImg.style.backgroundImage = '';
+        els.viewBannerImg.style.background = '';
         const idCardBg = document.getElementById('viewIdCardBg');
         if (idCardBg) {
-            idCardBg.style.backgroundImage = '';
+            idCardBg.style.background = '';
         }
     }
     
