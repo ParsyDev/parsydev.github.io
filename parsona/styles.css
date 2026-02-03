@@ -982,10 +982,10 @@ button:disabled {
 .profile-stats {
     display: flex;
     gap: 30px;
-    padding: 20px 0;
-    border-top: 1px solid var(--border-subtle);
-    border-bottom: 1px solid var(--border-subtle);
-    margin: 25px 0;
+    padding: 0;
+    border-top: none;
+    border-bottom: none;
+    margin: 0;
     align-items: center;
     justify-content: center;
 }
@@ -1010,10 +1010,16 @@ button:disabled {
 .social-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 12px;
     align-items: center;
-    justify-content: center;
-    padding: 10px 0;
+    justify-content: flex-start !important;
+    padding: 0;
+    position: relative;
+    margin-top: -40px;
+    margin-bottom: 0;
+    margin-left: 20px;
+    z-index: 10;
+    width: auto !important;
 }
 
 .social-links a,
@@ -1022,25 +1028,59 @@ button:disabled {
     flex-direction: column;
     align-items: center;
     text-decoration: none;
-    transition: all 0.3s ease;
-    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 0;
     cursor: pointer;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.social-links a:hover,
+.social-links > div:hover {
+    transform: translateY(-4px);
+    background: transparent !important;
 }
 
 .social-links a svg {
-    transition: transform 0.3s ease, filter 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease;
+    width: 44px;
+    height: 44px;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
 }
 
 .social-links a:hover svg {
-    filter: brightness(1.1);
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6)) brightness(1.1);
+    transform: scale(1.15);
 }
 
 .custom-social-link {
     position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+.custom-social-link:hover {
+    transform: translateY(-4px);
+    background: transparent !important;
 }
 
 .custom-social-link img {
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease;
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    border-radius: 8px;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+}
+
+.custom-social-link:hover img {
+    transform: scale(1.15);
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6)) brightness(1.1);
 }
 
 .stream {
@@ -1411,13 +1451,17 @@ input[type="color"] {
 
 /* Profile description styling */
 .profile-description {
-    margin-top: 16px;
-    padding: 16px;
+    margin: 60px 0 16px 0;
+    padding: 40px 24px 24px 24px;
     background: var(--bg-secondary);
-    border-left: 3px solid var(--accent-primary);
     font-size: 14px;
     line-height: 1.7;
-    border-radius: 6px;
+    border-radius: 5px;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    position: relative;
+    min-height: 80px;
 }
 
 /* Custom social link items */
@@ -1523,6 +1567,25 @@ input[type="color"] {
     
     .browse-wrapper {
         flex-direction: column;
+    }
+    
+    /* Mobile adjustments for overlapping design */
+    .profile-description {
+        margin-top: 50px;
+        padding: 36px 20px 20px 20px;
+    }
+    
+    .social-links {
+        margin-top: -36px;
+        margin-left: 16px;
+        gap: 10px;
+        justify-content: flex-start !important;
+    }
+    
+    .social-links a svg,
+    .custom-social-link img {
+        width: 40px;
+        height: 40px;
     }
 }
 
@@ -1652,4 +1715,15 @@ input[type="color"] {
     .browse-wrapper {
         max-width: 1200px;
     }
+}
+
+/* Custom social links display */
+#customSocialLinksDisplay {
+    display: contents;
+}
+
+/* Ensure icons stay above description box */
+.social-links > * {
+    position: relative;
+    z-index: 10;
 }
