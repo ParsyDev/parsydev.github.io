@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="icon.png">
+  <title>Imprint – Parcyval Studios</title>
+  <link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-image: url('backgrounda.jpg');
+      background-color: #000000;
+      background-size: cover;
+      background-position: center;
+      font-family: 'Saira', sans-serif;
+      position: relative;
+      overflow-x: hidden;
+      min-height: 100vh;
+      padding-top: 30px;
+    }
+
+    body::before {
+      --line: rgb(100, 100, 100);
+      --size: 55px;
+      content: "";
+      height: 100%;
+      width: 100%;
+      position: fixed;
+      background:
+        linear-gradient(90deg, var(--line) 1px, transparent 1px var(--size)) 0 -5vmin / var(--size) var(--size),
+        linear-gradient(var(--line) 2px, transparent 2px var(--size)) 0 -5vmin / var(--size) var(--size);
+      mask: linear-gradient(-15deg, transparent 65%, white);
+      -webkit-mask: linear-gradient(-15deg, transparent 65%, white);
+      top: 0;
+      z-index: -1;
+    }
+
+    body::after {
+      --line: rgb(100, 100, 100);
+      --size: 55px;
+      content: "";
+      height: 100%;
+      width: 100%;
+      position: fixed;
+      background:
+        linear-gradient(90deg, var(--line) 1px, transparent 1px var(--size)) 0 -5vmin / var(--size) var(--size),
+        linear-gradient(var(--line) 2px, transparent 2px var(--size)) 0 -5vmin / var(--size) var(--size);
+      mask: linear-gradient(-15deg, white, transparent 65%);
+      -webkit-mask: linear-gradient(-15deg, white, transparent 65%);
+      top: 0;
+      z-index: -1;
+    }
+
+    .logo {
+      position: absolute;
+      top: 25px;
+      left: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 10px;
+      padding: 5px 10px;
+      text-decoration: none;
+    }
+
+    .logo img {
+      width: 50px;
+      height: auto;
+    }
+
+    .company-name {
+      font-family: 'Saira', sans-serif;
+      font-weight: bold;
+      font-size: 22px;
+      color: white;
+    }
+
+    .imprint-box {
+      width: 90%;
+      max-width: 700px;
+      margin: 120px auto 80px;
+      padding: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 14px;
+      background-color: rgba(0, 0, 0, 0.65);
+      color: white;
+      font-family: 'Saira', sans-serif;
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      box-sizing: border-box;
+    }
+
+    .imprint-box h1 {
+      font-size: 36px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin: 0 0 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      padding-bottom: 20px;
+    }
+
+    .imprint-box h2 {
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin: 32px 0 10px;
+    }
+
+    .imprint-box p {
+      font-size: 17px;
+      line-height: 1.8;
+      color: #ddd;
+      margin: 0;
+      font-family: 'Josefin Sans', sans-serif;
+    }
+
+    .imprint-box a {
+      color: #ccc;
+      text-decoration: underline;
+    }
+
+    .imprint-box a:hover {
+      color: #fff;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 40px;
+      padding: 12px 24px;
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      color: white;
+      font-family: 'Saira', sans-serif;
+      font-weight: bold;
+      font-size: 14px;
+      text-decoration: none;
+      letter-spacing: 1px;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background-color: #4c4c4c;
+    }
+
+    @media (max-width: 600px) {
+      .imprint-box {
+        padding: 30px 24px;
+        margin-top: 100px;
+      }
+      .imprint-box h1 {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <a class="logo" href="index.html">
+    <img src="icon_t.png" alt="logo">
+    <span class="company-name">PARCYVAL</span>
+  </a>
+
+  <div class="imprint-box">
+    <h1>Imprint</h1>
+
+    <h2>Responsible for this website</h2>
+    <p>
+      Marian Dreher<br>
+      Bernäckerstraße 28<br>
+      76571 Gaggenau<br>
+      Germany
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      <a href="mailto:parsyprivat@gmail.com">parsyprivat@gmail.com</a>
+    </p>
+
+    <h2>Note</h2>
+    <p>
+      This website is operated privately and non-commercially by Marian Dreher.<br>
+      All content &copy; Parcyval Studios (aside from placeholder content)
+    </p>
+
+    <a class="back-btn" href="index.html">&#8592; Back to Home</a>
+  </div>
+
+</body>
+</html>
