@@ -231,8 +231,8 @@
 
     .gs-stage {
       position: relative;
-      width: 320px;
-      height: 520px;
+      width: clamp(320px, 28vw, 480px);
+      height: clamp(520px, 46vw, 780px);
       perspective: 1400px;
     }
 
@@ -395,6 +395,7 @@
       .hero-title { font-size: clamp(44px, 14vw, 72px); }
       .hero-desc { font-size: 13px; }
       .gs-stage { width: min(82vw, 320px); height: clamp(420px, 130vw, 520px); }
+      .gs-wrap { padding: 20px 16px; }
       .gs-card[data-state="next"] { transform: translateX(52%) translateZ(-160px) scale(0.78); }
       .gs-card[data-state="prev"] { transform: translateX(-52%) translateZ(-160px) scale(0.78); }
       .gs-card__info { padding: 14px 14px 16px; }
