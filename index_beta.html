@@ -309,7 +309,7 @@
     }
 
     .gs-card__tag {
-      font-size: 10px; font-weight: 700;
+      font-size: clamp(10px, 0.85vw, 13px); font-weight: 700;
       letter-spacing: 0.22em; text-transform: uppercase;
       color: var(--orange); margin-bottom: 8px;
     }
@@ -318,7 +318,7 @@
     .gs-card__title {
       font-family: "Mulish", sans-serif;
       font-weight: 1000;
-      font-size: clamp(16px, 1.8vw, 24px);
+      font-size: clamp(16px, 2.4vw, 30px);
       color: var(--navy);
       line-height: 1.05;
       letter-spacing: -0.02em;
@@ -326,7 +326,7 @@
     }
 
     .gs-card__desc {
-      font-size: 13px; font-weight: 500;
+      font-size: clamp(13px, 1.1vw, 16px); font-weight: 500;
       color: #555a78;
       line-height: 1.55;
       opacity: 0; transform: translateY(6px);
@@ -337,7 +337,7 @@
     .gs-card__cta {
       display: inline-flex; align-items: center; gap: 8px;
       margin-top: 14px;
-      font-size: 10px; font-weight: 900;
+      font-size: clamp(10px, 0.85vw, 13px); font-weight: 900;
       letter-spacing: 0.12em; text-transform: uppercase;
       color: var(--navy);
       border: 1px solid rgba(14,17,40,0.35);
