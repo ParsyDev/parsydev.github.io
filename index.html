@@ -865,9 +865,8 @@
   </div>
   <p class="about-text">
     Parcyval Studios is an indie game studio with the aim to shape our games to the exact state in which players say
-    "that is exactly what I always wanted to play, why did nobody make this earlier?" and tickle all the itches
-    players all around the world ever had. We don't work by blueprint — every game is shaped to be unique and fit to
-    what we are aiming for, not orienting onto other games. It's a hard task, but we have fun along the way.
+    "that is exactly what I always wanted to play, why did nobody make this earlier?" We don't work by blueprint — every game is shaped to be unique and fit to
+    what we are aiming for, not orienting onto other games just to make the most profit.
     <br><br>
     All of our games are forged from community feedback and votings for new features on Discord.
     <br><br>
@@ -1137,6 +1136,347 @@
   </div>
 </section>
 -->
+
+<style>
+  /* ══════════════════════════════════════════════════
+     JOIN SECTION
+  ══════════════════════════════════════════════════ */
+  #join {
+    position: relative;
+    padding: 100px 60px 120px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .join-heading {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .join-label {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--orange);
+    display: block;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .join-heading h2 {
+    font-family: "Mulish", sans-serif;
+    font-weight: 1000;
+    font-size: clamp(36px, 6vw, 72px);
+    letter-spacing: -0.02em;
+    color: var(--light);
+    line-height: 1;
+  }
+
+  .join-sub {
+    font-size: clamp(13px, 1.4vw, 16px);
+    font-weight: 500;
+    color: var(--mid);
+    line-height: 1.75;
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 64px;
+  }
+
+  .join-pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(138,143,168,0.12);
+    border: 1px solid rgba(138,143,168,0.12);
+    margin-bottom: 64px;
+  }
+
+  .join-pillar {
+    padding: 36px 28px;
+    background: var(--navy);
+    transition: background 0.25s ease;
+  }
+
+  .join-pillar:hover {
+    background: rgba(255,255,255,0.02);
+  }
+
+  .join-pillar__icon {
+    width: 28px;
+    height: 28px;
+    color: var(--orange);
+    margin-bottom: 16px;
+  }
+
+  .join-pillar:nth-child(2) .join-pillar__icon { color: var(--gold); }
+  .join-pillar:nth-child(3) .join-pillar__icon { color: #22c55e; }
+
+  .join-pillar__title {
+    font-family: "DM Serif Display", serif;
+    font-size: clamp(16px, 1.6vw, 20px);
+    color: var(--light);
+    margin-bottom: 10px;
+  }
+
+  .join-pillar__desc {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--mid);
+    line-height: 1.65;
+  }
+
+  .join-apply {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+  }
+
+  .join-apply a {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    font-size: clamp(13px, 1.4vw, 16px);
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--light);
+    text-decoration: none;
+    border: 1px solid rgba(236,224,200,0.35);
+    padding: clamp(18px, 2.5vw, 26px) clamp(48px, 7vw, 100px);
+    transition: background 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .join-apply a::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--orange);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 0;
+  }
+
+  .join-apply a:hover::before {
+    transform: scaleX(1);
+  }
+
+  .join-apply a span,
+  .join-apply a svg {
+    position: relative;
+    z-index: 1;
+    transition: color 0.2s ease;
+  }
+
+  .join-apply a:hover span,
+  .join-apply a:hover svg {
+    color: var(--navy);
+  }
+
+  .join-apply a:hover {
+    border-color: var(--orange);
+    box-shadow: 0 0 40px rgba(240,112,32,0.25);
+    transform: scale(1.02);
+  }
+
+  /* ── Two-track layout ── */
+  .join-tracks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: rgba(138,143,168,0.12);
+    border: 1px solid rgba(138,143,168,0.12);
+  }
+
+  .join-track {
+    background: var(--navy);
+    padding: 48px 40px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    transition: background 0.25s ease;
+  }
+
+  .join-track:hover {
+    background: rgba(255,255,255,0.018);
+  }
+
+  .join-track--pub {
+    border-left: 1px solid rgba(138,143,168,0.12);
+  }
+
+  .join-track__tag {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .join-track__title {
+    font-family: "DM Serif Display", serif;
+    font-size: clamp(22px, 2.5vw, 32px);
+    color: var(--light);
+    margin-bottom: 14px;
+    line-height: 1.1;
+  }
+
+  .join-track__desc {
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--mid);
+    line-height: 1.75;
+  }
+
+  .join-track__desc strong {
+    color: var(--light);
+    font-weight: 700;
+  }
+
+  .join-track__pillars {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+  }
+
+  .join-track__pillar {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .join-track__pillar svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--orange);
+  }
+
+  .join-track--pub .join-track__pillar svg {
+    color: var(--gold);
+  }
+
+  .join-track__pillar strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--light);
+    margin-bottom: 4px;
+    letter-spacing: 0.01em;
+  }
+
+  .join-track__pillar p {
+    font-size: 12.5px;
+    color: var(--mid);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .join-tracks { grid-template-columns: 1fr; }
+    .join-track--pub { border-left: none; border-top: 1px solid rgba(138,143,168,0.12); }
+  }
+
+  @media (max-width: 768px) {
+    #join { padding: 64px 24px 80px; }
+    .join-track { padding: 36px 24px; }
+  }
+</style>
+
+<section id="join">
+  <span class="join-label">Open Studio</span>
+  <div class="join-heading">
+    <h2>Join the Studio</h2>
+  </div>
+  <p class="join-sub">Two ways to be part of Parcyval. <strong>None is a scam, i promise.</strong></p>
+
+  <!-- TRACK GRID -->
+  <div class="join-tracks">
+
+    <!-- TRACK 1: Join the Team -->
+    <div class="join-track">
+      <div class="join-track__header">
+        <span class="join-track__tag" style="color:var(--orange)">For Creators</span>
+        <h3 class="join-track__title">Join the Team</h3>
+        <p class="join-track__desc">This isn't a job listing. Parcyval is about passion. We build something together :) Profits are split based on your role and what you bring to the table. No salaries, no shitty corporation, just people who want to make something ACTUALLY special<br><br><strong>Being honest with you:</strong> profits are small to nonexistent right now. We're early. This is for people who build out of passion, not because it pays. Keep that in mind.</p>
+      </div>
+      <div class="join-track__pillars">
+        <div class="join-track__pillar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <div>
+            <strong>Shared Profit</strong>
+            <p>No paycheck, but a real cut of what we make together. The studio stays mine — but what we build is equally yours.</p>
+          </div>
+        </div>
+        <div class="join-track__pillar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <div>
+            <strong>Unique Work</strong>
+            <p>Not a copy of whatever's trending to make quick cash. We only build things that feel like they needed to exist.</p>
+          </div>
+        </div>
+        <div class="join-track__pillar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <div>
+            <strong>All Skills Welcome</strong>
+            <p>no matter what you can do (coding, art, music, etc.) if you have a GENUINE talent and it helps a project, there is probably a place for you.</p>
+          </div>
+        </div>
+      </div>
+      <div class="join-apply">
+        <a href="https://discord.com/users/483554506026647552" target="_blank">
+          <span>Text Me</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- TRACK 2: Publisher Listing -->
+    <div class="join-track join-track--pub">
+      <div class="join-track__header">
+        <span class="join-track__tag" style="color:var(--gold)">For Developers</span>
+        <h3 class="join-track__title">Get Published</h3>
+        <p class="join-track__desc">You have a project you REALLY believe in because it's truly unique and innovative? If Parcyval believes in it too and sees your vision, we'll list it under the Parcyval publisher page on Steam and put our (for now small) weight behind promoting it as much was we can :) No revenue split. Having you will grow our community allowing us to put more weight behind projects we support in the future! <br><br>We keep nothing. You keep all the rights to your project.</p>
+      </div>
+      <div class="join-track__pillars">
+        <div class="join-track__pillar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg>
+          <div>
+            <strong>Steam Publisher Page</strong>
+            <p>Your game gets listed under Parcyval on Steam, and highlighted on release and sales</p>
+          </div>
+        </div>
+        <div class="join-track__pillar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          <div>
+            <strong>Soft Promotion</strong>
+            <p>We try to promote your game across our channels. Even if our community is small (right now)! We want it to succeed, that's why we support it!</p>
+          </div>
+        </div>
+        <div class="join-track__pillar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <div>
+            <strong>You Keep the Money</strong>
+            <p>Zero revenue share, we just want you to succeed! if you feel like we helped, you can pay us back (no need to! but REALLY appreciated!)</p>
+          </div>
+        </div>
+      </div>
+      <div class="join-apply">
+        <a href="https://mail.google.com/mail/?view=cm&to=parsyprivat@gmail.com" target="_blank">
+          <span>Show Me Your Game</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
 
 <footer>
   <h2>Contact</h2>
