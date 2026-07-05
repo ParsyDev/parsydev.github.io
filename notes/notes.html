@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes</title>
+<meta name="description" content="The visible future recedes in proportion to your influence on it. Notes by Marian Dreher, using science to conclude explanations — starting with why a perfect prediction of the future cannot be used to change it.">
+<meta property="og:title" content="Notes — Marian Dreher">
+<meta property="og:description" content="The visible future recedes in proportion to your influence on it.">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Why time travel is possible, but...",
+  "author": { "@type": "Person", "name": "Marian Dreher" },
+  "description": "A perfect prediction of the future must include the physical process of an observer receiving and reacting to that prediction, since this reaction is itself part of the future being predicted.",
+  "citation": "The visible future recedes in proportion to your influence on it."
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a1b1d;
+    --graphite:#494c50;
+    --slate:#797d83;
+    --hair: rgba(20,20,22,0.10);
+    --bg:#ffffff;
+    --surface:#eef0f2;
+    --glass: rgba(20,22,25,0.045);
+    --glass-hover: rgba(20,22,25,0.075);
+    --glass-border: rgba(20,22,25,0.10);
+    --ion:#5c7482;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+
+  h1,h2,h3, .display{
+    font-family:'Newsreader', serif;
+    font-weight:500;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+
+  a{color:inherit;}
+
+  .wrap{
+    max-width:1080px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  /* ---------- nav ---------- */
+  header{
+    position:sticky;
+    top:0;
+    background:rgba(255,255,255,0.72);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--hair);
+    z-index:50;
+  }
+  nav.wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    height:72px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    text-decoration:none;
+    color:var(--ink);
+  }
+  .brand svg{width:30px;height:30px;display:block;}
+  .brand-name{
+    font-family:'Newsreader', serif;
+    font-size:1.25rem;
+    font-weight:500;
+  }
+  .nav-links{
+    display:flex;
+    gap:32px;
+    font-size:0.92rem;
+    color:var(--graphite);
+  }
+  .nav-links a{
+    text-decoration:none;
+    padding:6px 0;
+    border-bottom:1px solid transparent;
+    transition:border-color .2s ease, color .2s ease;
+  }
+  .nav-links a:hover, .nav-links a:focus-visible{
+    color:var(--ink);
+    border-color:var(--ink);
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding:100px 0 92px;
+    display:grid;
+    grid-template-columns:1.1fr 0.9fr;
+    gap:56px;
+    align-items:center;
+    border-bottom:1px solid var(--hair);
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.78rem;
+    letter-spacing:0.09em;
+    text-transform:uppercase;
+    color:var(--ion);
+    margin-bottom:18px;
+    display:block;
+  }
+  .hero h1{
+    font-size:clamp(2.3rem, 4.2vw, 3.4rem);
+    line-height:1.08;
+  }
+  .hero h1 em{
+    font-style:italic;
+    color:var(--slate);
+  }
+  .hero p.lede{
+    margin-top:24px;
+    max-width:46ch;
+    color:var(--graphite);
+    font-size:1.05rem;
+  }
+  .hero-atom{
+    display:flex;
+    justify-content:center;
+  }
+  .hero-atom svg{
+    width:min(320px, 100%);
+    height:auto;
+  }
+
+  /* ---------- section headings ---------- */
+  .section{
+    padding:80px 0;
+    border-bottom:1px solid var(--hair);
+  }
+  .section-alt{
+    background:var(--surface);
+  }
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:44px;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .section-head h2{
+    font-size:1.7rem;
+  }
+  .section-head .count{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.82rem;
+    color:var(--slate);
+  }
+
+  /* ---------- glass panels ---------- */
+  .glass{
+    background:var(--glass);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    border:1px solid var(--glass-border);
+    border-radius:14px;
+  }
+
+  /* ---------- note entry ---------- */
+  .note-entry{
+    padding:44px 48px;
+  }
+  .note-entry h3{
+    font-size:1.5rem;
+    margin-bottom:22px;
+  }
+  .note-entry p{
+    color:var(--graphite);
+    font-size:1rem;
+    margin:0 0 18px;
+    max-width:66ch;
+  }
+  .note-entry p:last-of-type{
+    margin-bottom:0;
+  }
+  .pull-quote{
+    margin:32px 0;
+    padding:6px 0 6px 24px;
+    border-left:2px solid var(--ion);
+  }
+  .pull-quote p{
+    font-family:'Newsreader', serif;
+    font-style:italic;
+    font-size:1.25rem;
+    color:var(--ink);
+    margin:0;
+  }
+  .pull-quote cite{
+    display:block;
+    margin-top:10px;
+    font-family:'IBM Plex Mono', monospace;
+    font-style:normal;
+    font-size:0.78rem;
+    letter-spacing:0.04em;
+    color:var(--slate);
+  }
+  .footnote{
+    margin-top:28px;
+    padding-top:20px;
+    border-top:1px solid var(--glass-border);
+  }
+  .footnote p{
+    font-size:0.78rem;
+    line-height:1.6;
+    color:var(--slate);
+    max-width:70ch;
+    margin:0;
+  }
+
+  /* ---------- footer ---------- */
+  footer{
+    padding:44px 0 60px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:16px;
+    color:var(--slate);
+    font-size:0.85rem;
+  }
+  footer .brand{ opacity:0.85; }
+  footer .brand svg{ width:20px; height:20px; }
+  .foot-links a{
+    text-decoration:none;
+    color:var(--slate);
+    margin-left:22px;
+  }
+  .foot-links a:hover{ color:var(--ink); }
+
+  @media(max-width:720px){
+    .hero{ grid-template-columns:1fr; padding:56px 0 48px; }
+    .hero-atom{ order:-1; }
+    .nav-links{ display:none; }
+    .section{ padding:56px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="20" cy="20" r="2.6" fill="#1a1b1d"/>
+        <ellipse cx="20" cy="20" rx="17" ry="7" stroke="#1a1b1d" stroke-width="1.4"/>
+        <ellipse cx="20" cy="20" rx="17" ry="7" stroke="#1a1b1d" stroke-width="1.4" transform="rotate(60 20 20)"/>
+        <ellipse cx="20" cy="20" rx="17" ry="7" stroke="#5c7482" stroke-width="1.4" transform="rotate(120 20 20)"/>
+      </svg>
+      <span class="brand-name">Notes</span>
+    </a>
+    <div class="nav-links">
+      <a href="#notes">Notes</a>
+      <a href="#top">About</a>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="hero wrap">
+    <div>
+      <h1>Explanations, concluded<br>from science.</h1>
+      <p class="lede">Personal notes from Marian Dreher — conclusions drawn from established science facts.</p>
+    </div>
+    <div class="hero-atom">
+      <svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Stylised atom, three electron orbits around a nucleus">
+        <ellipse cx="170" cy="170" rx="150" ry="58" stroke="#d4d6d9" stroke-width="1.2" fill="none"/>
+        <ellipse cx="170" cy="170" rx="150" ry="58" stroke="#d4d6d9" stroke-width="1.2" fill="none" transform="rotate(60 170 170)"/>
+        <ellipse cx="170" cy="170" rx="150" ry="58" stroke="#d4d6d9" stroke-width="1.2" fill="none" transform="rotate(120 170 170)"/>
+        <circle cx="320" cy="170" r="5" fill="#1a1b1d"/>
+        <circle cx="20" cy="170" r="5" fill="#494c50" transform="rotate(60 170 170)"/>
+        <circle cx="320" cy="170" r="5" fill="#5c7482" transform="rotate(120 170 170)"/>
+        <circle cx="170" cy="170" r="10" fill="#1a1b1d"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="notes">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Notes</h2>
+        <span class="count">1 published</span>
+      </div>
+
+      <article class="glass note-entry">
+        <h3>Why time travel is possible, but...</h3>
+        <p>If you could track the exact current state of every atom, and if we imagine a computer with enough processing power to calculate that system, the state of all matter would be sufficient to determine its future evolution through physical interactions.</p>
+        <p>In that sense, predicting the future would be possible by simulating how every atom influences every other atom. Likewise, reconstructing the past would also be possible by reversing these interactions, since the present state is the result of a continuous chain of causal events originating from the beginning of the universe.</p>
+        <p>But:</p>
+        <p>A perfect prediction of the future must include the physical process of an observer receiving and reacting to that prediction, since this reaction is itself part of the future being predicted. Because that reaction is part of the predicted future, the system can determine which later events remain unaffected within the relevant causal time window.</p>
+        <p>That reaction propagates through spacetime at finite speed, expanding its influence outward. Because of this, the visible future is progressively reduced toward the observer, with the invisible region expanding outward in proportion to that influence, over time.</p>
+        <blockquote class="pull-quote">
+          <p>The visible future recedes in proportion to your influence on it.</p>
+          <cite>— Marian Dreher</cite>
+        </blockquote>
+        <p>Which also means: you cannot change the future by obtaining knowledge from the prediction.</p>
+
+        <div class="footnote">
+          <p>A more theoretical view: because the prediction already contains the reaction — since that reaction is part of the predicted future — this isn't, in theory, a paradox. The output of the prediction could cover the future of all space and time, but that's not something the human brain can actually imagine.</p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+
+</main>
+
+<footer class="wrap">
+  <a class="brand" href="#top">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="20" cy="20" r="2.6" fill="#797d83"/>
+      <ellipse cx="20" cy="20" rx="17" ry="7" stroke="#797d83" stroke-width="1.2"/>
+      <ellipse cx="20" cy="20" rx="17" ry="7" stroke="#797d83" stroke-width="1.2" transform="rotate(60 20 20)"/>
+      <ellipse cx="20" cy="20" rx="17" ry="7" stroke="#797d83" stroke-width="1.2" transform="rotate(120 20 20)"/>
+    </svg>
+    <span>Notes</span>
+  </a>
+  <div class="foot-links">
+    <a href="#notes">Notes</a>
+    <a href="mailto:hello@example.com">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>
