@@ -150,7 +150,7 @@
       font-weight: 500;
       letter-spacing: 0.25em;
       text-transform: uppercase;
-      color: var(--mid);
+      color: var(--gold);
     }
     .hero-desc {
       font-size: clamp(13px, 1.4vw, 16px);
@@ -215,7 +215,7 @@
     ══════════════════════════════════════════════════ */
     #games {
       position: relative;
-      padding: 100px 0 120px;
+      padding: 88px 0 25px;
     }
 
     .games-heading {
@@ -225,20 +225,22 @@
     .games-heading h2 {
       font-family: "Mulish", sans-serif;
       font-weight: 1000;
-      font-size: clamp(36px, 6vw, 72px);
+      font-size: clamp(40px, 6vw, 100px);
       letter-spacing: -0.02em;
       color: var(--light);
       line-height: 1;
     }
-    .games-heading span {
-      font-family: "DM Serif Display", serif;
-      font-size: clamp(14px, 1.5vw, 18px);
-      color: var(--mid);
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      display: block;
-      margin-top: 10px;
-    }
+  .games-heading span,
+  .about-heading span,
+  .team-heading span {
+    font-family: "Mulish", sans-serif;
+    font-size: clamp(11px, 1.5vw, 13px);
+    color: var(--mid);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    display: block;
+    margin-top: 25px;
+  }
 
     /* ── CAROUSEL ── */
     .gs-wrap {
@@ -436,6 +438,7 @@
       padding: 100px 60px 40px;
       max-width: 1080px;
       margin: 0 auto;
+      
     }
 
     .about-eyebrow {
@@ -451,12 +454,12 @@
 
     .about-heading {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 77px;
     }
     .about-heading h2 {
       font-family: "Mulish", sans-serif;
       font-weight: 1000;
-      font-size: clamp(36px, 6vw, 72px);
+      font-size: clamp(40px, 6vw, 77px);
       letter-spacing: -0.02em;
       color: var(--light);
       line-height: 1;
@@ -470,6 +473,7 @@
       text-align: center;
       max-width: 560px;
       margin: 0 auto 56px;
+      text-transform: uppercase;
     }
 
     /* ── About: styled as a code diff, because that's what we actually live in ── */
@@ -579,27 +583,28 @@
     .team-heading h2 {
       font-family: "Mulish", sans-serif;
       font-weight: 1000;
-      font-size: clamp(28px, 4vw, 48px);
+      font-size: clamp(33px, 4vw, 66px);
       letter-spacing: -0.02em;
       color: var(--light);
     }
 
-    /* Team — an editorial credits line, not a bordered card */
-    .team-container {
-      border-top: 1px solid rgba(138,143,168,0.14);
-      padding-top: 65px;
-      padding-bottom: 65px;
-    }
+  .team-container {
 
-    .team-entry {
-      display: flex;
-      align-items: center;
-      gap: 28px;
-      max-width: 560px;
-      margin: 0 auto;
-      justify-content: center;
-    }
+    padding-top: 25px;
+    padding-bottom: 65px;
+  }
 
+.team-entry {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  max-width: 100%;
+  margin: 0 auto;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.014);
+  border-radius: 5px;
+  padding: 32px 40px;
+}
     .team-entry__avatar { text-decoration: none; flex-shrink: 0; display: block; }
 
     .team-entry img {
@@ -635,9 +640,10 @@
     }
     .team-entry__name a:hover { color: var(--gold); }
     .team-entry__name a svg { width: 15px; height: 15px; }
-
+    
     .team-entry__role {
-      font-family: "JetBrains Mono", monospace;
+      font-family: "Mulish", sans-serif;
+      font-weight: 700;
       font-size: 13px;
       letter-spacing: 0.04em;
       color: var(--mid);
@@ -826,8 +832,8 @@
   <div class="hero-body">
     <div class="hero-text">
       <h1 class="hero-title">Parcyval</h1>
-      <p class="hero-label">Indie Game Studio / Collective</p>
-      <p class="hero-sub">Germany</p>
+      <p class="hero-label"></p>
+      <p class="hero-sub">German Indie Game Studio</p>
       <p class="hero-desc">We build games nobody made yet, but people always wanted</p>
       <a href="#games" class="hero-cta">See Our Games</a>
     </div>
@@ -999,11 +1005,11 @@
 </script>
 
 <section id="about">
-  <span class="about-eyebrow">INFORMATION</span>
-  <div class="about-heading">
-    <h2>About Us</h2>
-  </div>
-  <p class="about-lede">here is some info about us:</p>
+
+<div class="about-heading">
+  <h2>About Us</h2>
+  <span>here's some info about us</span>
+</div>
 
   <div class="diff-panel">
     <div class="diff-panel__tab">
@@ -1036,10 +1042,11 @@
     </div>
   </div>
 
-  <span class="team-eyebrow">Creation together</span>
-  <div class="team-heading">
-    <h2>The Team</h2>
-  </div>
+
+<div class="team-heading">
+  <h2>The Team</h2>
+  <span>every team member:</span>
+</div>
   <div class="team-container">
     <div class="team-entry">
       <a class="team-entry__avatar" href="https://www.instagram.com/lord_parcyval" target="_blank">
@@ -1053,7 +1060,7 @@
           </a>
         </h3>
         <p class="team-entry__role">
-  <span style="color: rgb(255, 187, 0);">
+  <span style="color: rgba(255, 187, 0, 1);">
     Founder · Game Design
   </span>
 </p>
