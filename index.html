@@ -602,7 +602,7 @@
   margin: 0 auto;
   justify-content: center;
   background: rgba(255, 255, 255, 0.014);
-  border-radius: 5px;
+  border-radius: 125px;
   padding: 32px 40px;
 }
     .team-entry__avatar { text-decoration: none; flex-shrink: 0; display: block; }
@@ -611,7 +611,7 @@
       width: 120px;
       height: 120px;
       object-fit: cover;
-      border-radius: 20%;
+      border-radius: 100%;
       border: 1px solid rgba(236,224,200,0.18);
       transition: transform 0.3s ease, border-color 0.3s ease;
       display: block;
@@ -872,8 +872,7 @@
   const navLinks = [
     { label: "Games",   href: "#games",   domain: null, cta: false },
     { label: "About",   href: "#about",   domain: null, cta: false },
-    { label: "Discord", href: "https://discord.gg/359XqyZRjt",                             domain: "discord.com",            cta: false },
-    { label: "YouTube", href: "https://www.youtube.com/@parsydev",                         domain: "youtube.com",            cta: false },
+    
     { label: "Steam",   href: "https://store.steampowered.com/developer/Parcyval",          domain: "store.steampowered.com", cta: true  },
   ];
 
@@ -1039,6 +1038,11 @@
       <div class="diff-line diff-line--add"><span class="diff-line__num">12</span><span class="diff-line__mark">+</span><span class="diff-line__text">we love helping solo devs by giving them more reach and advertising</span></div>
       <div class="diff-line diff-line--add"><span class="diff-line__num">13</span><span class="diff-line__mark">+</span><span class="diff-line__text">them — nothing brings more joy than seeing good games by small</span></div>
       <div class="diff-line diff-line--add"><span class="diff-line__num">14</span><span class="diff-line__mark">+</span><span class="diff-line__text">developers succeeding.<span class="diff-cursor"></span></span></div>
+      <div class="diff-line diff-line--blank"></div>
+      <div class="diff-line diff-line--comment"><span class="diff-line__num">11</span><span class="diff-line__mark">#</span><span class="diff-line__text">ai</span></div>
+      <div class="diff-line diff-line--blank"></div>
+      <div class="diff-line diff-line--rm"><span class="diff-line__num">6</span><span class="diff-line__mark">-</span><span class="diff-line__text">ai generated assets/visuals</span></div>
+      <div class="diff-line diff-line--add"><span class="diff-line__num">9</span><span class="diff-line__mark">+</span><span class="diff-line__text">only using ai to help us code tedious tasks</span></div>
     </div>
   </div>
 
@@ -1092,10 +1096,6 @@
       <img src="https://www.google.com/s2/favicons?domain=store.steampowered.com&sz=32" alt="Steam">
       Steam
     </a>
-    <a href="https://www.patreon.com/c/Parcyval" target="_blank">
-      <img src="https://www.google.com/s2/favicons?domain=patreon.com&sz=32" alt="Patreon">
-      Patreon
-    </a>
     <a href="https://www.youtube.com/@parsydev" target="_blank" class="youtube-btn">
       <img src="https://www.google.com/s2/favicons?domain=youtube.com&sz=32" alt="YouTube">
       YouTube
@@ -1105,6 +1105,10 @@
           <p class="hover-video-loading">Loading latest video...</p>
         </div>
       </div>
+    </a>
+    <a href="https://www.patreon.com/c/Parcyval" target="_blank">
+      <img src="https://www.google.com/s2/favicons?domain=patreon.com&sz=32" alt="Patreon">
+      Patreon
     </a>
     <a href="/parsona/" target="_blank">
       <img src="creator_hub_icon.png" alt="Parsona">

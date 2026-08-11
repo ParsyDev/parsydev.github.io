@@ -167,6 +167,14 @@
                             </div>
                         </div>
                     </div>
+                    <div class="field" id="backgroundBlurField" style="display: none;">
+                        <label>🌫️ Background Blur</label>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <input type="range" id="backgroundBlur" min="0" max="30" value="0" step="1" style="flex: 1; cursor: pointer;">
+                            <span style="font-size: 12px; color: var(--text-muted); min-width: 45px;" id="backgroundBlurLabel">0px</span>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">Blurs your profile's background image (not the banner)</div>
+                    </div>
                     <div class="field">
                         <label>Stream URL (optional)</label>
                         <input type="text" id="streamUrl" placeholder="YouTube or Twitch URL">
@@ -247,7 +255,8 @@
             <div class="profile-container">
                 <div class="profile-header" id="viewBannerImg"></div>
                 <div class="profile-content" id="viewProfileContent">
-                    <!-- ID Card with Flip -->
+                    <!-- ID Card with Flip, plus Social Links positioned on the banner/box seam to its right -->
+                    <div class="profile-header-row">
                     <div class="profile-id-card-container">
                         <div class="profile-id-card-flipper" id="cardFlipper">
                             <!-- Front of Card -->
@@ -314,11 +323,7 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="profile-bio" id="viewProfileBio" style="display: none;"></div>
-                    <div class="profile-description" id="viewProfileDescription" style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-left: 3px solid #333; color: #555; font-size: 14px; line-height: 1.6; white-space: pre-wrap; display: none;"></div>
-                    <div class="profile-stats">
-                        <div class="stat social-links" id="socialLinks" style="display: none; justify-content: center; width: 100%;">
+                    <div class="stat social-links" id="socialLinks" style="display: none;">
                             <a href="#" id="youtubeLink" target="_blank" style="display: none;" title="YouTube Channel">
                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="#FF0000">
                                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
@@ -344,8 +349,11 @@
                             </a>
                             <!-- Custom social links will be dynamically added here -->
                             <div id="customSocialLinksDisplay"></div>
-                        </div>
                     </div>
+                    </div>
+                    
+                    <div class="profile-bio" id="viewProfileBio" style="display: none;"></div>
+                    <div class="profile-description" id="viewProfileDescription" style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-left: 3px solid #333; color: #555; font-size: 14px; line-height: 1.6; white-space: pre-wrap; display: none;"></div>
                     <!-- EDIT BUTTON ADDED HERE -->
                     
                     
@@ -354,7 +362,7 @@
                         <div style="font-size: 17px; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid rgba(0,0,0,0.1);">
                             Favorite Media
                         </div>
-                        <div id="mediaCardsContainer" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start; justify-content: flex-start;">
+                        <div id="mediaCardsContainer" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start; justify-content: center;">
                             <!-- Media cards will be populated here -->
                             <div id="addMediaCard" class="add-media-card" style="display: none;">
                                 <div style="font-size: 40px; color: #999;">+</div>

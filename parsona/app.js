@@ -14,7 +14,7 @@ let currentImageType = 'profile'; // Track which image we're editing
 let imageCrops = {
     profile: { url: '', crop: null },
     banner: { url: '', crop: null },
-    background: { url: '', crop: null }
+    background: { url: '', crop: null, blur: 0 }
 };
 let editingProfileId = null;
 let currentUser = null;
@@ -48,6 +48,9 @@ const els = {
     img: document.getElementById('imageUrl'),
     imageType: document.getElementById('imageType'),
     clearImage: document.getElementById('clearImage'),
+    backgroundBlurField: document.getElementById('backgroundBlurField'),
+    backgroundBlur: document.getElementById('backgroundBlur'),
+    backgroundBlurLabel: document.getElementById('backgroundBlurLabel'),
     stream: document.getElementById('streamUrl'),
     customSocialLinksContainer: document.getElementById('customSocialLinksContainer'),
     customSocialModal: document.getElementById('customSocialModal'),
@@ -696,7 +699,7 @@ function displayProfile(profile) {
     if (profile.description && profile.description.trim()) {
         // Convert newlines to <br> for proper display
         els.viewDescription.innerHTML = profile.description.replace(/\n/g, '<br>');
-        els.viewDescription.style.display = 'block';
+        els.viewDescription.style.display = 'flex';
     } else {
         els.viewDescription.style.display = 'none';
     }
@@ -753,8 +756,10 @@ function displayProfile(profile) {
             els.siteBackground.style.backgroundImage = `url(${profile.backgroundUrl})`;
             els.siteBackground.style.backgroundSize = `${scale * 100}%`;
             els.siteBackground.style.backgroundPosition = `${posX}% ${posY}%`;
+            els.siteBackground.style.filter = profile.backgroundBlur ? `blur(${profile.backgroundBlur}px)` : '';
         } else {
             els.siteBackground.style.backgroundImage = '';
+            els.siteBackground.style.filter = '';
         }
     }
     
@@ -1146,6 +1151,12 @@ els.loginModal.onclick = (e) => {
     }
 };
 
+// Show/hide the background blur slider - only relevant for the Background Image type
+function updateBackgroundBlurFieldVisibility() {
+    if (!els.backgroundBlurField) return;
+    els.backgroundBlurField.style.display = (currentImageType === 'background') ? 'block' : 'none';
+}
+
 // Image crop system
 els.imageType.onchange = () => {
     currentImageType = els.imageType.value;
@@ -1156,7 +1167,21 @@ els.imageType.onchange = () => {
     
     // Hide crop UI when switching types - user must manually enable it
     els.cropCont.classList.remove('active');
+    
+    // Show blur slider only for the background image type
+    updateBackgroundBlurFieldVisibility();
 };
+
+// Background blur slider
+if (els.backgroundBlur) {
+    els.backgroundBlur.oninput = (e) => {
+        const value = parseInt(e.target.value, 10) || 0;
+        imageCrops.background.blur = value;
+        if (els.backgroundBlurLabel) {
+            els.backgroundBlurLabel.textContent = `${value}px`;
+        }
+    };
+}
 
 // Image URL input - Don't auto-show crop UI
 els.img.oninput = (e) => {
@@ -1446,6 +1471,7 @@ els.create.onclick = async () => {
         bannerCrop: imageCrops.banner.crop,
         backgroundUrl: imageCrops.background.url,
         backgroundCrop: imageCrops.background.crop,
+        backgroundBlur: imageCrops.background.blur || 0,
         streamUrl: streamUrl,
         customSocialLinks: currentCustomSocialLinks,
         cardStyle: cardStyle,
@@ -1614,6 +1640,7 @@ els.update.onclick = async () => {
         bannerCrop: imageCrops.banner.crop,
         backgroundUrl: imageCrops.background.url,
         backgroundCrop: imageCrops.background.crop,
+        backgroundBlur: imageCrops.background.blur || 0,
         streamUrl: streamUrl,
         customSocialLinks: currentCustomSocialLinks,
         cardStyle: cardStyle,
@@ -1779,12 +1806,21 @@ function resetCreateForm() {
     imageCrops = {
         profile: { url: '', crop: null },
         banner: { url: '', crop: null },
-        background: { url: '', crop: null }
+        background: { url: '', crop: null, blur: 0 }
     };
     
     currentImageType = 'profile';
     els.imageType.value = 'profile';
     els.cropCont.classList.remove('active');
+    
+    // Reset background blur slider
+    if (els.backgroundBlur) {
+        els.backgroundBlur.value = 0;
+    }
+    if (els.backgroundBlurLabel) {
+        els.backgroundBlurLabel.textContent = '0px';
+    }
+    updateBackgroundBlurFieldVisibility();
     
     // Reset card style to frosted
     document.querySelectorAll('.card-style-option').forEach(o => o.classList.remove('active'));
@@ -1876,8 +1912,17 @@ function loadProfileForEdit(profile) {
     };
     imageCrops.background = {
         url: profile.backgroundUrl || '',
-        crop: profile.backgroundCrop || null
+        crop: profile.backgroundCrop || null,
+        blur: profile.backgroundBlur || 0
     };
+    
+    // Load background blur slider state
+    if (els.backgroundBlur) {
+        els.backgroundBlur.value = imageCrops.background.blur;
+    }
+    if (els.backgroundBlurLabel) {
+        els.backgroundBlurLabel.textContent = `${imageCrops.background.blur}px`;
+    }
     
     // Set image type selector and load first available image
     if (imageCrops.profile.url) {
@@ -1891,6 +1936,8 @@ function loadProfileForEdit(profile) {
         els.img.value = imageCrops.banner.url;
         // Don't auto-show crop UI - user must click "Crop" button
     }
+    
+    updateBackgroundBlurFieldVisibility();
     
     // Load card style
     const cardStyle = profile.cardStyle || 'frosted';
