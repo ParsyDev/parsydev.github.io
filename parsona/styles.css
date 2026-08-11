@@ -1469,16 +1469,16 @@ input[type="color"] {
 /* Profile description styling */
 .profile-description {
     margin: 8px 0 20px 0;
-    padding: 18px 22px;
+    padding: 34px 22px 20px 22px;
     background: var(--bg-secondary);
     font-family: 'Sora', sans-serif;
     font-weight: 400;
-    font-size: 15.5px;
-    line-height: 1.65;
+    font-size: 15px;
+    line-height: 1.45;
     letter-spacing: 0.1px;
-    border-radius: 10px;
-    border: none;
-    color: var(--text-primary);
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
     white-space: pre-wrap;
     word-wrap: break-word;
     position: relative;
@@ -1488,6 +1488,18 @@ input[type="color"] {
     justify-content: center;
     align-items: center;
     text-align: center;
+}
+
+.profile-description::before {
+    content: "ABOUT";
+    position: absolute;
+    top: 14px;
+    left: 22px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
 }
 
 /* Custom social link items */
@@ -1639,7 +1651,7 @@ input[type="color"] {
     /* Mobile adjustments for overlapping design */
     .profile-description {
         margin-top: 8px;
-        padding: 16px 18px;
+        padding: 30px 18px 16px 18px;
     }
     
     .social-links {

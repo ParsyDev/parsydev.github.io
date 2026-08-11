@@ -41,12 +41,12 @@ const menu = {
 // Scale description font size based on text length - shorter text reads bigger, longer text shrinks to fit
 function getDescriptionFontSize(text) {
     const len = text.length;
-    if (len <= 30) return 20;
-    if (len <= 60) return 18;
-    if (len <= 100) return 17;
-    if (len <= 160) return 16;
-    if (len <= 250) return 15;
-    return 14;
+    if (len <= 30) return 16;
+    if (len <= 60) return 15.5;
+    if (len <= 100) return 15;
+    if (len <= 160) return 14.5;
+    if (len <= 250) return 14;
+    return 13.5;
 }
 
 const els = {
@@ -761,15 +761,24 @@ function displayProfile(profile) {
     
     // Display background image (only if element exists)
     if (els.siteBackground) {
-        if (profile.backgroundUrl && profile.backgroundCrop) {
+        if (profile.backgroundUrl) {
             const crop = profile.backgroundCrop;
-            const scale = 1 / crop.width;
-            const posX = -crop.x / crop.width * 100;
-            const posY = -crop.y / crop.height * 100;
-            
-            els.siteBackground.style.backgroundImage = `url(${profile.backgroundUrl})`;
-            els.siteBackground.style.backgroundSize = `${scale * 100}%`;
-            els.siteBackground.style.backgroundPosition = `${posX}% ${posY}%`;
+            const hasValidCrop = crop && crop.width > 0;
+
+            if (hasValidCrop) {
+                const scale = 1 / crop.width;
+                const posX = -crop.x / crop.width * 100;
+                const posY = -crop.y / crop.height * 100;
+
+                els.siteBackground.style.backgroundImage = `url(${profile.backgroundUrl})`;
+                els.siteBackground.style.backgroundSize = `${scale * 100}%`;
+                els.siteBackground.style.backgroundPosition = `${posX}% ${posY}%`;
+            } else {
+                // No crop saved yet - show the full image instead of nothing
+                els.siteBackground.style.backgroundImage = `url(${profile.backgroundUrl})`;
+                els.siteBackground.style.backgroundSize = 'cover';
+                els.siteBackground.style.backgroundPosition = 'center';
+            }
             els.siteBackground.style.filter = profile.backgroundBlur ? `blur(${profile.backgroundBlur}px)` : '';
         } else {
             els.siteBackground.style.backgroundImage = '';
