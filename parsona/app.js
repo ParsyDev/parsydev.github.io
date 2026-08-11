@@ -38,6 +38,17 @@ const menu = {
     logout: document.getElementById('menuLogout')
 };
 
+// Scale description font size based on text length - shorter text reads bigger, longer text shrinks to fit
+function getDescriptionFontSize(text) {
+    const len = text.length;
+    if (len <= 30) return 20;
+    if (len <= 60) return 18;
+    if (len <= 100) return 17;
+    if (len <= 160) return 16;
+    if (len <= 250) return 15;
+    return 14;
+}
+
 const els = {
     grid: document.getElementById('profilesGrid'),
     profileSearch: document.getElementById('profileSearch'),
@@ -46,6 +57,7 @@ const els = {
     pass: document.getElementById('profilePassword'),
     description: document.getElementById('profileDescription'),
     img: document.getElementById('imageUrl'),
+    imageUrlStatus: document.getElementById('imageUrlStatus'),
     imageType: document.getElementById('imageType'),
     clearImage: document.getElementById('clearImage'),
     backgroundBlurField: document.getElementById('backgroundBlurField'),
@@ -700,6 +712,8 @@ function displayProfile(profile) {
         // Convert newlines to <br> for proper display
         els.viewDescription.innerHTML = profile.description.replace(/\n/g, '<br>');
         els.viewDescription.style.display = 'flex';
+        // Scale text size up when there's less text, and down as it gets longer
+        els.viewDescription.style.fontSize = getDescriptionFontSize(profile.description.trim()) + 'px';
     } else {
         els.viewDescription.style.display = 'none';
     }
@@ -921,7 +935,6 @@ function displayProfile(profile) {
             els.viewName.style.color = profile.fontColor;
             els.viewDescription.style.color = profile.fontColor;
             els.viewDescription.style.background = 'rgba(0, 0, 0, 0.1)';
-            els.viewDescription.style.borderLeftColor = profile.fontColor;
         } else {
             // Auto-adjust text color based on background brightness
             const color = profile.cardColor;
@@ -936,13 +949,11 @@ function displayProfile(profile) {
                 els.viewName.style.color = 'white';
                 els.viewDescription.style.color = 'rgba(255, 255, 255, 0.9)';
                 els.viewDescription.style.background = 'rgba(0, 0, 0, 0.2)';
-                els.viewDescription.style.borderLeftColor = 'rgba(255, 255, 255, 0.5)';
             } else {
                 // Light background - use dark text
                 els.viewName.style.color = '#333';
                 els.viewDescription.style.color = '#555';
                 els.viewDescription.style.background = 'rgba(255, 255, 255, 0.3)';
-                els.viewDescription.style.borderLeftColor = '#333';
             }
         }
     } else {
@@ -954,7 +965,6 @@ function displayProfile(profile) {
         els.viewName.style.color = '#333';
         els.viewDescription.style.color = '#555';
         els.viewDescription.style.background = '#f9f9f9';
-        els.viewDescription.style.borderLeftColor = '#333';
     }
     
     // Display profile picture
@@ -1170,6 +1180,10 @@ els.imageType.onchange = () => {
     
     // Show blur slider only for the background image type
     updateBackgroundBlurFieldVisibility();
+
+    // Re-run the live check for whichever URL is now showing
+    clearTimeout(imageUrlCheckTimer);
+    checkImageUrl(els.img.value.trim());
 };
 
 // Background blur slider
@@ -1184,6 +1198,54 @@ if (els.backgroundBlur) {
 }
 
 // Image URL input - Don't auto-show crop UI
+let imageUrlCheckToken = 0;
+let imageUrlCheckTimer = null;
+
+function setImageUrlStatus(state, message, thumbUrl) {
+    if (!els.imageUrlStatus) return;
+    if (!state) {
+        els.imageUrlStatus.className = 'image-url-status';
+        els.imageUrlStatus.innerHTML = '';
+        return;
+    }
+    els.imageUrlStatus.className = `image-url-status visible ${state}`;
+    const thumb = (state === 'ok' && thumbUrl)
+        ? `<div class="image-url-status-thumb" style="background-image:url('${thumbUrl}')"></div>`
+        : '';
+    els.imageUrlStatus.innerHTML = `${thumb}<span>${message}</span>`;
+}
+
+function checkImageUrl(url) {
+    const token = ++imageUrlCheckToken;
+
+    if (!url) {
+        setImageUrlStatus(null);
+        return;
+    }
+
+    setImageUrlStatus('checking', '⏳ Checking image…');
+
+    const img = new Image();
+    const timeout = setTimeout(() => {
+        if (token !== imageUrlCheckToken) return;
+        setImageUrlStatus('error', "⚠️ Couldn't load this image (timed out). The host may be blocking hotlinking, or the link is slow/broken.");
+    }, 8000);
+
+    img.onload = () => {
+        clearTimeout(timeout);
+        if (token !== imageUrlCheckToken) return;
+        setImageUrlStatus('ok', `Image loads fine (${img.naturalWidth}×${img.naturalHeight})`, url);
+    };
+
+    img.onerror = () => {
+        clearTimeout(timeout);
+        if (token !== imageUrlCheckToken) return;
+        setImageUrlStatus('error', "⚠️ Couldn't load this image. The host likely blocks hotlinking (common on wallpaper sites), or the link is broken/outdated. Try a different host like imgur or a Discord CDN link.");
+    };
+
+    img.src = url;
+}
+
 els.img.oninput = (e) => {
     const url = e.target.value.trim();
     console.log(`📝 Image URL changed for ${currentImageType}:`, url ? url.substring(0, 50) + '...' : 'empty');
@@ -1195,6 +1257,10 @@ els.img.oninput = (e) => {
         imageCrops[currentImageType].url = '';
         els.cropCont.classList.remove('active');
     }
+
+    // Debounced live check so we don't fire a request on every keystroke
+    clearTimeout(imageUrlCheckTimer);
+    imageUrlCheckTimer = setTimeout(() => checkImageUrl(url), 500);
 };
 
 // Enable Crop button
@@ -1228,6 +1294,8 @@ els.clearImage.onclick = () => {
     imageCrops[currentImageType].crop = null;
     els.cropCont.classList.remove('active');
     cropper.imageLoaded = false;
+    clearTimeout(imageUrlCheckTimer);
+    setImageUrlStatus(null);
 };
 
 // Apply crop
@@ -1935,6 +2003,12 @@ function loadProfileForEdit(profile) {
         els.imageType.value = 'banner';
         els.img.value = imageCrops.banner.url;
         // Don't auto-show crop UI - user must click "Crop" button
+    }
+
+    // Live-check whichever image URL ended up in the field
+    if (typeof checkImageUrl === 'function') {
+        clearTimeout(imageUrlCheckTimer);
+        checkImageUrl(els.img.value.trim());
     }
     
     updateBackgroundBlurFieldVisibility();
