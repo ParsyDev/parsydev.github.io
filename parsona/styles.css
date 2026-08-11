@@ -15,7 +15,7 @@
     
     --text-primary: #e4e4e7;
     --text-secondary: #a1a1aa;
-    --text-muted: #fafafa5e;
+    --text-muted: #71717a;
     --text-black: #000000;
     
     --accent-primary: #ffffff;
@@ -26,7 +26,7 @@
     --warning: #f59e0b;
     --error: #ef4444;
     
-    --border-subtle: #ffffff0e;
+    --border-subtle: #ffffff10;
     --border-medium: #404040;
     --border-strong: #525252;
     
@@ -679,10 +679,9 @@ button:disabled {
 
 .profile-container {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: var(--shadow-md);
+    box-shadow: inset 0 0 0 1px var(--border-subtle), var(--shadow-md);
 }
 
 .profile-header {
