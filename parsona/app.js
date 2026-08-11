@@ -945,13 +945,21 @@ function displayProfile(profile) {
             els.viewDescription.style.color = profile.fontColor;
             els.viewDescription.style.background = 'rgba(0, 0, 0, 0.1)';
         } else {
-            // Auto-adjust text color based on background brightness
-            const color = profile.cardColor;
-            const rgb = parseInt(color.slice(1), 16);
-            const r = (rgb >> 16) & 0xff;
-            const g = (rgb >>  8) & 0xff;
-            const b = (rgb >>  0) & 0xff;
-            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            // Auto-adjust text color based on background brightness.
+            // If there's a gradient, average both stops so we don't pick
+            // a text color that only works for the lighter end.
+            const getBrightness = (hex) => {
+                const rgb = parseInt(hex.slice(1), 16);
+                const r = (rgb >> 16) & 0xff;
+                const g = (rgb >>  8) & 0xff;
+                const b = (rgb >>  0) & 0xff;
+                return (r * 299 + g * 587 + b * 114) / 1000;
+            };
+
+            const startBrightness = getBrightness(profile.cardColor);
+            const brightness = profile.cardColorGradient
+                ? Math.min(startBrightness, getBrightness(profile.cardColorGradient))
+                : startBrightness;
             
             if (brightness < 128) {
                 // Dark background - use light text
