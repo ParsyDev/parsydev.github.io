@@ -1,17 +1,32 @@
+
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="icon" type="image/x-icon" href="icon.png">
+
   <title>Parcyval Studios</title>
+
   <meta name="description" content="An indie game studio from Germany.">
+
   <meta property="og:title" content="Parcyval Studios">
+
   <meta property="og:description" content="An indie game studio from Germany.">
+
   <meta property="og:url" content="https://parcyval.com">
+
   <meta property="og:type" content="website">
+
   <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
+
     :root {
       --navy:  #0e1128;
       --navy2: #1a1f40;
@@ -23,35 +38,51 @@
       --t:     all 0.2s ease-in-out;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { font-family: "Mulish", sans-serif; overflow-x: clip; }
-    html { background: var(--navy); }
-    body { background-color: var(--navy); position: relative; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      font-family: "Mulish", sans-serif;
+      overflow-x: clip;
+    }
+
+    html {
+      background: var(--navy);
+    }
+
+    body {
+      background-color: var(--navy);
+      position: relative;
+    }
 
     .page-glow {
       position: absolute;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
       pointer-events: none;
       z-index: 1;
       background:
-        radial-gradient(ellipse 50% 18% at 15% 8%,  rgba(240,112,32,0.07) 0%, transparent 100%),
-        radial-gradient(ellipse 40% 15% at 80% 20%,  rgba(240,168,32,0.05) 0%, transparent 100%),
-        radial-gradient(ellipse 55% 12% at 60% 38%,  rgba(240,112,32,0.06) 0%, transparent 100%),
-        radial-gradient(ellipse 45% 14% at 20% 55%,  rgba(240,168,32,0.05) 0%, transparent 100%),
-        radial-gradient(ellipse 50% 13% at 85% 65%,  rgba(240,112,32,0.06) 0%, transparent 100%),
-        radial-gradient(ellipse 40% 12% at 40% 78%,  rgba(240,168,32,0.04) 0%, transparent 100%),
-        radial-gradient(ellipse 45% 10% at 10% 90%,  rgba(240,112,32,0.05) 0%, transparent 100%),
-        radial-gradient(ellipse 50% 11% at 75% 92%,  rgba(240,168,32,0.04) 0%, transparent 100%);
+        radial-gradient(ellipse 50% 18% at 15% 8%, rgba(240,112,32,0.07) 0%, transparent 100%),
+        radial-gradient(ellipse 40% 15% at 80% 20%, rgba(240,168,32,0.05) 0%, transparent 100%),
+        radial-gradient(ellipse 55% 12% at 60% 38%, rgba(240,112,32,0.06) 0%, transparent 100%),
+        radial-gradient(ellipse 45% 14% at 20% 55%, rgba(240,168,32,0.05) 0%, transparent 100%),
+        radial-gradient(ellipse 50% 13% at 85% 65%, rgba(240,112,32,0.06) 0%, transparent 100%),
+        radial-gradient(ellipse 40% 12% at 40% 78%, rgba(240,168,32,0.04) 0%, transparent 100%),
+        radial-gradient(ellipse 45% 10% at 10% 90%, rgba(240,112,32,0.05) 0%, transparent 100%),
+        radial-gradient(ellipse 50% 11% at 75% 92%, rgba(240,168,32,0.04) 0%, transparent 100%);
       -webkit-mask-image: linear-gradient(to top, black 0%, black 15%, transparent 55%);
       mask-image: linear-gradient(to top, black 0%, black 15%, transparent 55%);
     }
 
-
     /* ══════════════════════════════════════════════════
-       HEADER — stripes live here, scroll away with it
+       HEADER
     ══════════════════════════════════════════════════ */
+
     .header {
       position: static;
       width: 100vw;
@@ -62,9 +93,6 @@
       overflow: visible;
     }
 
-
-
-    /* Grain overlay — also inside header only */
     .header::after {
       content: "";
       position: absolute;
@@ -75,6 +103,7 @@
       pointer-events: none;
       z-index: 1;
     }
+
     body::after {
       content: "";
       position: fixed;
@@ -87,6 +116,7 @@
     }
 
     /* ── NAV ── */
+
     nav {
       position: relative;
       z-index: 10;
@@ -97,6 +127,7 @@
       gap: 32px;
       flex-wrap: wrap;
     }
+
     nav a {
       font-family: "Mulish", sans-serif;
       font-size: 11px;
@@ -110,13 +141,40 @@
       align-items: center;
       gap: 6px;
     }
-    nav a img.favicon { width: 14px; height: 14px; object-fit: contain; opacity: 0.7; border-radius: 2px; }
-    nav a:not(.nav-cta):hover { font-weight: 900; color: var(--light); }
-    nav a:not(.nav-cta):hover img.favicon { opacity: 1; }
-    nav a.nav-cta { border: 1px solid var(--mid); padding: 9px 24px; color: var(--light); font-weight: 900; }
-    nav a.nav-cta:hover { background: var(--orange); border-color: var(--orange); color: var(--navy); transform: scale(1.05); }
+
+    nav a img.favicon {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+      opacity: 0.7;
+      border-radius: 2px;
+    }
+
+    nav a:not(.nav-cta):hover {
+      font-weight: 900;
+      color: var(--light);
+    }
+
+    nav a:not(.nav-cta):hover img.favicon {
+      opacity: 1;
+    }
+
+    nav a.nav-cta {
+      border: 1px solid var(--mid);
+      padding: 9px 24px;
+      color: var(--light);
+      font-weight: 900;
+    }
+
+    nav a.nav-cta:hover {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: var(--navy);
+      transform: scale(1.05);
+    }
 
     /* ── HERO BODY ── */
+
     .hero-body {
       position: relative;
       z-index: 10;
@@ -128,7 +186,12 @@
       gap: 48px;
     }
 
-    .hero-text { display: flex; flex-direction: column; gap: 14px; max-width: 520px; }
+    .hero-text {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 520px;
+    }
 
     .hero-title {
       font-family: "Mulish", sans-serif;
@@ -138,6 +201,7 @@
       color: var(--light);
       line-height: 0.92;
     }
+
     .hero-label {
       font-family: "DM Serif Display", serif;
       font-style: italic;
@@ -145,6 +209,7 @@
       color: var(--gold);
       letter-spacing: 0.04em;
     }
+
     .hero-sub {
       font-size: 11px;
       font-weight: 500;
@@ -152,6 +217,7 @@
       text-transform: uppercase;
       color: var(--gold);
     }
+
     .hero-desc {
       font-size: clamp(13px, 1.4vw, 16px);
       font-weight: 500;
@@ -160,6 +226,7 @@
       max-width: 380px;
       margin-top: 8px;
     }
+
     .hero-cta {
       display: inline-flex;
       align-items: center;
@@ -176,7 +243,13 @@
       width: fit-content;
       transition: var(--t);
     }
-    .hero-cta:hover { background: var(--orange); border-color: var(--orange); color: var(--navy); transform: scale(1.04); }
+
+    .hero-cta:hover {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: var(--navy);
+      transform: scale(1.04);
+    }
 
     .hero-logo {
       flex-shrink: 0;
@@ -187,6 +260,7 @@
       justify-content: center;
       margin-right: 13vw;
     }
+
     .hero-logo img {
       width: clamp(140px, 25vw, 600px);
       height: clamp(140px, 25vw, 600px);
@@ -195,6 +269,7 @@
     }
 
     /* ── LEARN MORE ── */
+
     .learn-more {
       position: relative;
       z-index: 10;
@@ -206,13 +281,32 @@
       text-decoration: none;
       transition: var(--t);
     }
-    .learn-more:hover { opacity: 0.7; transform: translateY(4px); }
-    .learn-text { font-size: 10px; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mid); transition: var(--t); }
-    .learn-arrow { display: inline-flex; color: var(--light); line-height: 1; animation: bob 2s ease-in-out infinite; }
+
+    .learn-more:hover {
+      opacity: 0.7;
+      transform: translateY(4px);
+    }
+
+    .learn-text {
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mid);
+      transition: var(--t);
+    }
+
+    .learn-arrow {
+      display: inline-flex;
+      color: var(--light);
+      line-height: 1;
+      animation: bob 2s ease-in-out infinite;
+    }
 
     /* ══════════════════════════════════════════════════
-       GAMES SECTION — solid navy, carousel inside
+       GAMES SECTION
     ══════════════════════════════════════════════════ */
+
     #games {
       position: relative;
       padding: 88px 0 25px;
@@ -222,6 +316,7 @@
       text-align: center;
       margin-bottom: 64px;
     }
+
     .games-heading h2 {
       font-family: "Mulish", sans-serif;
       font-weight: 1000;
@@ -230,19 +325,21 @@
       color: var(--light);
       line-height: 1;
     }
-  .games-heading span,
-  .about-heading span,
-  .team-heading span {
-    font-family: "Mulish", sans-serif;
-    font-size: clamp(11px, 1.5vw, 13px);
-    color: var(--mid);
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    display: block;
-    margin-top: 25px;
-  }
+
+    .games-heading span,
+    .about-heading span,
+    .team-heading span {
+      font-family: "Mulish", sans-serif;
+      font-size: clamp(11px, 1.5vw, 13px);
+      color: var(--mid);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      display: block;
+      margin-top: 25px;
+    }
 
     /* ── CAROUSEL ── */
+
     .gs-wrap {
       display: flex;
       align-items: center;
@@ -261,13 +358,16 @@
 
     .gs-card {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
       cursor: pointer;
-      transition: transform 0.75s cubic-bezier(0.77,0,0.175,1),
-                  opacity  0.75s cubic-bezier(0.77,0,0.175,1),
-                  filter   0.75s ease;
+      transition:
+        transform 0.75s cubic-bezier(0.77,0,0.175,1),
+        opacity 0.75s cubic-bezier(0.77,0,0.175,1),
+        filter 0.75s ease;
       will-change: transform, opacity;
       text-decoration: none;
       background: var(--navy2);
@@ -296,47 +396,49 @@
       z-index: 2;
     }
 
-    /* States */
     .gs-card[data-state="current"] {
       transform: translateX(0) translateZ(0) scale(1);
-      opacity: 1; filter: none; z-index: 10;
+      opacity: 1;
+      filter: none;
+      z-index: 10;
       pointer-events: auto;
     }
+
     .gs-card[data-state="next"] {
       transform: translateX(58%) translateZ(-240px) scale(0.82);
-      opacity: 0.5; filter: brightness(0.4); z-index: 5;
-      pointer-events: none;
-    }
-    .gs-card[data-state="prev"] {
-      transform: translateX(-58%) translateZ(-240px) scale(0.82);
-      opacity: 0.5; filter: brightness(0.4); z-index: 5;
-      pointer-events: none;
-    }
-    .gs-card[data-state="hidden"] {
-      transform: translateX(0) translateZ(-600px) scale(0.5);
-      opacity: 0; z-index: 1;
+      opacity: 0.5;
+      filter: brightness(0.4);
+      z-index: 5;
       pointer-events: none;
     }
 
-    /* Text overlay — strong gradient so text always readable */
-    .gs-card__info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 20px 24px;
-      background: var(--light);
-      z-index: 2;
+    .gs-card[data-state="prev"] {
+      transform: translateX(-58%) translateZ(-240px) scale(0.82);
+      opacity: 0.5;
+      filter: brightness(0.4);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .gs-card[data-state="hidden"] {
+      transform: translateX(0) translateZ(-600px) scale(0.5);
+      opacity: 0;
+      z-index: 1;
+      pointer-events: none;
     }
 
     .gs-card__tag {
-      font-size: clamp(10px, 0.85vw, 13px); font-weight: 700;
-      letter-spacing: 0.22em; text-transform: uppercase;
-      color: var(--orange); margin-bottom: 8px;
+      font-size: clamp(10px, 0.85vw, 13px);
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 8px;
     }
-    .gs-card__tag.collab { color: #22c55e; }
+
+    .gs-card__tag.collab {
+      color: #22c55e;
+    }
 
     .gs-card__title {
       font-family: "Mulish", sans-serif;
@@ -349,97 +451,129 @@
     }
 
     .gs-card__desc {
-      font-size: clamp(13px, 1.1vw, 16px); font-weight: 500;
+      font-size: clamp(13px, 1.1vw, 16px);
+      font-weight: 500;
       color: #555a78;
       line-height: 1.55;
-      opacity: 0; transform: translateY(6px);
+      opacity: 0;
+      transform: translateY(6px);
       transition: opacity 0.3s ease 0.05s, transform 0.3s ease 0.05s;
     }
-    .gs-card[data-state="current"] .gs-card__desc { opacity: 1; transform: translateY(0); }
+
+    .gs-card[data-state="current"] .gs-card__desc {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
     .gs-card__cta {
-      display: inline-flex; align-items: center; gap: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       margin-top: 14px;
-      font-size: clamp(10px, 0.85vw, 13px); font-weight: 900;
-      letter-spacing: 0.12em; text-transform: uppercase;
+      font-size: clamp(10px, 0.85vw, 13px);
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       color: var(--navy);
       border: 1px solid rgba(14,17,40,0.35);
       padding: 8px 18px;
-      opacity: 0; transform: translateY(6px);
-      transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s,
-                  background 0.2s, border-color 0.2s, color 0.2s;
+      opacity: 0;
+      transform: translateY(6px);
+      transition:
+        opacity 0.3s ease 0.1s,
+        transform 0.3s ease 0.1s,
+        background 0.2s,
+        border-color 0.2s,
+        color 0.2s;
     }
-    .gs-card[data-state="current"] .gs-card__cta { opacity: 1; transform: translateY(0); }
-    .gs-card__cta:hover { background: var(--orange); border-color: var(--orange); color: #fff; }
 
-    /* Nav buttons */
+    .gs-card[data-state="current"] .gs-card__cta {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .gs-card__cta:hover {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #fff;
+    }
+
     .gs-btn {
       flex-shrink: 0;
-      width: 48px; height: 48px;
+      width: 48px;
+      height: 48px;
       border: 1px solid rgba(138,143,168,0.35);
       background: transparent;
       color: var(--mid);
       cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: var(--t);
       margin: 0 18px;
     }
-    .gs-btn:hover { border-color: var(--orange); color: var(--orange); }
-    .gs-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
-    /* Dots */
-    .gs-dots {
-      display: flex; justify-content: center;
-      gap: 10px; margin-top: 40px;
+    .gs-btn:hover {
+      border-color: var(--orange);
+      color: var(--orange);
     }
+
+    .gs-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .gs-dots {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 40px;
+    }
+
     .gs-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--mid); opacity: 0.35;
-      cursor: pointer; border: none;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--mid);
+      opacity: 0.35;
+      cursor: pointer;
+      border: none;
       transition: opacity 0.3s, transform 0.3s, background 0.3s;
     }
-    .gs-dot.active { opacity: 1; background: var(--orange); transform: scale(1.5); }
+
+    .gs-dot.active {
+      opacity: 1;
+      background: var(--orange);
+      transform: scale(1.5);
+    }
 
     .gs-counter {
-      text-align: center; margin-top: 16px;
-      font-size: 11px; letter-spacing: 0.2em; color: var(--mid);
-    }
-    .gs-counter strong { color: var(--light); font-weight: 900; }
-
-    /* ── MOBILE ── */
-    @media (max-width: 768px) {
-      nav { padding: 24px 20px; gap: 18px; justify-content: center; }
-      .hero-body { flex-direction: column; align-items: center; justify-content: center; padding: 0 24px; gap: 20px; }
-      .hero-text { align-items: center; text-align: center; }
-      .hero-desc { text-align: center; }
-      .hero-cta { align-self: center; }
-      .hero-logo { margin-right: 0; order: -1; }
-      .hero-logo img { width: 110px; height: 110px; }
-      .hero-title { font-size: clamp(44px, 14vw, 72px); }
-      .hero-desc { font-size: 13px; }
-      .gs-stage { width: min(58vw, 210px); height: clamp(300px, 105vw, 350px); }
-      .gs-wrap { padding: 20px 14px; }
-      .gs-btn { width: 32px; height: 32px; margin: 0 6px; }
-      .gs-card[data-state="next"] { transform: translateX(52%) translateZ(-160px) scale(0.78); }
-      .gs-card[data-state="prev"] { transform: translateX(-52%) translateZ(-160px) scale(0.78); }
-      .gs-card__info { padding: 14px 14px 16px; }
-      .gs-card__title { font-size: 15px; }
-      .gs-card__desc { font-size: 12px; }
-      .gs-card__tag { font-size: 9px; }
+      text-align: center;
+      margin-top: 16px;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--mid);
     }
 
-    @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .gs-counter strong {
+      color: var(--light);
+      font-weight: 900;
+    }
 
     /* ══════════════════════════════════════════════════
        ABOUT SECTION
     ══════════════════════════════════════════════════ */
+
     #about {
       position: relative;
       padding: 100px 60px 40px;
       max-width: 1080px;
       margin: 0 auto;
-      
     }
 
     .about-eyebrow {
@@ -457,6 +591,7 @@
       text-align: center;
       margin-bottom: 77px;
     }
+
     .about-heading h2 {
       font-family: "Mulish", sans-serif;
       font-weight: 1000;
@@ -477,7 +612,8 @@
       text-transform: uppercase;
     }
 
-    /* ── About: styled as a code diff, because that's what we actually live in ── */
+    /* ── ABOUT: CODE DIFF ── */
+
     .diff-panel {
       max-width: 800px;
       margin: 0 auto 100px;
@@ -495,12 +631,16 @@
       background: rgba(255,255,255,0.025);
       border-bottom: 1px solid rgba(138,143,168,0.14);
     }
+
     .diff-panel__dot {
-      width: 7px; height: 7px; border-radius: 50%;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
       background: var(--orange);
       box-shadow: 0 0 6px rgba(240,112,32,0.6);
       flex-shrink: 0;
     }
+
     .diff-panel__filename {
       font-family: "JetBrains Mono", monospace;
       font-size: 11px;
@@ -508,6 +648,7 @@
       color: var(--mid);
       letter-spacing: 0.02em;
     }
+
     .diff-panel__lang {
       margin-left: auto;
       font-family: "JetBrains Mono", monospace;
@@ -529,6 +670,7 @@
       line-height: 1.95;
       white-space: pre-wrap;
     }
+
     .diff-line__num {
       flex-shrink: 0;
       width: 40px;
@@ -537,35 +679,185 @@
       color: rgba(138,143,168,0.35);
       user-select: none;
     }
+
     .diff-line__mark {
       flex-shrink: 0;
       width: 18px;
       text-align: center;
       user-select: none;
     }
-    .diff-line__text { padding-right: 20px; }
 
-    .diff-line--comment .diff-line__text { color: rgba(138,143,168,0.65); font-style: italic; }
-    .diff-line--rm { background: rgba(232,24,24,0.06); }
+    .diff-line__text {
+      padding-right: 20px;
+    }
+
+    .diff-line--comment .diff-line__text {
+      color: rgba(138,143,168,0.65);
+      font-style: italic;
+    }
+
+    .diff-line--rm {
+      background: rgba(232,24,24,0.06);
+    }
+
     .diff-line--rm .diff-line__mark,
-    .diff-line--rm .diff-line__text { color: #e05a5a; }
-    .diff-line--rm .diff-line__text { text-decoration: line-through; text-decoration-color: rgba(224,90,90,0.35); }
-    .diff-line--add { background: rgba(34,197,94,0.07); }
-    .diff-line--add .diff-line__mark { color: #22c55e; }
-    .diff-line--add .diff-line__text { color: var(--light); }
-    .diff-line--blank { height: 8px; }
+    .diff-line--rm .diff-line__text {
+      color: #e05a5a;
+    }
+
+    .diff-line--rm .diff-line__text {
+      text-decoration: line-through;
+      text-decoration-color: rgba(224,90,90,0.35);
+    }
+
+    .diff-line--add {
+      background: rgba(34,197,94,0.07);
+    }
+
+    .diff-line--add .diff-line__mark {
+      color: #22c55e;
+    }
+
+    .diff-line--add .diff-line__text {
+      color: var(--light);
+    }
+
+    .diff-line--blank {
+      height: 8px;
+    }
 
     .diff-cursor {
       display: inline-block;
-      width: 7px; height: 14px;
+      width: 7px;
+      height: 14px;
       background: var(--gold);
       margin-left: 4px;
       vertical-align: -2px;
       animation: blink 1.1s step-end infinite;
     }
-    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── NAME STORY / IDENTITY PANEL ── */
+
+    .identity-panel {
+      max-width: 800px;
+      margin: 0 auto 110px;
+      background: rgba(255,255,255,0.015);
+      border: 1px solid rgba(138,143,168,0.18);
+      box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
+    }
+
+    .identity-panel__tab {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      height: 38px;
+      background: rgba(255,255,255,0.025);
+      border-bottom: 1px solid rgba(138,143,168,0.14);
+    }
+
+    .identity-panel__dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 6px rgba(240,112,32,0.6);
+      flex-shrink: 0;
+    }
+
+    .identity-panel__filename {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--mid);
+      letter-spacing: 0.02em;
+    }
+
+    .identity-panel__lang {
+      margin-left: auto;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(138,143,168,0.5);
+    }
+
+    .identity-panel__body {
+      padding: 36px 40px 36px;
+    }
+
+    .identity-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .identity-card {
+      text-align: center;
+    }
+
+    .identity-card__tag {
+      display: block;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--mid);
+      margin-bottom: 10px;
+    }
+
+    .identity-card__name {
+      font-family: "Mulish", sans-serif;
+      font-weight: 1000;
+      font-size: clamp(28px, 5vw, 44px);
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--light);
+      margin-bottom: 14px;
+    }
+
+    .identity-card--studio .identity-card__name {
+      color: var(--gold);
+    }
+
+    .identity-card__desc {
+      color: var(--mid);
+      font-size: 13px;
+      line-height: 1.75;
+      max-width: 240px;
+      margin: 0 auto;
+    }
+
+    .identity-card__desc strong {
+      color: var(--light);
+      font-weight: 700;
+    }
+
+    .identity-grid__arrow {
+      color: var(--mid);
+      font-size: 22px;
+      opacity: 0.6;
+    }
+
+    .identity-panel__note {
+      margin-top: 36px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(138,143,168,0.14);
+      text-align: center;
+      color: var(--gold);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.03em;
+    }
+
+    .identity-panel__note::before {
+      content: "// ";
+      color: rgba(138,143,168,0.5);
+    }
 
     /* ── TEAM ── */
+
     .team-eyebrow {
       display: block;
       text-align: center;
@@ -577,10 +869,12 @@
       color: var(--gold);
       margin-bottom: 16px;
     }
+
     .team-heading {
       text-align: center;
       margin-bottom: 48px;
     }
+
     .team-heading h2 {
       font-family: "Mulish", sans-serif;
       font-weight: 1000;
@@ -589,24 +883,28 @@
       color: var(--light);
     }
 
-  .team-container {
+    .team-container {
+      padding-top: 25px;
+      padding-bottom: 65px;
+    }
 
-    padding-top: 25px;
-    padding-bottom: 65px;
-  }
+    .team-entry {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      max-width: 100%;
+      margin: 0 auto;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.014);
+      border-radius: 125px;
+      padding: 32px 40px;
+    }
 
-.team-entry {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  max-width: 100%;
-  margin: 0 auto;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.014);
-  border-radius: 125px;
-  padding: 32px 40px;
-}
-    .team-entry__avatar { text-decoration: none; flex-shrink: 0; display: block; }
+    .team-entry__avatar {
+      text-decoration: none;
+      flex-shrink: 0;
+      display: block;
+    }
 
     .team-entry img {
       width: 120px;
@@ -617,9 +915,15 @@
       transition: transform 0.3s ease, border-color 0.3s ease;
       display: block;
     }
-    .team-entry img:hover { transform: scale(1.05); border-color: rgba(240,168,32,0.5); }
 
-    .team-entry__text { min-width: 0; }
+    .team-entry img:hover {
+      transform: scale(1.05);
+      border-color: rgba(240,168,32,0.5);
+    }
+
+    .team-entry__text {
+      min-width: 0;
+    }
 
     .team-entry__name {
       font-family: "DM Serif Display", serif;
@@ -639,9 +943,16 @@
       color: var(--mid);
       transition: color 0.2s ease;
     }
-    .team-entry__name a:hover { color: var(--gold); }
-    .team-entry__name a svg { width: 15px; height: 15px; }
-    
+
+    .team-entry__name a:hover {
+      color: var(--gold);
+    }
+
+    .team-entry__name a svg {
+      width: 15px;
+      height: 15px;
+    }
+
     .team-entry__role {
       font-family: "Mulish", sans-serif;
       font-weight: 700;
@@ -650,18 +961,8 @@
       color: var(--mid);
     }
 
-    @media (max-width: 560px) {
-      .diff-panel { margin-left: 20px; margin-right: 20px; }
-      .diff-line { font-size: 11px; }
-      .diff-line__num { width: 28px; padding-right: 10px; }
-      .team-entry { flex-direction: column; text-align: center; gap: 18px; }
-      .team-entry__name { justify-content: center; }
-    }
+    /* ── FOOTER ── */
 
-
-    /* ══════════════════════════════════════════════════
-       FOOTER
-    ══════════════════════════════════════════════════ */
     footer {
       background: linear-gradient(transparent, rgba(0,0,0,0.6));
       padding: 60px 20px 80px;
@@ -716,15 +1017,18 @@
       opacity: 0.7;
     }
 
-    /* YouTube hover video */
-    .youtube-btn { position: relative; }
+    .youtube-btn {
+      position: relative;
+    }
 
     .youtube-btn::before {
       content: "";
       position: absolute;
-      top: 50%; left: 14px;
+      top: 50%;
+      left: 14px;
       transform: translateY(-50%);
-      width: 7px; height: 7px;
+      width: 7px;
+      height: 7px;
       background: #ff4444;
       border-radius: 50%;
       box-shadow: 0 0 6px rgba(255,68,68,0.7);
@@ -732,14 +1036,17 @@
 
     .hover-video-container {
       position: absolute;
-      bottom: 120%; left: 50%;
+      bottom: 120%;
+      left: 50%;
       transform: translateX(-50%);
-      width: 380px; max-width: 90vw;
+      width: 380px;
+      max-width: 90vw;
       background: rgba(10,12,30,0.97);
       border: 1px solid rgba(138,143,168,0.25);
       border-radius: 4px;
       padding: 20px;
-      opacity: 0; visibility: hidden;
+      opacity: 0;
+      visibility: hidden;
       transition: opacity 0.25s ease, visibility 0.25s ease;
       z-index: 1000;
       box-shadow: 0 0 40px rgba(0,0,0,0.6);
@@ -747,7 +1054,8 @@
     }
 
     .youtube-btn:hover .hover-video-container {
-      opacity: 1; visibility: visible;
+      opacity: 1;
+      visibility: visible;
     }
 
     .hover-video-container h3 {
@@ -761,8 +1069,10 @@
     }
 
     .hover-video-container iframe {
-      width: 100%; height: 210px;
-      border-radius: 2px; border: none;
+      width: 100%;
+      height: 210px;
+      border-radius: 2px;
+      border: none;
       display: block;
     }
 
@@ -773,358 +1083,995 @@
       font-size: 13px;
     }
 
+    /* ── MOBILE ── */
+
     @media (max-width: 768px) {
-      #about { padding: 80px 24px 60px; }
-      .footer-buttons { flex-direction: column; }
-      .footer-buttons a { width: 220px; }
-      .hover-video-container { width: 300px; }
-      .hover-video-container iframe { height: 170px; }
+
+      nav {
+        padding: 24px 20px;
+        gap: 18px;
+        justify-content: center;
+      }
+
+      .hero-body {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0 24px;
+        gap: 20px;
+      }
+
+      .hero-text {
+        align-items: center;
+        text-align: center;
+      }
+
+      .hero-desc {
+        text-align: center;
+      }
+
+      .hero-cta {
+        align-self: center;
+      }
+
+      .hero-logo {
+        margin-right: 0;
+        order: -1;
+      }
+
+      .hero-logo img {
+        width: 110px;
+        height: 110px;
+      }
+
+      .hero-title {
+        font-size: clamp(44px, 14vw, 72px);
+      }
+
+      .hero-desc {
+        font-size: 13px;
+      }
+
+      .gs-stage {
+        width: min(58vw, 210px);
+        height: clamp(300px, 105vw, 350px);
+      }
+
+      .gs-wrap {
+        padding: 20px 14px;
+      }
+
+      .gs-btn {
+        width: 32px;
+        height: 32px;
+        margin: 0 6px;
+      }
+
+      .gs-card[data-state="next"] {
+        transform: translateX(52%) translateZ(-160px) scale(0.78);
+      }
+
+      .gs-card[data-state="prev"] {
+        transform: translateX(-52%) translateZ(-160px) scale(0.78);
+      }
+
+      .gs-card__info {
+        padding: 14px 14px 16px;
+      }
+
+      .gs-card__title {
+        font-size: 15px;
+      }
+
+      .gs-card__desc {
+        font-size: 12px;
+      }
+
+      .gs-card__tag {
+        font-size: 9px;
+      }
+
+      #about {
+        padding: 80px 24px 60px;
+      }
+
+      .diff-panel {
+        margin-left: 20px;
+        margin-right: 20px;
+      }
+
+      .diff-line {
+        font-size: 11px;
+      }
+
+      .diff-line__num {
+        width: 28px;
+        padding-right: 10px;
+      }
+
+      .identity-panel {
+        margin: 0 8px 80px;
+      }
+
+      .identity-panel__body {
+        padding: 32px 20px 28px;
+      }
+
+      .identity-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .identity-grid__arrow {
+        transform: rotate(90deg);
+      }
+
+      .identity-card__desc {
+        max-width: 320px;
+      }
+
+      .team-entry {
+        flex-direction: column;
+        text-align: center;
+        gap: 18px;
+      }
+
+      .team-entry__name {
+        justify-content: center;
+      }
+
+      .footer-buttons {
+        flex-direction: column;
+      }
+
+      .footer-buttons a {
+        width: 220px;
+      }
+
+      .hover-video-container {
+        width: 300px;
+      }
+
+      .hover-video-container iframe {
+        height: 170px;
+      }
+    }
+
+    @keyframes bob {
+      0%, 100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(7px);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
     }
 
   </style>
 
   <script>
-  let latestVideoId = null;
 
-  async function loadLatestFullVideo() {
-    const key = "AIzaSyDEI2dlqzHG4HyuwCDIHCqIKezUO4ksjhM";
-    const channel = "UCndWwQL8AaXQfDwOh2mSpvg";
-    try {
-      const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${key}&channelId=${channel}&order=date&part=snippet&type=video&maxResults=5`);
-      const data = await res.json();
-      if (!data.items || !data.items.length) { showMessage("No videos found."); return; }
-      for (const item of data.items) {
-        const videoId = item.id.videoId;
-        const detailsRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?key=${key}&id=${videoId}&part=contentDetails`);
-        const detailsData = await detailsRes.json();
-        if (detailsData.items.length > 0) {
-          const duration = detailsData.items[0].contentDetails.duration;
-          const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-          let seconds = 0;
-          if (match) { seconds = (parseInt(match[1]||0)*3600) + (parseInt(match[2]||0)*60) + parseInt(match[3]||0); }
-          if (seconds >= 100) { populateHoverVideo(videoId); return; }
+    let latestVideoId = null;
+
+    async function loadLatestFullVideo() {
+
+      const key = "AIzaSyDEI2dlqzHG4HyuwCDIHCqIKezUO4ksjhM";
+      const channel = "UCndWwQL8AaXQfDwOh2mSpvg";
+
+      try {
+
+        const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${key}&channelId=${channel}&order=date&part=snippet&type=video&maxResults=5`);
+        const data = await res.json();
+
+        if (!data.items || !data.items.length) {
+          showMessage("No videos found.");
+          return;
         }
+
+        for (const item of data.items) {
+
+          const videoId = item.id.videoId;
+
+          const detailsRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?key=${key}&id=${videoId}&part=contentDetails`);
+          const detailsData = await detailsRes.json();
+
+          if (detailsData.items.length > 0) {
+
+            const duration = detailsData.items[0].contentDetails.duration;
+            const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+
+            let seconds = 0;
+
+            if (match) {
+              seconds =
+                (parseInt(match[1] || 0) * 3600) +
+                (parseInt(match[2] || 0) * 60) +
+                parseInt(match[3] || 0);
+            }
+
+            if (seconds >= 100) {
+              populateHoverVideo(videoId);
+              return;
+            }
+          }
+        }
+
+        showMessage("No recent full-length videos.");
+
+      } catch(err) {
+        showMessage("Error loading video.");
       }
-      showMessage("No recent full-length videos.");
-    } catch(err) { showMessage("Error loading video."); }
-  }
-
-  function populateHoverVideo(videoId) {
-    const el = document.getElementById("hover-video");
-    if (el) el.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
-  }
-
-  function showMessage(msg) {
-    const el = document.getElementById("hover-video");
-    if (el) el.innerHTML = `<p class="hover-video-loading">${msg}</p>`;
-  }
-
-  loadLatestFullVideo();
-  </script>
-</head>
-<body>
-<div class="page-glow" aria-hidden="true"></div>
-
-
-
-<div id="stripes" style="position:absolute;top:0;right:0;width:100vmax;height:100%;pointer-events:none;z-index:0;background-image:linear-gradient(150deg,#0e1128 0,#0e1128 56.57vmax,#1e2448 56.68vmax,#1e2448 57.27vmax,#0e1128 57.38vmax,#0e1128 58.22vmax,#1e2448 58.33vmax,#1e2448 59.85vmax,#0e1128 59.96vmax,#0e1128 61.05vmax,#1e2448 61.16vmax,#1e2448 62.68vmax,#0e1128 62.79vmax,#0e1128 63.88vmax,#1e2448 63.99vmax,#1e2448 66.74vmax,#0e1128 66.85vmax,#0e1128 68.23vmax,#1e2448 68.34vmax,#1e2448 72.40vmax,#0e1128 72.51vmax,#0e1128 73.89vmax,#1e2448 74.00vmax,#1e2448 79.47vmax,#0e1128 79.58vmax,#0e1128 80.96vmax,#1e2448 81.07vmax,#1e2448 86.54vmax,#0e1128 86.65vmax,#0e1128 88.03vmax,#1e2448 88.14vmax,#1e2448 95.02vmax,#0e1128 95.13vmax);"></div>
-<header class="header">
-<nav id="site-nav"></nav>
-  <div class="hero-body">
-    <div class="hero-text">
-      <h1 class="hero-title">Parcyval</h1>
-      <p class="hero-label"></p>
-      <p class="hero-sub">German Indie Game Studio</p>
-      <p class="hero-desc">We build games nobody made yet, but people always wanted</p>
-      <a href="#games" class="hero-cta">See Our Games</a>
-    </div>
-    <div class="hero-logo">
-      <img src="icon_t.png" alt="Parcyval Logo">
-    </div>
-  </div>
-  <a class="learn-more" href="#games">
-    <span class="learn-text">Learn More</span>
-    <span class="learn-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="6 9 12 15 18 9"></polyline>
-      </svg>
-    </span>
-  </a>
-</header>
-
-<section id="games">
-  <div class="games-heading">
-    <h2>Our Games</h2>
-    <span>7 projects · built from community feedback</span>
-  </div>
-
-  <div class="gs-wrap">
-    <button class="gs-btn gs-btn--prev" aria-label="Previous game">
-      <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
-    </button>
-    <div class="gs-stage" id="gs-stage"></div>
-    <button class="gs-btn gs-btn--next" aria-label="Next game">
-      <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
-    </button>
-  </div>
-
-  <div class="gs-dots" id="gs-dots"></div>
-  <p class="gs-counter"><strong id="gs-cur">1</strong> / <span id="gs-total">7</span></p>
-</section>
-
-<script>
-  /* ── NAV ── */
-  const navLinks = [
-    { label: "Games",   href: "#games",   domain: null, cta: false },
-    { label: "About",   href: "#about",   domain: null, cta: false },
-    
-    { label: "Steam",   href: "https://store.steampowered.com/developer/Parcyval",          domain: "store.steampowered.com", cta: true  },
-  ];
-
-  const nav = document.getElementById("site-nav");
-  navLinks.forEach(({ label, href, domain, cta }) => {
-    const a = document.createElement("a");
-    a.href = href;
-    if (href.startsWith("http")) a.target = "_blank";
-    if (cta) a.classList.add("nav-cta");
-    if (domain) {
-      const img = document.createElement("img");
-      img.classList.add("favicon");
-      img.alt = "";
-      img.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-      a.appendChild(img);
     }
-    a.appendChild(document.createTextNode(label));
-    nav.appendChild(a);
-  });
 
-  /* ── GAMES DATA ── */
-  const games = [
-    { title: "Descending Empires", desc: "A multiplayer RTS blending in-depth mechanics with fast-paced skirmish matches. Manage an empire in large-scale online battles.", img: "descending_empires.png", href: "descending_empires.html", tag: "RTS · Multiplayer", collab: false },
-    { title: "TYPE",               desc: "A typing game where the player has to defend themselves by typing the name of approaching threats. On Steam now.",               img: "type.png",               href: "https://store.steampowered.com/app/3884500", tag: "Typing · Action · On Steam", collab: false },
-    { title: "VARIENT",   desc: "A prototype of a movement shooter with hundreds of unique guns / styles and fast movement.",                            img: "SOON.png",               href: "movement_shooter.html",   tag: "Shooter · Prototype",       collab: false },
-    { title: "Friedbert",          desc: "Singleplayer - a story game about a toaster army taking over the world. Yes, really.",                           img: "friedbert.png",          href: "friedbert.html",          tag: "Slasher · Story",           collab: false },
-    { title: "The Bank",           desc: "A finance MMO with the goal to compete in a virtual economy",                                                    img: "bank_logo.png",          href: "https://store.steampowered.com/app/4676940", tag: "MMO · Economy · On Steam",  collab: false },
-    { title: "Parsona",            desc: "A tiny social media platform, free of the toxic and addictive parts other platforms force onto their users.",                   img: "creator_hub_icon.png",   href: "/parsona/",               tag: "Social Platform",           collab: false },
-    { title: "Spellloom",          desc: "A roguelike bullet-hell dungeon crawler with deep spell-building and a lot of chaos.",                                          img: "spellloom.jpg",          href: "https://store.steampowered.com/app/3587900/spellloom/", tag: "Roguelike · Bullet-Hell · On Steam", collab: true },
-  ];
+    function populateHoverVideo(videoId) {
 
-  /* ── SLIDER ── */
-  const stage    = document.getElementById("gs-stage");
-  const dotsWrap = document.getElementById("gs-dots");
-  const curEl    = document.getElementById("gs-cur");
-  const totalEl  = document.getElementById("gs-total");
-  const N = games.length;
-  let current = 0, animating = false;
+      const el = document.getElementById("hover-video");
 
-  totalEl.textContent = N;
+      if (el) {
+        el.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
+      }
 
-  games.forEach((g, i) => {
-    const a = document.createElement("a");
-    a.className = "gs-card";
-    a.href = g.href;
-    if (g.href.startsWith("http")) a.target = "_blank";
-    a.dataset.index = i;
+    }
 
-    const img = document.createElement("img");
-    img.className = "gs-card__img";
-    img.src = g.img;
-    img.alt = g.title;
-    img.loading = "lazy";
-    a.appendChild(img);
+    function showMessage(msg) {
 
-    const info = document.createElement("div");
-    info.className = "gs-card__info";
+      const el = document.getElementById("hover-video");
 
-    const tag = document.createElement("div");
-    tag.className = "gs-card__tag" + (g.collab ? " collab" : "");
-    tag.textContent = g.collab ? "✦ COLLAB  ·  " + g.tag : g.tag;
+      if (el) {
+        el.innerHTML = `<p class="hover-video-loading">${msg}</p>`;
+      }
 
-    const title = document.createElement("div");
-    title.className = "gs-card__title";
-    title.textContent = g.title;
+    }
 
-    const desc = document.createElement("div");
-    desc.className = "gs-card__desc";
-    desc.textContent = g.desc;
+    loadLatestFullVideo();
 
-    const cta = document.createElement("span");
-    cta.className = "gs-card__cta";
-    cta.textContent = g.href.startsWith("http") ? "View on Steam" : "Learn More";
+  </script>
 
-    info.append(tag, title, desc, cta);
-    a.appendChild(info);
-    stage.appendChild(a);
-  });
+</head>
 
-  for (let i = 0; i < N; i++) {
-    const b = document.createElement("button");
-    b.className = "gs-dot" + (i === 0 ? " active" : "");
-    b.setAttribute("aria-label", `Go to game ${i+1}`);
-    b.addEventListener("click", () => goTo(i));
-    dotsWrap.appendChild(b);
-  }
+<body>
 
-  function stateOf(i) {
-    if (i === current) return "current";
-    if (i === (current + 1) % N) return "next";
-    if (i === (current - 1 + N) % N) return "prev";
-    return "hidden";
-  }
+  <div class="page-glow" aria-hidden="true"></div>
 
-  function applyStates() {
-    stage.querySelectorAll(".gs-card").forEach((c, i) => c.dataset.state = stateOf(i));
-    dotsWrap.querySelectorAll(".gs-dot").forEach((d, i) => d.classList.toggle("active", i === current));
-    curEl.textContent = current + 1;
-  }
+  <div id="stripes" style="position:absolute;top:0;right:0;width:100vmax;height:100%;pointer-events:none;z-index:0;background-image:linear-gradient(150deg,#0e1128 0,#0e1128 56.57vmax,#1e2448 56.68vmax,#1e2448 57.27vmax,#0e1128 57.38vmax,#0e1128 58.22vmax,#1e2448 58.33vmax,#1e2448 59.85vmax,#0e1128 59.96vmax,#0e1128 61.05vmax,#1e2448 61.16vmax,#1e2448 62.68vmax,#0e1128 62.79vmax,#0e1128 63.88vmax,#1e2448 63.99vmax,#1e2448 66.74vmax,#0e1128 66.85vmax,#0e1128 68.23vmax,#1e2448 68.34vmax,#1e2448 72.40vmax,#0e1128 72.51vmax,#0e1128 73.89vmax,#1e2448 74.00vmax,#1e2448 79.47vmax,#0e1128 79.58vmax,#0e1128 80.96vmax,#1e2448 81.07vmax,#1e2448 86.54vmax,#0e1128 86.65vmax,#0e1128 88.03vmax,#1e2448 88.14vmax,#1e2448 95.02vmax,#0e1128 95.13vmax);"></div>
 
-  function goTo(idx) {
-    if (animating || idx === current) return;
-    animating = true;
-    current = ((idx % N) + N) % N;
+  <header class="header">
+
+    <nav id="site-nav"></nav>
+
+    <div class="hero-body">
+
+      <div class="hero-text">
+
+        <h1 class="hero-title">Parcyval</h1>
+
+        <p class="hero-label"></p>
+
+        <p class="hero-sub">German Indie Game Studio</p>
+
+        <p class="hero-desc">We build games nobody made yet, but people always wanted</p>
+
+        <a href="#games" class="hero-cta">See Our Games</a>
+
+      </div>
+
+      <div class="hero-logo">
+
+        <img src="icon_t.png" alt="Parcyval Logo">
+
+      </div>
+
+    </div>
+
+    <a class="learn-more" href="#games">
+
+      <span class="learn-text">Learn More</span>
+
+      <span class="learn-arrow">
+
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+
+          <polyline points="6 9 12 15 18 9"></polyline>
+
+        </svg>
+
+      </span>
+
+    </a>
+
+  </header>
+
+  <section id="games">
+
+    <div class="games-heading">
+
+      <h2>Our Games</h2>
+
+      <span>7 projects · built from community feedback</span>
+
+    </div>
+
+    <div class="gs-wrap">
+
+      <button class="gs-btn gs-btn--prev" aria-label="Previous game">
+
+        <svg viewBox="0 0 24 24">
+
+          <path d="m15 18-6-6 6-6"/>
+
+        </svg>
+
+      </button>
+
+      <div class="gs-stage" id="gs-stage"></div>
+
+      <button class="gs-btn gs-btn--next" aria-label="Next game">
+
+        <svg viewBox="0 0 24 24">
+
+          <path d="m9 18 6-6-6-6"/>
+
+        </svg>
+
+      </button>
+
+    </div>
+
+    <div class="gs-dots" id="gs-dots"></div>
+
+    <p class="gs-counter"><strong id="gs-cur">1</strong> / <span id="gs-total">7</span></p>
+
+  </section>
+
+  <script>
+
+    /* ── NAV ── */
+
+    const navLinks = [
+
+      { label: "Games", href: "#games", domain: null, cta: false },
+      { label: "About", href: "#about", domain: null, cta: false },
+      { label: "Steam", href: "https://store.steampowered.com/developer/Parcyval", domain: "store.steampowered.com", cta: true },
+
+    ];
+
+    const nav = document.getElementById("site-nav");
+
+    navLinks.forEach(({ label, href, domain, cta }) => {
+
+      const a = document.createElement("a");
+
+      a.href = href;
+
+      if (href.startsWith("http")) {
+        a.target = "_blank";
+      }
+
+      if (cta) {
+        a.classList.add("nav-cta");
+      }
+
+      if (domain) {
+
+        const img = document.createElement("img");
+
+        img.classList.add("favicon");
+        img.alt = "";
+        img.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+
+        a.appendChild(img);
+
+      }
+
+      a.appendChild(document.createTextNode(label));
+
+      nav.appendChild(a);
+
+    });
+
+    /* ── GAMES DATA ── */
+
+    const games = [
+
+      {
+        title: "Descending Empires",
+        desc: "A multiplayer RTS blending in-depth mechanics with fast-paced skirmish matches. Manage an empire in large-scale online battles.",
+        img: "descending_empires.png",
+        href: "descending_empires.html",
+        tag: "RTS · Multiplayer",
+        collab: false
+      },
+
+      {
+        title: "TYPE",
+        desc: "A typing game where the player has to defend themselves by typing the name of approaching threats. On Steam now.",
+        img: "type.png",
+        href: "https://store.steampowered.com/app/3884500",
+        tag: "Typing · Action · On Steam",
+        collab: false
+      },
+
+      {
+        title: "VARIENT",
+        desc: "A prototype of a movement shooter with hundreds of unique guns / styles and fast movement.",
+        img: "SOON.png",
+        href: "movement_shooter.html",
+        tag: "Shooter · Prototype",
+        collab: false
+      },
+
+      {
+        title: "Friedbert",
+        desc: "Singleplayer - a story game about a toaster army taking over the world. Yes, really.",
+        img: "friedbert.png",
+        href: "friedbert.html",
+        tag: "Slasher · Story",
+        collab: false
+      },
+
+      {
+        title: "The Bank",
+        desc: "A finance MMO with the goal to compete in a virtual economy",
+        img: "bank_logo.png",
+        href: "https://store.steampowered.com/app/4676940",
+        tag: "MMO · Economy · On Steam",
+        collab: false
+      },
+
+      {
+        title: "Parsona",
+        desc: "A tiny social media platform, free of the toxic and addictive parts other platforms force onto their users.",
+        img: "creator_hub_icon.png",
+        href: "/parsona/",
+        tag: "Social Platform",
+        collab: false
+      },
+
+      {
+        title: "Spellloom",
+        desc: "A roguelike bullet-hell dungeon crawler with deep spell-building and a lot of chaos.",
+        img: "spellloom.jpg",
+        href: "https://store.steampowered.com/app/3587900/spellloom/",
+        tag: "Roguelike · Bullet-Hell · On Steam",
+        collab: true
+      },
+
+    ];
+
+    /* ── SLIDER ── */
+
+    const stage = document.getElementById("gs-stage");
+    const dotsWrap = document.getElementById("gs-dots");
+    const curEl = document.getElementById("gs-cur");
+    const totalEl = document.getElementById("gs-total");
+
+    const N = games.length;
+    let current = 0;
+    let animating = false;
+
+    totalEl.textContent = N;
+
+    games.forEach((g, i) => {
+
+      const a = document.createElement("a");
+
+      a.className = "gs-card";
+      a.href = g.href;
+
+      if (g.href.startsWith("http")) {
+        a.target = "_blank";
+      }
+
+      a.dataset.index = i;
+
+      const img = document.createElement("img");
+
+      img.className = "gs-card__img";
+      img.src = g.img;
+      img.alt = g.title;
+      img.loading = "lazy";
+
+      a.appendChild(img);
+
+      const info = document.createElement("div");
+
+      info.className = "gs-card__info";
+
+      const tag = document.createElement("div");
+
+      tag.className = "gs-card__tag" + (g.collab ? " collab" : "");
+
+      tag.textContent = g.collab
+        ? "✦ COLLAB · " + g.tag
+        : g.tag;
+
+      const title = document.createElement("div");
+
+      title.className = "gs-card__title";
+      title.textContent = g.title;
+
+      const desc = document.createElement("div");
+
+      desc.className = "gs-card__desc";
+      desc.textContent = g.desc;
+
+      const cta = document.createElement("span");
+
+      cta.className = "gs-card__cta";
+      cta.textContent = g.href.startsWith("http")
+        ? "View on Steam"
+        : "Learn More";
+
+      info.append(tag, title, desc, cta);
+
+      a.appendChild(info);
+      stage.appendChild(a);
+
+    });
+
+    for (let i = 0; i < N; i++) {
+
+      const b = document.createElement("button");
+
+      b.className = "gs-dot" + (i === 0 ? " active" : "");
+      b.setAttribute("aria-label", `Go to game ${i + 1}`);
+
+      b.addEventListener("click", () => goTo(i));
+
+      dotsWrap.appendChild(b);
+
+    }
+
+    function stateOf(i) {
+
+      if (i === current) return "current";
+
+      if (i === (current + 1) % N) return "next";
+
+      if (i === (current - 1 + N) % N) return "prev";
+
+      return "hidden";
+
+    }
+
+    function applyStates() {
+
+      stage
+        .querySelectorAll(".gs-card")
+        .forEach((c, i) => c.dataset.state = stateOf(i));
+
+      dotsWrap
+        .querySelectorAll(".gs-dot")
+        .forEach((d, i) => d.classList.toggle("active", i === current));
+
+      curEl.textContent = current + 1;
+
+    }
+
+    function goTo(idx) {
+
+      if (animating || idx === current) return;
+
+      animating = true;
+
+      current = ((idx % N) + N) % N;
+
+      applyStates();
+
+      setTimeout(() => animating = false, 800);
+
+    }
+
+    document
+      .querySelector(".gs-btn--prev")
+      .addEventListener("click", () => goTo(current - 1));
+
+    document
+      .querySelector(".gs-btn--next")
+      .addEventListener("click", () => goTo(current + 1));
+
+    stage.addEventListener("click", (e) => {
+
+      const card = e.target.closest(".gs-card");
+
+      if (!card) return;
+
+      if (card.dataset.state === "next") {
+        e.preventDefault();
+        goTo(current + 1);
+      }
+
+      if (card.dataset.state === "prev") {
+        e.preventDefault();
+        goTo(current - 1);
+      }
+
+    });
+
+    document.addEventListener("keydown", (e) => {
+
+      if (e.key === "ArrowRight") goTo(current + 1);
+      if (e.key === "ArrowLeft") goTo(current - 1);
+
+    });
+
+    let tx = 0;
+
+    stage.addEventListener("touchstart", (e) => {
+      tx = e.touches[0].clientX;
+    }, { passive: true });
+
+    stage.addEventListener("touchend", (e) => {
+
+      const dx = e.changedTouches[0].clientX - tx;
+
+      if (Math.abs(dx) > 40) {
+        dx < 0
+          ? goTo(current + 1)
+          : goTo(current - 1);
+      }
+
+    });
+
     applyStates();
-    setTimeout(() => animating = false, 800);
-  }
 
-  document.querySelector(".gs-btn--prev").addEventListener("click", () => goTo(current - 1));
-  document.querySelector(".gs-btn--next").addEventListener("click", () => goTo(current + 1));
+  </script>
 
-  stage.addEventListener("click", (e) => {
-    const card = e.target.closest(".gs-card");
-    if (!card) return;
-    if (card.dataset.state === "next") { e.preventDefault(); goTo(current + 1); }
-    if (card.dataset.state === "prev") { e.preventDefault(); goTo(current - 1); }
-  });
+  <section id="about">
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight") goTo(current + 1);
-    if (e.key === "ArrowLeft")  goTo(current - 1);
-  });
+    <div class="about-heading">
 
-  let tx = 0;
-  stage.addEventListener("touchstart", (e) => { tx = e.touches[0].clientX; }, { passive: true });
-  stage.addEventListener("touchend",   (e) => { const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 40) dx < 0 ? goTo(current+1) : goTo(current-1); });
+      <h2>About Us</h2>
 
-  applyStates();
-</script>
+      <span>here's some info about us</span>
 
-<section id="about">
-
-<div class="about-heading">
-  <h2>About Us</h2>
-  <span>here's some info about us</span>
-</div>
-
-  <div class="diff-panel">
-    <div class="diff-panel__tab">
-      <span class="diff-panel__dot"></span>
-      <span class="diff-panel__filename">about.txt</span>
-      <span class="diff-panel__lang">diff</span>
     </div>
-    <div class="diff-panel__body">
-      <div class="diff-line diff-line--comment"><span class="diff-line__num">1</span><span class="diff-line__mark">#</span><span class="diff-line__text">philosophy</span></div>
-      <div class="diff-line diff-line--blank"></div>
-      <div class="diff-line diff-line--add"><span class="diff-line__num">2</span><span class="diff-line__mark">+</span><span class="diff-line__text">Parcyval Studios is an indie game studio with the aim to shape our</span></div>
-      <div class="diff-line diff-line--add"><span class="diff-line__num">3</span><span class="diff-line__mark">+</span><span class="diff-line__text">games to the exact state in which players say "that's exactly what</span></div>
-      <div class="diff-line diff-line--add"><span class="diff-line__num">4</span><span class="diff-line__mark">+</span><span class="diff-line__text">i always wanted to play, why did nobody make this earlier?"</span></div>
-      <div class="diff-line diff-line--blank"></div>
-      <div class="diff-line diff-line--rm"><span class="diff-line__num">5</span><span class="diff-line__mark">-</span><span class="diff-line__text">games made after a blueprint, </span></div>
-      <div class="diff-line diff-line--rm"><span class="diff-line__num">6</span><span class="diff-line__mark">-</span><span class="diff-line__text">oriented onto other games just to make the most profit</span></div>
-      <div class="diff-line diff-line--add"><span class="diff-line__num">7</span><span class="diff-line__mark">+</span><span class="diff-line__text">every game is made to be unique and fun to play</span></div>
-      <div class="diff-line diff-line--blank"></div>
-      <div class="diff-line diff-line--comment"><span class="diff-line__num">8</span><span class="diff-line__mark">#</span><span class="diff-line__text">community</span></div>
-      <div class="diff-line diff-line--blank"></div>
-      <div class="diff-line diff-line--add"><span class="diff-line__num">9</span><span class="diff-line__mark">+</span><span class="diff-line__text">all of our games are forged from community feedback and votings</span></div>
-      <div class="diff-line diff-line--add"><span class="diff-line__num">10</span><span class="diff-line__mark">+</span><span class="diff-line__text">for new features on Discord.</span></div>
-      <div class="diff-line diff-line--rm"><span class="diff-line__num">6</span><span class="diff-line__mark">-</span><span class="diff-line__text">radio silence and anti consumer updates</span></div>
-      <div class="diff-line diff-line--blank"></div>
-      <div class="diff-line diff-line--comment"><span class="diff-line__num">11</span><span class="diff-line__mark">#</span><span class="diff-line__text">collaboration</span></div>
-      <div class="diff-line diff-line--blank"></div>
-      <div class="diff-line diff-line--add"><span class="diff-line__num">12</span><span class="diff-line__mark">+</span><span class="diff-line__text">we love helping solo devs by giving them more reach and advertising</span></div>
-      <div class="diff-line diff-line--add"><span class="diff-line__num">13</span><span class="diff-line__mark">+</span><span class="diff-line__text">them — nothing brings more joy than seeing good games by small</span></div>
-      <div class="diff-line diff-line--add"><span class="diff-line__num">14</span><span class="diff-line__mark">+</span><span class="diff-line__text">developers succeeding.<span class="diff-cursor"></span></span></div>
-      <div class="diff-line diff-line--blank"></div>
-      <div class="diff-line diff-line--comment"><span class="diff-line__num">11</span><span class="diff-line__mark">#</span><span class="diff-line__text">ai</span></div>
-      <div class="diff-line diff-line--blank"></div>
-      <div class="diff-line diff-line--rm"><span class="diff-line__num">6</span><span class="diff-line__mark">-</span><span class="diff-line__text">ai generated assets/visuals</span></div>
-      <div class="diff-line diff-line--add"><span class="diff-line__num">9</span><span class="diff-line__mark">+</span><span class="diff-line__text">only using ai to help us code tedious tasks</span></div>
-    </div>
-  </div>
 
+    <div class="diff-panel">
 
-<div class="team-heading">
-  <h2>The Team</h2>
-  <span>every team member:</span>
-</div>
-  <div class="team-container">
-    <div class="team-entry">
-      <a class="team-entry__avatar" href="https://www.instagram.com/lord_parcyval" target="_blank">
-        <img src="marian.jpg" alt="Marian">
-      </a>
-      <div class="team-entry__text">
-        <h3 class="team-entry__name">
-          Marian
-          <a href="https://www.instagram.com/lord_parcyval" target="_blank" aria-label="Marian's Instagram">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </a>
-        </h3>
-        <p class="team-entry__role">
-  <span style="color: rgba(255, 187, 0, 1);">
-    Founder · Game Design
-  </span>
-</p>
+      <div class="diff-panel__tab">
+
+        <span class="diff-panel__dot"></span>
+
+        <span class="diff-panel__filename">about.txt</span>
+
+        <span class="diff-panel__lang">diff</span>
+
       </div>
-    </div>
 
-  </div>
-</section>
+      <div class="diff-panel__body">
 
-<!-- OUR PLANS SECTION temporarily commented out -->
-<!-- Temporary: remove gap left by hidden plans section -->
-<style>
-  #about { padding-bottom: 0; }
-  footer { padding-top: 0; background: linear-gradient(var(--navy), rgba(0,0,0,0.6)); }
-</style>
-
-<footer>
-  <h2>Contact</h2>
-  <div class="footer-buttons">
-    <a href="mailto:parsyprivat@gmail.com" target="_blank">
-      <img src="https://www.google.com/s2/favicons?domain=gmail.com&sz=32" alt="Email">
-      Email
-    </a>
-    <a href="https://discord.gg/359XqyZRjt" target="_blank">
-      <img src="https://www.google.com/s2/favicons?domain=discord.com&sz=32" alt="Discord">
-      Discord
-    </a>
-    <a href="https://store.steampowered.com/developer/Parcyval" target="_blank">
-      <img src="https://www.google.com/s2/favicons?domain=store.steampowered.com&sz=32" alt="Steam">
-      Steam
-    </a>
-    <a href="https://www.youtube.com/@parsydev" target="_blank" class="youtube-btn">
-      <img src="https://www.google.com/s2/favicons?domain=youtube.com&sz=32" alt="YouTube">
-      YouTube
-      <div class="hover-video-container">
-        <h3>Latest Devlog</h3>
-        <div id="hover-video">
-          <p class="hover-video-loading">Loading latest video...</p>
+        <div class="diff-line diff-line--comment">
+          <span class="diff-line__num">1</span>
+          <span class="diff-line__mark">#</span>
+          <span class="diff-line__text">philosophy</span>
         </div>
+
+        <div class="diff-line diff-line--blank"></div>
+
+        <div class="diff-line diff-line--add">
+          <span class="diff-line__num">2</span>
+          <span class="diff-line__mark">+</span>
+          <span class="diff-line__text">Parcyval Studios is an indie game studio with the aim to shape our</span>
+        </div>
+
+        <div class="diff-line diff-line--add">
+          <span class="diff-line__num">3</span>
+          <span class="diff-line__mark">+</span>
+          <span class="diff-line__text">games to the exact state in which players say "that's exactly what</span>
+        </div>
+
+        <div class="diff-line diff-line--add">
+          <span class="diff-line__num">4</span>
+          <span class="diff-line__mark">+</span>
+          <span class="diff-line__text">i always wanted to play, why did nobody make this earlier?"</span>
+        </div>
+
+        <div class="diff-line diff-line--blank"></div>
+
+        <div class="diff-line diff-line--rm">
+          <span class="diff-line__num">5</span>
+          <span class="diff-line__mark">-</span>
+          <span class="diff-line__text">games made after a blueprint, </span>
+        </div>
+
+        <div class="diff-line diff-line--rm">
+          <span class="diff-line__num">6</span>
+          <span class="diff-line__mark">-</span>
+          <span class="diff-line__text">oriented onto other games just to make the most profit</span>
+        </div>
+
+        <div class="diff-line diff-line--add">
+          <span class="diff-line__num">7</span>
+          <span class="diff-line__mark">+</span>
+          <span class="diff-line__text">every game is made to be unique and fun to play</span>
+        </div>
+
+        <div class="diff-line diff-line--blank"></div>
+
+        <div class="diff-line diff-line--comment">
+          <span class="diff-line__num">8</span>
+          <span class="diff-line__mark">#</span>
+          <span class="diff-line__text">community</span>
+        </div>
+
+        <div class="diff-line diff-line--blank"></div>
+
+        <div class="diff-line diff-line--add">
+          <span class="diff-line__num">9</span>
+          <span class="diff-line__mark">+</span>
+          <span class="diff-line__text">all of our games are forged from community feedback and votings</span>
+        </div>
+
+        <div class="diff-line diff-line--add">
+          <span class="diff-line__num">10</span>
+          <span class="diff-line__mark">+</span>
+          <span class="diff-line__text">for new features on Discord.</span>
+        </div>
+
+        <div class="diff-line diff-line--rm">
+          <span class="diff-line__num">6</span>
+          <span class="diff-line__mark">-</span>
+          <span class="diff-line__text">radio silence and anti consumer updates</span>
+        </div>
+
+        <div class="diff-line diff-line--blank"></div>
+
+        <div class="diff-line diff-line--comment">
+          <span class="diff-line__num">11</span>
+          <span class="diff-line__mark">#</span>
+          <span class="diff-line__text">collaboration</span>
+        </div>
+
+        <div class="diff-line diff-line--blank"></div>
+
+        <div class="diff-line diff-line--add">
+          <span class="diff-line__num">12</span>
+          <span class="diff-line__mark">+</span>
+          <span class="diff-line__text">we love helping solo devs by giving them more reach and advertising</span>
+        </div>
+
+        <div class="diff-line diff-line--add">
+          <span class="diff-line__num">13</span>
+          <span class="diff-line__mark">+</span>
+          <span class="diff-line__text">them — nothing brings more joy than seeing good games by small</span>
+        </div>
+
+        <div class="diff-line diff-line--add">
+          <span class="diff-line__num">14</span>
+          <span class="diff-line__mark">+</span>
+          <span class="diff-line__text">developers succeeding.<span class="diff-cursor"></span></span>
+        </div>
+
+        <div class="diff-line diff-line--blank"></div>
+
+        <div class="diff-line diff-line--comment">
+          <span class="diff-line__num">11</span>
+          <span class="diff-line__mark">#</span>
+          <span class="diff-line__text">ai</span>
+        </div>
+
+        <div class="diff-line diff-line--blank"></div>
+
+        <div class="diff-line diff-line--rm">
+          <span class="diff-line__num">6</span>
+          <span class="diff-line__mark">-</span>
+          <span class="diff-line__text">ai generated assets/visuals</span>
+        </div>
+
+        <div class="diff-line diff-line--add">
+          <span class="diff-line__num">9</span>
+          <span class="diff-line__mark">+</span>
+          <span class="diff-line__text">only using ai to help us code tedious tasks</span>
+        </div>
+
       </div>
-    </a>
-    <a href="https://www.patreon.com/c/Parcyval" target="_blank">
-      <img src="https://www.google.com/s2/favicons?domain=patreon.com&sz=32" alt="Patreon">
-      Patreon
-    </a>
-    <a href="/parsona/" target="_blank">
-      <img src="creator_hub_icon.png" alt="Parsona">
-      Parsona
-    </a>
-    <a href="imprint.html">
-      <img src="imprint_icon.png" alt="Imprint">
-      Imprint
-    </a>
-  </div>
-</footer>
+
+    </div>
+
+    <!-- NAME STORY -->
+
+    <div class="identity-panel">
+
+      <div class="identity-panel__tab">
+        <span class="identity-panel__dot"></span>
+        <span class="identity-panel__filename">name.txt</span>
+        <span class="identity-panel__lang">readme</span>
+      </div>
+
+      <div class="identity-panel__body">
+
+        <div class="identity-grid">
+
+          <div class="identity-card">
+            <span class="identity-card__tag">// the person</span>
+            <h4 class="identity-card__name">Parsy</h4>
+            <p class="identity-card__desc">
+              The founder and game designer, turning an idea into a game and shaping it to become something unique and fun.
+            </p>
+          </div>
+
+          <span class="identity-grid__arrow">→</span>
+
+          <div class="identity-card identity-card--studio">
+            <span class="identity-card__tag">// the studio</span>
+            <h4 class="identity-card__name">Parcyval</h4>
+            <p class="identity-card__desc">
+              Parcyval are like my knights in shining armor working on the games and making them happen, be it 3d models, music, ...
+            </p>
+          </div>
+
+        </div>
+
+        <p class="identity-panel__note">
+          Like mouse → mice. Same root, different form.
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="team-heading">
+
+      <h2>The Team</h2>
+
+      <span>every team member:</span>
+
+    </div>
+
+    <div class="team-container">
+
+      <div class="team-entry">
+
+        <a class="team-entry__avatar" href="https://www.instagram.com/lord_parcyval" target="_blank">
+
+          <img src="marian.jpg" alt="Marian">
+
+        </a>
+
+        <div class="team-entry__text">
+
+          <h3 class="team-entry__name">
+
+            Parsy
+
+            <a href="https://www.instagram.com/lord_parcyval" target="_blank" aria-label="Marian's Instagram">
+
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+
+                <line x1="5" y1="12" x2="19" y2="12"/>
+
+                <polyline points="12 5 19 12 12 19"/>
+
+              </svg>
+
+            </a>
+
+          </h3>
+
+          <p class="team-entry__role">
+
+            <span style="color: rgba(255, 187, 0, 1);">
+              Founder · Game Design
+            </span>
+
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <style>
+
+    #about {
+      padding-bottom: 0;
+    }
+
+    footer {
+      padding-top: 0;
+      background: linear-gradient(var(--navy), rgba(0,0,0,0.6));
+    }
+
+  </style>
+
+  <footer>
+
+    <h2>Contact</h2>
+
+    <div class="footer-buttons">
+
+      <a href="mailto:parsyprivat@gmail.com" target="_blank">
+
+        <img src="https://www.google.com/s2/favicons?domain=gmail.com&sz=32" alt="Email">
+
+        Email
+
+      </a>
+
+      <a href="https://discord.gg/359XqyZRjt" target="_blank">
+
+        <img src="https://www.google.com/s2/favicons?domain=discord.com&sz=32" alt="Discord">
+
+        Discord
+
+      </a>
+
+      <a href="https://store.steampowered.com/developer/Parcyval" target="_blank">
+
+        <img src="https://www.google.com/s2/favicons?domain=store.steampowered.com&sz=32" alt="Steam">
+
+        Steam
+
+      </a>
+
+      <a href="https://www.youtube.com/@parsydev" target="_blank" class="youtube-btn">
+
+        <img src="https://www.google.com/s2/favicons?domain=youtube.com&sz=32" alt="YouTube">
+
+        YouTube
+
+        <div class="hover-video-container">
+
+          <h3>Latest Devlog</h3>
+
+          <div id="hover-video">
+
+            <p class="hover-video-loading">Loading latest video...</p>
+
+          </div>
+
+        </div>
+
+      </a>
+
+      <a href="https://www.patreon.com/c/Parcyval" target="_blank">
+
+        <img src="https://www.google.com/s2/favicons?domain=patreon.com&sz=32" alt="Patreon">
+
+        Patreon
+
+      </a>
+
+      <a href="/parsona/" target="_blank">
+
+        <img src="creator_hub_icon.png" alt="Parsona">
+
+        Parsona
+
+      </a>
+
+      <a href="imprint.html">
+
+        <img src="imprint_icon.png" alt="Imprint">
+
+        Imprint
+
+      </a>
+
+    </div>
+
+  </footer>
 
 </body>
+
 </html>
