@@ -3,203 +3,335 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="icon" type="image/x-icon" href="icon.png">
   <title>Imprint – Parcyval Studios</title>
-  <link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: #050505;
+    }
+
     body {
       margin: 0;
-      padding: 0;
-      background-image: url('backgrounda.jpg');
-      background-color: #000000;
-      background-size: cover;
-      background-position: center;
-      font-family: 'Saira', sans-serif;
-      position: relative;
-      overflow-x: hidden;
       min-height: 100vh;
-      padding-top: 30px;
+      background: #050505;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
     }
 
+    /* Subtle background glow */
     body::before {
-      --line: rgb(100, 100, 100);
-      --size: 55px;
       content: "";
-      height: 100%;
-      width: 100%;
       position: fixed;
+      inset: 0;
+      pointer-events: none;
       background:
-        linear-gradient(90deg, var(--line) 1px, transparent 1px var(--size)) 0 -5vmin / var(--size) var(--size),
-        linear-gradient(var(--line) 2px, transparent 2px var(--size)) 0 -5vmin / var(--size) var(--size);
-      mask: linear-gradient(-15deg, transparent 65%, white);
-      -webkit-mask: linear-gradient(-15deg, transparent 65%, white);
-      top: 0;
-      z-index: -1;
+        radial-gradient(
+          circle at 50% 0%,
+          rgba(255, 255, 255, 0.045),
+          transparent 45%
+        );
     }
 
-    body::after {
-      --line: rgb(100, 100, 100);
-      --size: 55px;
-      content: "";
-      height: 100%;
-      width: 100%;
+    /* Header */
+    header {
       position: fixed;
-      background:
-        linear-gradient(90deg, var(--line) 1px, transparent 1px var(--size)) 0 -5vmin / var(--size) var(--size),
-        linear-gradient(var(--line) 2px, transparent 2px var(--size)) 0 -5vmin / var(--size) var(--size);
-      mask: linear-gradient(-15deg, white, transparent 65%);
-      -webkit-mask: linear-gradient(-15deg, white, transparent 65%);
       top: 0;
-      z-index: -1;
+      left: 0;
+      width: 100%;
+      height: 76px;
+
+      display: flex;
+      align-items: center;
+
+      padding: 0 32px;
+
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(5, 5, 5, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+
+      z-index: 10;
     }
 
     .logo {
-      position: absolute;
-      top: 25px;
-      left: 15px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      background-color: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-radius: 10px;
-      padding: 5px 10px;
+      gap: 12px;
+
+      color: #ffffff;
       text-decoration: none;
     }
 
     .logo img {
-      width: 50px;
-      height: auto;
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
     }
 
     .company-name {
-      font-family: 'Saira', sans-serif;
-      font-weight: bold;
-      font-size: 22px;
-      color: white;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
     }
 
-    .imprint-box {
-      width: 90%;
-      max-width: 700px;
-      margin: 120px auto 80px;
-      padding: 50px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 14px;
-      background-color: rgba(0, 0, 0, 0.65);
-      color: white;
-      font-family: 'Saira', sans-serif;
-      box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(8px);
-      box-sizing: border-box;
+    /* Main */
+    main {
+      width: 100%;
+      max-width: 760px;
+
+      margin: 0 auto;
+      padding: 150px 24px 100px;
     }
 
-    .imprint-box h1 {
-      font-size: 36px;
-      font-weight: bold;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      margin: 0 0 40px;
-      border-bottom: 1px solid rgba(255,255,255,0.15);
-      padding-bottom: 20px;
-    }
+    .page-label {
+      margin-bottom: 14px;
 
-    .imprint-box h2 {
-      font-size: 14px;
-      font-weight: bold;
+      font-size: 12px;
+      font-weight: 600;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.5);
-      margin: 32px 0 10px;
+
+      color: #666666;
     }
 
-    .imprint-box p {
-      font-size: 17px;
-      line-height: 1.8;
-      color: #ddd;
+    h1 {
       margin: 0;
-      font-family: 'Josefin Sans', sans-serif;
+
+      font-size: clamp(38px, 7vw, 58px);
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: -2px;
     }
 
-    .imprint-box a {
-      color: #ccc;
-      text-decoration: underline;
+    .divider {
+      width: 100%;
+      height: 1px;
+
+      margin: 42px 0 48px;
+
+      background: rgba(255, 255, 255, 0.1);
     }
 
-    .imprint-box a:hover {
-      color: #fff;
+    /* Sections */
+    .section {
+      margin-bottom: 42px;
     }
 
+    .section-title {
+      margin: 0 0 14px;
+
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+
+      color: #666666;
+    }
+
+    .section-content {
+      margin: 0;
+
+      font-size: 16px;
+      line-height: 1.8;
+      font-weight: 400;
+
+      color: #d4d4d4;
+    }
+
+    .section-content strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    a {
+      color: #ffffff;
+      text-decoration: none;
+      border-bottom: 1px solid #444444;
+
+      transition:
+        color 0.2s ease,
+        border-color 0.2s ease;
+    }
+
+    a:hover {
+      color: #ffffff;
+      border-color: #ffffff;
+    }
+
+    /* Back button */
     .back-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      margin-top: 40px;
-      padding: 12px 24px;
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 20px;
-      color: white;
-      font-family: 'Saira', sans-serif;
-      font-weight: bold;
-      font-size: 14px;
-      text-decoration: none;
-      letter-spacing: 1px;
-      transition: background-color 0.3s ease;
+      gap: 10px;
+
+      margin-top: 10px;
+      padding: 11px 18px;
+
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 7px;
+
+      color: #bdbdbd;
+
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+
+      transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
     }
 
     .back-btn:hover {
-      background-color: #4c4c4c;
+      background: #ffffff;
+      border-color: #ffffff;
+      color: #000000;
     }
 
+    /* Footer */
+    footer {
+      margin-top: 70px;
+      padding-top: 24px;
+
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+      font-size: 12px;
+      color: #555555;
+    }
+
+    /* Mobile */
     @media (max-width: 600px) {
-      .imprint-box {
-        padding: 30px 24px;
-        margin-top: 100px;
+
+      header {
+        height: 68px;
+        padding: 0 20px;
       }
 
-      .imprint-box h1 {
-        font-size: 26px;
+      .logo img {
+        width: 34px;
+        height: 34px;
+      }
+
+      .company-name {
+        font-size: 15px;
+        letter-spacing: 2px;
+      }
+
+      main {
+        padding: 120px 22px 70px;
+      }
+
+      h1 {
+        font-size: 42px;
+        letter-spacing: -1.5px;
+      }
+
+      .divider {
+        margin: 32px 0 40px;
+      }
+
+      .section {
+        margin-bottom: 36px;
+      }
+
+      .section-content {
+        font-size: 15px;
+        line-height: 1.75;
       }
     }
   </style>
 </head>
+
 <body>
 
-  <a class="logo" href="index.html">
-    <img src="icon_t.png" alt="logo">
-    <span class="company-name">PARCYVAL</span>
-  </a>
+  <header>
+    <a class="logo" href="index.html">
+      <img src="icon_t.png" alt="Parcyval Studios logo">
+      <span class="company-name">PARCYVAL</span>
+    </a>
+  </header>
 
-  <div class="imprint-box">
+
+  <main>
+
+    <div class="page-label">Legal</div>
+
     <h1>Imprint</h1>
 
-<h2>Information pursuant to § 5 DDG</h2>
-<p>
-  Marian Dreher<br>
-  Bernäckerstraße 28<br>
-  76571 Gaggenau<br>
-  Germany
-</p>
-<h2>Contact</h2>
-<p>
-  <a href="mailto:parsyprivat@gmail.com">parsyprivat@gmail.com</a>
-</p>
+    <div class="divider"></div>
 
-<h2>Business Identification</h2>
-<p>
-  Wirtschafts-Identifikationsnummer (W-IdNr.): DE458065796
-</p>
 
-<h2>Copyright</h2>
-<p>
-  All content &copy; Parcyval Studios, unless otherwise stated.
-  Placeholder content may be excluded.
-</p>
+    <section class="section">
+      <h2 class="section-title">
+        Information pursuant to § 5 DDG
+      </h2>
 
-    <a class="back-btn" href="index.html">&#8592; Back to Home</a>
-  </div>
+      <p class="section-content">
+        Marian Dreher<br>
+        Bernäckerstraße 28<br>
+        76571 Gaggenau<br>
+        Germany
+      </p>
+    </section>
+
+
+    <section class="section">
+      <h2 class="section-title">
+        Contact
+      </h2>
+
+      <p class="section-content">
+        <a href="mailto:parsyprivat@gmail.com">
+          parsyprivat@gmail.com
+        </a>
+      </p>
+    </section>
+
+
+    <section class="section">
+      <h2 class="section-title">
+        Business Identification
+      </h2>
+
+      <p class="section-content">
+        Wirtschafts-Identifikationsnummer (W-IdNr.):
+        <strong>DE458065796</strong>
+      </p>
+    </section>
+
+
+    <section class="section">
+      <h2 class="section-title">
+        Copyright
+      </h2>
+
+      <p class="section-content">
+        All content &copy; Parcyval Studios, unless otherwise stated.
+        Placeholder content may be excluded.
+      </p>
+    </section>
+
+
+    <a class="back-btn" href="index.html">
+      <span>←</span>
+      <span>Back to Home</span>
+    </a>
+
+
+    <footer>
+      © Parcyval Studios
+    </footer>
+
+  </main>
 
 </body>
 </html>
