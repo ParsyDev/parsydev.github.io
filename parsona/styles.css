@@ -1151,39 +1151,35 @@ button:disabled {
 }
 
 .refresh-btn {
+    width: auto;
+    margin: 0;
+    padding: 6px 12px;
     background: transparent;
     color: var(--text-secondary);
-    border: 1px solid var(--border-subtle);
-    padding: 8px;
-    border-radius: 8px;
+    border: 1px solid var(--border-medium);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0;
     cursor: pointer;
-    font-size: 18px;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
+    transition: none;
 }
 
 .refresh-btn:hover {
     background: var(--bg-secondary);
-    color: var(--text);
-    border-color: var(--border);
-    transform: rotate(90deg);
+    color: var(--text-primary);
+    transform: none;
+    box-shadow: none;
 }
 
 .refresh-btn:active {
-    transform: rotate(90deg) scale(0.95);
+    transform: none;
 }
 
-.refresh-btn.refreshing {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+.refresh-btn:disabled {
+    background: transparent;
+    color: var(--text-muted);
+    cursor: default;
 }
 
 .search-container {
@@ -1196,7 +1192,7 @@ button:disabled {
 
 .search-box input {
     width: 100%;
-    padding: 14px 48px 14px 20px;
+    padding: 14px 20px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-subtle);
     border-radius: 12px;
@@ -1215,15 +1211,6 @@ button:disabled {
 
 .search-box input::placeholder {
     color: var(--text-muted);
-}
-
-.search-icon {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
 }
 
 .profiles-grid {

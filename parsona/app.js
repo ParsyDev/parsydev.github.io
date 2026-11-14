@@ -193,7 +193,6 @@ if (navLogo) {
 // Refresh button handler
 if (els.refreshBtn) {
     els.refreshBtn.onclick = async () => {
-        els.refreshBtn.classList.add('refreshing');
         els.refreshBtn.disabled = true;
         
         // Clear ALL cache
@@ -206,7 +205,6 @@ if (els.refreshBtn) {
         await loadAllProfiles();
         
         // Reset button
-        els.refreshBtn.classList.remove('refreshing');
         els.refreshBtn.disabled = false;
         
         console.log('✅ Profiles refreshed from server');
@@ -465,7 +463,7 @@ async function loadAllProfiles() {
         console.error('Failed to load registry:', e);
         els.grid.innerHTML = `
             <div style="text-align:center;padding:40px;color:#ff6b6b;">
-                <h3 style="margin-bottom:10px;">⚠️ Error Loading Profiles</h3>
+                <h3 style="margin-bottom:10px;">Error Loading Profiles</h3>
                 <p style="color:#666;font-size:14px;">Could not connect to the API proxy.</p>
                 <p style="color:#666;font-size:14px;margin-top:10px;">Make sure API_URL is set correctly in app.js</p>
                 <p style="color:#999;font-size:12px;margin-top:10px;">Error: ${e.message}</p>
@@ -668,7 +666,7 @@ function createProfileCard(profile, id) {
         const partnerValue = document.createElement('div');
         partnerValue.className = 'profile-card-field-value';
         partnerValue.style.cssText = 'color: var(--accent-primary); cursor: pointer;';
-        partnerValue.textContent = '🔗 Loading...';
+        partnerValue.textContent = 'Loading...';
         partnerField.appendChild(partnerLabel);
         partnerField.appendChild(partnerValue);
         info.appendChild(partnerField);
@@ -676,10 +674,10 @@ function createProfileCard(profile, id) {
         // Fetch partner name async
         loadProfile(profile.partnerId).then(partnerProfile => {
             if (partnerProfile) {
-                partnerValue.textContent = '🔗 ' + partnerProfile.name;
+                partnerValue.textContent = '' + partnerProfile.name;
             }
         }).catch(() => {
-            partnerValue.textContent = '🔗 Unknown';
+            partnerValue.textContent = 'Unknown';
         });
         
         // Make partner clickable
@@ -1242,7 +1240,7 @@ els.loginBtn.onclick = async () => {
     const password = els.loginPass.value.trim();
     
     if (!name || !password) {
-        showStatus(els.loginStatus, 'error', 'Please enter name and password!');
+        showStatus(els.loginStatus, 'error', 'Please enter name and password.');
         return;
     }
     
@@ -1250,24 +1248,24 @@ els.loginBtn.onclick = async () => {
         // Fresh registry so recently renamed / created profiles can log in
         await refreshRegistry();
     } catch(e) {
-        showStatus(els.loginStatus, 'error', '❌ Could not reach the server!');
+        showStatus(els.loginStatus, 'error', 'Could not reach the server.');
         return;
     }
 
     if (!registry[name]) {
-        showStatus(els.loginStatus, 'error', '❌ Profile not found!');
+        showStatus(els.loginStatus, 'error', 'Profile not found.');
         return;
     }
 
     const profileId = registry[name];
 
     try {
-        showStatus(els.loginStatus, 'loading', '🔄 Loading profile...');
+        showStatus(els.loginStatus, 'loading', 'Loading profile...');
         const profile = await fetchProfileFromServer(profileId);
         
         // Check if profile has password protection
         if (!profile.passwordHash) {
-            showStatus(els.loginStatus, 'error', '❌ This profile has no password!');
+            showStatus(els.loginStatus, 'error', 'This profile has no password.');
             return;
         }
         
@@ -1276,7 +1274,7 @@ els.loginBtn.onclick = async () => {
             const inputHash = await cryptoHelper.hashPassword(password);
             
             if (inputHash !== profile.passwordHash) {
-                showStatus(els.loginStatus, 'error', '❌ Wrong password!');
+                showStatus(els.loginStatus, 'error', 'Wrong password.');
                 return;
             }
             
@@ -1301,7 +1299,7 @@ els.loginBtn.onclick = async () => {
         } else {
             // Fallback: simple password check
             if (profile.password !== password) {
-                showStatus(els.loginStatus, 'error', '❌ Wrong password!');
+                showStatus(els.loginStatus, 'error', 'Wrong password.');
                 return;
             }
             
@@ -1318,7 +1316,7 @@ els.loginBtn.onclick = async () => {
         // Update UI
         applyLoggedInUI(profile);
 
-        showStatus(els.loginStatus, 'success', '✅ Logged in successfully!');
+        showStatus(els.loginStatus, 'success', 'Logged in.');
         
         setTimeout(() => {
             els.loginModal.classList.remove('active');
@@ -1327,7 +1325,7 @@ els.loginBtn.onclick = async () => {
         
     } catch(e) {
         console.error('Login error:', e);
-        showStatus(els.loginStatus, 'error', '❌ Error loading profile!');
+        showStatus(els.loginStatus, 'error', 'Error loading profile.');
     }
 };
 
@@ -1404,12 +1402,12 @@ function checkImageUrl(url) {
         return;
     }
 
-    setImageUrlStatus('checking', '⏳ Checking image…');
+    setImageUrlStatus('checking', 'Checking image…');
 
     const img = new Image();
     const timeout = setTimeout(() => {
         if (token !== imageUrlCheckToken) return;
-        setImageUrlStatus('error', "⚠️ Couldn't load this image (timed out). The host may be blocking hotlinking, or the link is slow/broken.");
+        setImageUrlStatus('error', "Couldn't load this image (timed out). The host may be blocking hotlinking, or the link is slow/broken.");
     }, 8000);
 
     img.onload = () => {
@@ -1421,7 +1419,7 @@ function checkImageUrl(url) {
     img.onerror = () => {
         clearTimeout(timeout);
         if (token !== imageUrlCheckToken) return;
-        setImageUrlStatus('error', "⚠️ Couldn't load this image. The host likely blocks hotlinking (common on wallpaper sites), or the link is broken/outdated. Try a different host like imgur or a Discord CDN link.");
+        setImageUrlStatus('error', "Couldn't load this image. The host likely blocks hotlinking (common on wallpaper sites), or the link is broken/outdated. Try a different host like imgur or a Discord CDN link.");
     };
 
     img.src = url;
@@ -1485,7 +1483,7 @@ els.applyCrop.onclick = () => {
         const cropData = cropper.getCropData();
         imageCrops[currentImageType].crop = cropData;
         console.log(`Crop saved for ${currentImageType}:`, cropData);
-        alert(`✓ ${currentImageType.charAt(0).toUpperCase() + currentImageType.slice(1)} crop applied!`);
+        
         // Close crop UI after applying
         els.cropCont.classList.remove('active');
     }
@@ -1658,7 +1656,7 @@ els.create.onclick = async () => {
     // Check if terms are agreed to
     const agreeToTerms = document.getElementById('agreeToTerms');
     if (agreeToTerms && !agreeToTerms.checked) {
-        showStatus(els.createStatus, 'error', '⚠️ You must agree to the Terms of Service & Privacy Policy to create a profile.');
+        showStatus(els.createStatus, 'error', 'You must agree to the Terms of Service & Privacy Policy to create a profile.');
         return;
     }
     
@@ -1679,12 +1677,12 @@ els.create.onclick = async () => {
     const partnerId = document.getElementById('profilePartner').value.trim();
     
     if (!name) {
-        showStatus(els.createStatus, 'error', 'Name is required!');
+        showStatus(els.createStatus, 'error', 'Name is required.');
         return;
     }
     
     if (!password) {
-        showStatus(els.createStatus, 'error', 'Password is required!');
+        showStatus(els.createStatus, 'error', 'Password is required.');
         return;
     }
     
@@ -1692,11 +1690,11 @@ els.create.onclick = async () => {
     try {
         await refreshRegistry();
     } catch(e) {
-        showStatus(els.createStatus, 'error', '❌ Could not reach the server!');
+        showStatus(els.createStatus, 'error', 'Could not reach the server.');
         return;
     }
     if (registry[name]) {
-        showStatus(els.createStatus, 'error', 'Name already taken!');
+        showStatus(els.createStatus, 'error', 'Name already taken.');
         return;
     }
     
@@ -1747,7 +1745,7 @@ els.create.onclick = async () => {
     
     // Use encryption if available
     if (typeof cryptoHelper !== 'undefined' && typeof authManager !== 'undefined') {
-        showStatus(els.createStatus, 'loading', '🔒 Creating encrypted profile...');
+        showStatus(els.createStatus, 'loading', 'Creating profile...');
         
         const privateData = {
             notes: '' // Can be expanded later
@@ -1757,12 +1755,12 @@ els.create.onclick = async () => {
             profileData = await authManager.createAccount(name, password, publicData, privateData);
         } catch(e) {
             console.error('Encryption failed:', e);
-            showStatus(els.createStatus, 'error', '❌ Encryption failed!');
+            showStatus(els.createStatus, 'error', 'Encryption failed.');
             return;
         }
     } else {
         // Fallback: simple password storage
-        showStatus(els.createStatus, 'loading', '🔄 Creating profile...');
+        showStatus(els.createStatus, 'loading', 'Creating profile...');
         profileData = {
             ...publicData,
             password: password // Not secure, but works
@@ -1812,7 +1810,7 @@ els.create.onclick = async () => {
         // Update UI
         applyLoggedInUI(profileData);
 
-        showStatus(els.createStatus, 'success', '✅ Profile created!');
+        showStatus(els.createStatus, 'success', 'Profile created.');
         
         setTimeout(() => {
             viewProfile(gistId);
@@ -1821,14 +1819,14 @@ els.create.onclick = async () => {
         
     } catch(e) {
         console.error('Error creating profile:', e);
-        showStatus(els.createStatus, 'error', '❌ Failed to create profile!');
+        showStatus(els.createStatus, 'error', 'Failed to create profile.');
     }
 };
 
 // Update profile
 els.update.onclick = async () => {
     if (!editingProfileId || !currentUser) {
-        showStatus(els.createStatus, 'error', 'Not logged in!');
+        showStatus(els.createStatus, 'error', 'Not logged in.');
         return;
     }
     
@@ -1850,7 +1848,7 @@ els.update.onclick = async () => {
     const partnerId = document.getElementById('profilePartner').value.trim();
     
     if (!name) {
-        showStatus(els.createStatus, 'error', 'Name is required!');
+        showStatus(els.createStatus, 'error', 'Name is required.');
         return;
     }
     
@@ -1897,7 +1895,7 @@ els.update.onclick = async () => {
 
     const nameChanged = name !== currentUser.name;
 
-    showStatus(els.createStatus, 'loading', '🔄 Updating profile...');
+    showStatus(els.createStatus, 'loading', 'Updating profile...');
 
     // Always work from the live server copy (not the 1h cache)
     let existingProfile;
@@ -1905,7 +1903,7 @@ els.update.onclick = async () => {
         existingProfile = await fetchProfileFromServer(editingProfileId);
     } catch(e) {
         console.error('Could not load existing profile:', e);
-        showStatus(els.createStatus, 'error', '❌ Could not load your profile from the server!');
+        showStatus(els.createStatus, 'error', 'Could not load your profile from the server.');
         return;
     }
 
@@ -1914,11 +1912,11 @@ els.update.onclick = async () => {
         try {
             await refreshRegistry();
         } catch(e) {
-            showStatus(els.createStatus, 'error', '❌ Could not reach the server!');
+            showStatus(els.createStatus, 'error', 'Could not reach the server.');
             return;
         }
         if (registry[name] && registry[name] !== editingProfileId) {
-            showStatus(els.createStatus, 'error', 'Name already taken!');
+            showStatus(els.createStatus, 'error', 'Name already taken.');
             return;
         }
     }
@@ -1936,7 +1934,7 @@ els.update.onclick = async () => {
         // Typed the same password again → nothing to change
         if (newHash !== existingProfile.passwordHash) {
             if (!currentPasswordInput) {
-                showStatus(els.createStatus, 'error', '⚠️ Enter your current password to set a new one.');
+                showStatus(els.createStatus, 'error', 'Enter your current password to set a new one.');
                 return;
             }
 
@@ -1945,7 +1943,7 @@ els.update.onclick = async () => {
                 ? (await cryptoHelper.hashPassword(currentPasswordInput)) === existingProfile.passwordHash
                 : existingProfile.password === currentPasswordInput; // very old profiles
             if (!currentOk) {
-                showStatus(els.createStatus, 'error', '❌ Current password is wrong!');
+                showStatus(els.createStatus, 'error', 'Current password is wrong.');
                 return;
             }
 
@@ -1965,7 +1963,7 @@ els.update.onclick = async () => {
                 newPasswordSet = true;
             } catch(e) {
                 console.error('Re-encryption failed:', e);
-                showStatus(els.createStatus, 'error', '❌ Update failed: ' + e.message);
+                showStatus(els.createStatus, 'error', 'Update failed: ' + e.message);
                 return;
             }
         }
@@ -2010,7 +2008,7 @@ els.update.onclick = async () => {
         }
     } catch(e) {
         console.error('Error updating profile:', e);
-        showStatus(els.createStatus, 'error', '❌ Failed to update profile! (' + e.message + ')');
+        showStatus(els.createStatus, 'error', 'Failed to update profile (' + e.message + ').');
         return;
     }
 
@@ -2026,7 +2024,7 @@ els.update.onclick = async () => {
             await saveRegistry();
         } catch(e) {
             console.error('Registry update failed:', e);
-            showStatus(els.createStatus, 'error', '⚠️ Profile saved, but the name could not be updated in the registry. Please try saving again.');
+            showStatus(els.createStatus, 'error', 'Profile saved, but the name could not be updated in the registry. Please try saving again.');
             return;
         }
     }
@@ -2042,7 +2040,7 @@ els.update.onclick = async () => {
     saveLoginSession(editingProfileId, name);
     applyLoggedInUI(profileData);
 
-    showStatus(els.createStatus, 'success', newPasswordSet ? '✅ Profile updated & password changed!' : '✅ Profile updated!');
+    showStatus(els.createStatus, 'success', newPasswordSet ? 'Profile updated and password changed.' : 'Profile updated.');
 
     const updatedId = editingProfileId;
     setTimeout(() => {
@@ -2131,8 +2129,7 @@ function setPasswordFieldsMode(isEdit) {
     const label = document.getElementById('profilePasswordLabel');
     const currentField = document.getElementById('currentPasswordField');
     const currentInput = document.getElementById('currentPassword');
-    if (label) label.textContent = isEdit ? 'New Password (leave empty to keep current)' : 'Password (for editing later)';
-    els.pass.placeholder = isEdit ? 'Leave empty to keep your password' : 'Create a password';
+    if (label) label.textContent = isEdit ? 'New Password' : 'Password';
     els.pass.value = '';
     if (currentField) currentField.style.display = isEdit ? 'block' : 'none';
     if (currentInput) currentInput.value = '';
@@ -2588,13 +2585,13 @@ els.mediaSearchBtn.onclick = async () => {
 function addMediaCard(media) {
     // Check if already added
     if (currentMediaCards.some(card => card.id === media.id)) {
-        showStatus(els.mediaStatus, 'error', 'Already added!');
+        showStatus(els.mediaStatus, 'error', 'Already added.');
         return;
     }
     
     // Check limit
     if (currentMediaCards.length >= 12) {
-        showStatus(els.mediaStatus, 'error', 'Maximum 12 cards reached!');
+        showStatus(els.mediaStatus, 'error', 'Maximum 12 cards reached.');
         return;
     }
     
@@ -2603,7 +2600,7 @@ function addMediaCard(media) {
     
     // Close modal
     els.mediaModal.classList.remove('active');
-    showStatus(els.mediaStatus, 'success', 'Added!');
+    showStatus(els.mediaStatus, 'success', 'Added.');
 }
 
 // Remove media card
@@ -2756,7 +2753,7 @@ function addCustomSocialLink() {
     const name = els.customSocialName.value.trim();
     
     if (!url) {
-        showStatus(els.customSocialStatus, 'error', 'URL is required!');
+        showStatus(els.customSocialStatus, 'error', 'URL is required.');
         return;
     }
     
@@ -2764,13 +2761,13 @@ function addCustomSocialLink() {
     try {
         new URL(url);
     } catch (e) {
-        showStatus(els.customSocialStatus, 'error', 'Invalid URL!');
+        showStatus(els.customSocialStatus, 'error', 'Invalid URL.');
         return;
     }
     
     // Check limit
     if (currentCustomSocialLinks.length >= 10) {
-        showStatus(els.customSocialStatus, 'error', 'Maximum 10 links allowed!');
+        showStatus(els.customSocialStatus, 'error', 'Maximum 10 links allowed.');
         return;
     }
     
@@ -2782,7 +2779,7 @@ function addCustomSocialLink() {
     
     renderCustomSocialLinks();
     els.customSocialModal.classList.remove('active');
-    showStatus(els.customSocialStatus, 'success', 'Link added!');
+    showStatus(els.customSocialStatus, 'success', 'Link added.');
     setTimeout(() => els.customSocialStatus.style.display = 'none', 2000);
 }
 

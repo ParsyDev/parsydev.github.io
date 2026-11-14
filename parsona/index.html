@@ -32,12 +32,11 @@
             <div class="browse-container">
                 <div class="browse-header">
                     <span>All Users</span>
-                    <button class="refresh-btn" id="refreshBtn" title="Refresh profiles from server">↻</button>
+                    <button class="refresh-btn" id="refreshBtn">Refresh</button>
                 </div>
                 <div class="search-container">
                     <div class="search-box">
-                        <input type="text" id="profileSearch" placeholder="Search profiles by name...">
-                        <span class="search-icon">🔍</span>
+                        <input type="text" id="profileSearch" placeholder="Search">
                     </div>
                 </div>
                 <div class="profiles-grid" id="profilesGrid">
@@ -68,12 +67,12 @@
                         <input type="text" id="profileName" placeholder="Your name">
                     </div>
                     <div class="field">
-                        <label id="profilePasswordLabel">Password (for editing later)</label>
-                        <input type="password" id="profilePassword" placeholder="Create a password">
+                        <label id="profilePasswordLabel">Password</label>
+                        <input type="password" id="profilePassword">
                     </div>
                     <div class="field" id="currentPasswordField" style="display: none;">
                         <label>Current Password</label>
-                        <input type="password" id="currentPassword" placeholder="Only needed if you set a new password above">
+                        <input type="password" id="currentPassword">
                     </div>
                     <div class="field">
                         <label>Description</label>
@@ -147,8 +146,8 @@
                         <div class="drop-zone" id="dropZone">Drop image URL here or paste below</div>
                         <div style="display: flex; gap: 5px;">
                             <input type="text" id="imageUrl" placeholder="Paste image URL" style="flex: 1;">
-                            <button type="button" id="enableCrop" style="width: auto; padding: 8px 15px; background: #3b82f6; margin: 0;">✂️ Crop</button>
-                            <button type="button" id="clearImage" style="width: auto; padding: 8px 15px; background: #e74c3c; margin: 0;">✕ Clear</button>
+                            <button type="button" id="enableCrop" style="width: auto; padding: 8px 15px; background: #3b82f6; margin: 0;">Crop</button>
+                            <button type="button" id="clearImage" style="width: auto; padding: 8px 15px; background: #e74c3c; margin: 0;">Clear</button>
                         </div>
                         <div class="image-url-status" id="imageUrlStatus"></div>
                         
@@ -167,13 +166,13 @@
                                 </div>
                             </div>
                             <div style="display: flex; gap: 8px; margin-top: 10px;">
-                                <button type="button" id="applyCrop" style="background: #ffffff; color: #18181b; flex: 1; font-weight: 600;">✓ Apply Crop</button>
-                                <button type="button" id="cancelCrop" style="background: #71717a; color: white; flex: 1; font-weight: 600;">✕ Cancel</button>
+                                <button type="button" id="applyCrop" style="background: #ffffff; color: #18181b; flex: 1; font-weight: 600;">Apply Crop</button>
+                                <button type="button" id="cancelCrop" style="background: #71717a; color: white; flex: 1; font-weight: 600;">Cancel</button>
                             </div>
                         </div>
                     </div>
                     <div class="field" id="backgroundBlurField" style="display: none;">
-                        <label>🌫️ Background Blur</label>
+                        <label>Background Blur</label>
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <input type="range" id="backgroundBlur" min="0" max="30" value="0" step="1" style="flex: 1; cursor: pointer;">
                             <span style="font-size: 12px; color: var(--text-muted); min-width: 45px;" id="backgroundBlurLabel">0px</span>
@@ -220,7 +219,7 @@
                         <input type="hidden" id="cardStyle" value="frosted">
                     </div>
                     <div class="field">
-                        <label>🔗 Social Media Links</label>
+                        <label>Social Media Links</label>
                         <div style="margin-top: 10px;">
                             <label style="font-size: 13px; color: #666; margin-bottom: 10px; display: block;">Add Social Media (Instagram, YouTube, Twitch, etc.)</label>
                             <div id="customSocialLinksContainer" style="display: flex; flex-wrap: wrap; gap: 10px; min-height: 60px; align-items: flex-start;">
@@ -302,7 +301,7 @@
                                             <div class="profile-card-field-label">PARTNER</div>
                                             <div class="profile-card-field-value">
                                                 <a href="#" id="viewProfilePartnerLink" style="color: var(--accent-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                                                    🔗 <span id="viewProfilePartnerName">Loading...</span>
+                                                    <span id="viewProfilePartnerName">Loading...</span>
                                                 </a>
                                             </div>
                                         </div>
@@ -385,12 +384,12 @@
     <!-- Login Modal -->
     <div class="modal" id="loginModal">
         <div class="modal-content">
-            <div class="modal-header">🔒 LOG IN</div>
+            <div class="modal-header">LOG IN</div>
             <div class="modal-body">
                 <label>Profile Name</label>
                 <input type="text" id="loginProfileName" placeholder="Enter your profile name">
                 <label>Password</label>
-                <input type="password" id="loginPassword" placeholder="Enter password">
+                <input type="password" id="loginPassword">
                 <button class="login-btn" id="loginBtn">Log In</button>
                 <button class="close-btn" id="closeLoginModal">Close</button>
                 <div class="status" id="loginStatus"></div>
@@ -426,7 +425,7 @@
     <!-- Add Custom Social Link Modal -->
     <div class="modal" id="customSocialModal">
         <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">🔗 Add Social Media Link</div>
+            <div class="modal-header">Add Social Media Link</div>
             <div class="modal-body">
                 <label>Social Media URL</label>
                 <input type="text" id="customSocialUrl" placeholder="https://discord.gg/... or any social media link">
@@ -549,7 +548,7 @@
                 
                 <h4 style="margin-top: 20px; color: var(--text-primary);">2.6 We CANNOT Read Your Private Data</h4>
                 <p style="background: rgba(255, 165, 0, 0.1); padding: 15px; border-left: 4px solid orange; border-radius: 4px;">
-                    <strong>⚠️ Zero-Knowledge Encryption:</strong><br>
+                    <strong>Zero-Knowledge Encryption:</strong><br>
                     Your password is used to encrypt private data on YOUR device (in your browser) before it's ever sent to our servers. We never see your password or unencrypted private data. Even if we wanted to read your private data, we mathematically cannot—we don't have the decryption key (your password). This is called "zero-knowledge encryption" and means your private data is truly private.
                 </p>
                 
@@ -684,12 +683,12 @@
                     We are not liable for any damages arising from user-generated content, including but not limited to defamation, copyright infringement, violation of personality rights, or other illegal content uploaded by users.
                 </p>
                 
-                <h4 style="margin-top: 20px; color: var(--text-primary);">⚠️ Report Illegal Content (Notice and Takedown)</h4>
+                <h4 style="margin-top: 20px; color: var(--text-primary);">Report Illegal Content (Notice and Takedown)</h4>
                 <p style="font-size: 13px;">
                     If you believe any profile contains illegal content or violates your rights, please report it immediately to:
                 </p>
                 <p style="font-size: 13px; margin-top: 5px;">
-                    📧 Email: <a href="mailto:parsyprivat@gmail.com" style="color: var(--accent-primary); font-weight: bold;">parsyprivat@gmail.com</a>
+                    Email: <a href="mailto:parsyprivat@gmail.com" style="color: var(--accent-primary); font-weight: bold;">parsyprivat@gmail.com</a>
                 </p>
                 <p style="font-size: 13px; margin-top: 10px;">
                     <strong>Please include in your report:</strong>
