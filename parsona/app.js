@@ -13,10 +13,43 @@ const DEFAULT_PFP = 'none.jpg'; // shown when a profile has no picture set
 
 // Show the default picture on an element (background-image based)
 function applyDefaultPfp(el) {
+    el.dataset.pfpUrl = '';
     el.style.backgroundImage = `url("${DEFAULT_PFP}")`;
     el.style.backgroundSize = 'cover';
     el.style.backgroundPosition = 'center';
     el.style.backgroundRepeat = 'no-repeat';
+}
+// Safe CSS url() - links with spaces, brackets or quotes otherwise break silently
+function cssUrl(url) {
+    const safe = String(url || '').trim()
+        .replace(/ /g, '%20').replace(/"/g, '%22').replace(/'/g, '%27')
+        .replace(/\(/g, '%28').replace(/\)/g, '%29');
+    return `url("${safe}")`;
+}
+
+// Check whether a picture link actually loads (results cached per link)
+const pfpLoadCache = new Map();
+function pfpLoads(url) {
+    if (!pfpLoadCache.has(url)) {
+        pfpLoadCache.set(url, new Promise((resolve) => {
+            const probe = new Image();
+            probe.onload = () => resolve(probe.naturalWidth > 0);
+            probe.onerror = () => resolve(false);
+            probe.src = url;
+        }));
+    }
+    return pfpLoadCache.get(url);
+}
+
+// After setting a picture on an element: swap in the default if the link is broken/blocked
+function watchPfp(el, url) {
+    const link = String(url || '').trim();
+    el.dataset.pfpUrl = link;
+    if (!link) { applyDefaultPfp(el); return; }
+    pfpLoads(link).then((ok) => {
+        // Ignore if the element got a different picture in the meantime
+        if (!ok && el.dataset.pfpUrl === link) applyDefaultPfp(el);
+    });
 }
 let registry = {};
 let currentImageType = 'profile'; // Track which image we're editing
@@ -366,11 +399,8 @@ function setNavAvatar(imageUrl, crop) {
         applyDefaultPfp(menu.trigger);
         return;
     }
-    // Quoted + escaped so URLs with spaces / brackets / quotes still work
-    const safeUrl = String(imageUrl).trim()
-        .replace(/ /g, '%20').replace(/"/g, '%22').replace(/'/g, '%27')
-        .replace(/\(/g, '%28').replace(/\)/g, '%29');
-    menu.trigger.style.backgroundImage = `url("${safeUrl}")`;
+    menu.trigger.style.backgroundImage = cssUrl(imageUrl);
+    watchPfp(menu.trigger, imageUrl);
     menu.trigger.style.backgroundRepeat = 'no-repeat';
 
     const validCrop = crop && crop.width > 0 && crop.height > 0;
@@ -532,7 +562,7 @@ function createProfileCard(profile, id) {
                 const posX = (crop.x / (1 - crop.width)) * 100;
                 const posY = (crop.y / (1 - crop.height)) * 100;
                 
-                img.style.backgroundImage = `url(${profile.imageUrl})`;
+                img.style.backgroundImage = cssUrl(profile.imageUrl);
                 img.style.backgroundSize = `${scale * 100}%`;
                 img.style.backgroundPosition = `${posX}% ${posY}%`;
             } else if (profile.cropData) {
@@ -540,22 +570,23 @@ function createProfileCard(profile, id) {
                 const scale = profile.cropData.zoom / 100;
                 const x = profile.cropData.x;
                 const y = profile.cropData.y;
-                img.style.backgroundImage = `url(${profile.imageUrl})`;
+                img.style.backgroundImage = cssUrl(profile.imageUrl);
                 img.style.backgroundSize = `${scale * 100}%`;
                 img.style.backgroundPosition = `${x}% ${y}%`;
             } else {
                 // No crop data
-                img.style.backgroundImage = `url(${profile.imageUrl})`;
+                img.style.backgroundImage = cssUrl(profile.imageUrl);
                 img.style.backgroundSize = 'cover';
                 img.style.backgroundPosition = 'center';
             }
         } catch(e) {
             console.error('Error displaying profile card image:', e);
             // Fallback to simple display
-            img.style.backgroundImage = `url(${profile.imageUrl})`;
+            img.style.backgroundImage = cssUrl(profile.imageUrl);
             img.style.backgroundSize = 'cover';
             img.style.backgroundPosition = 'center';
         }
+        watchPfp(img, profile.imageUrl);
     } else {
         applyDefaultPfp(img);
     }
@@ -1162,7 +1193,7 @@ function displayProfile(profile) {
             const posX = (crop.x / (1 - crop.width)) * 100;
             const posY = (crop.y / (1 - crop.height)) * 100;
             
-            els.viewImg.style.backgroundImage = `url(${profile.imageUrl})`;
+            els.viewImg.style.backgroundImage = cssUrl(profile.imageUrl);
             els.viewImg.style.backgroundSize = `${scale * 100}%`;
             els.viewImg.style.backgroundPosition = `${posX}% ${posY}%`;
             
@@ -1172,15 +1203,16 @@ function displayProfile(profile) {
             const scale = profile.cropData.zoom / 100;
             const x = profile.cropData.x;
             const y = profile.cropData.y;
-            els.viewImg.style.backgroundImage = `url(${profile.imageUrl})`;
+            els.viewImg.style.backgroundImage = cssUrl(profile.imageUrl);
             els.viewImg.style.backgroundSize = `${scale * 100}%`;
             els.viewImg.style.backgroundPosition = `${x}% ${y}%`;
         } else {
             // No crop data, just show the image
-            els.viewImg.style.backgroundImage = `url(${profile.imageUrl})`;
+            els.viewImg.style.backgroundImage = cssUrl(profile.imageUrl);
             els.viewImg.style.backgroundSize = 'cover';
             els.viewImg.style.backgroundPosition = 'center';
         }
+        watchPfp(els.viewImg, profile.imageUrl);
     } else {
         applyDefaultPfp(els.viewImg);
     }
