@@ -771,6 +771,7 @@ function applyCardStyle(profile) {
     profileContainer.style.backdropFilter = 'none';
     profileContainer.style.webkitBackdropFilter = 'none';
     profileContainer.style.color = '';
+    profileContainer.style.boxShadow = ''; // back to the stylesheet's shadow
     profileContent.style.background = 'transparent';
     els.viewName.style.color = ''; // name sits on the (always dark) ID card
     els.viewDescription.style.color = '';
@@ -805,7 +806,9 @@ function applyCardStyle(profile) {
         profileContainer.style.background = `rgba(18, 18, 22, ${GLASS_ALPHA})`;
         profileContainer.style.backdropFilter = 'blur(20px)';
         profileContainer.style.webkitBackdropFilter = 'blur(20px)';
-        
+        // No drop shadow on glass - keep only the thin 1px edge
+        profileContainer.style.boxShadow = 'inset 0 0 0 1px var(--border-subtle)';
+
         // Without a background image the page behind is near-black → white text
         applyTextTheme(false);
         
