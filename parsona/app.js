@@ -689,6 +689,126 @@ function createProfileCard(profile, id) {
     return card;
 }
 
+// ==================== CARD STYLE + AUTO TEXT COLOR ====================
+
+// Perceived brightness 0-255 of an "#rrggbb" color
+function hexBrightness(hex) {
+    const rgb = parseInt(String(hex || '#000000').slice(1), 16) || 0;
+    const r = (rgb >> 16) & 0xff, g = (rgb >> 8) & 0xff, b = rgb & 0xff;
+    return (r * 299 + g * 587 + b * 114) / 1000;
+}
+
+// Average brightness of an image (0-255), or null if the host doesn't allow reading it (CORS)
+const imageBrightnessCache = new Map();
+function getImageBrightness(url) {
+    if (!url) return Promise.resolve(null);
+    if (imageBrightnessCache.has(url)) return imageBrightnessCache.get(url);
+    const promise = new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        const timer = setTimeout(() => resolve(null), 6000);
+        img.onload = () => {
+            clearTimeout(timer);
+            try {
+                const size = 32;
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, size, size);
+                const data = ctx.getImageData(0, 0, size, size).data;
+                let total = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                    total += (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000;
+                }
+                resolve(total / (data.length / 4));
+            } catch (e) {
+                resolve(null); // canvas tainted - host blocks reading pixels
+            }
+        };
+        img.onerror = () => { clearTimeout(timer); resolve(null); };
+        img.src = url;
+    });
+    imageBrightnessCache.set(url, promise);
+    return promise;
+}
+
+// Color the text that sits on the profile box: black on light, white on dark
+function applyTextTheme(lightBackground) {
+    const profileContainer = document.querySelector('.profile-container');
+    if (lightBackground) {
+        profileContainer.style.color = '#111';
+        els.viewDescription.style.color = '#222';
+        els.viewDescription.style.background = 'rgba(255, 255, 255, 0.35)';
+        els.viewDescription.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+    } else {
+        profileContainer.style.color = '#fff';
+        els.viewDescription.style.color = 'rgba(255, 255, 255, 0.92)';
+        els.viewDescription.style.background = 'rgba(0, 0, 0, 0.25)';
+        els.viewDescription.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+    }
+}
+
+let cardStyleToken = 0;
+function applyCardStyle(profile) {
+    const token = ++cardStyleToken; // ignore late results if another profile was opened
+    const profileContainer = document.querySelector('.profile-container');
+    const profileContent = document.getElementById('viewProfileContent');
+    
+    // Reset everything first so styles from the previously viewed profile don't leak
+    profileContainer.style.background = '';
+    profileContainer.style.backdropFilter = 'none';
+    profileContainer.style.webkitBackdropFilter = 'none';
+    profileContainer.style.color = '';
+    profileContent.style.background = 'transparent';
+    els.viewName.style.color = ''; // name sits on the (always dark) ID card
+    els.viewDescription.style.color = '';
+    els.viewDescription.style.background = '';
+    els.viewDescription.style.borderColor = '';
+    
+    if (profile.cardStyle === 'custom' && profile.cardColor) {
+        profileContainer.style.background = profile.cardColorGradient
+            ? `linear-gradient(135deg, ${profile.cardColor} 0%, ${profile.cardColorGradient} 100%)`
+            : profile.cardColor;
+        
+        if (profile.fontColor) {
+            // User picked a text color themselves - respect it
+            els.viewName.style.color = profile.fontColor;
+            profileContainer.style.color = profile.fontColor;
+            els.viewDescription.style.color = profile.fontColor;
+            els.viewDescription.style.background = 'rgba(0, 0, 0, 0.1)';
+        } else {
+            const brightness = profile.cardColorGradient
+                ? (hexBrightness(profile.cardColor) + hexBrightness(profile.cardColorGradient)) / 2
+                : hexBrightness(profile.cardColor);
+            applyTextTheme(brightness >= 140);
+        }
+    } else if (profile.cardStyle === 'solid') {
+        // Classic light
+        profileContainer.style.background = '#f4f4f5';
+        applyTextTheme(true);
+    } else {
+        // Frosted (default): dark glass, matching the preview on the create page
+        const GLASS_ALPHA = 0.45;
+        const GLASS_BRIGHTNESS = 20; // the dark tint
+        profileContainer.style.background = `rgba(18, 18, 22, ${GLASS_ALPHA})`;
+        profileContainer.style.backdropFilter = 'blur(20px)';
+        profileContainer.style.webkitBackdropFilter = 'blur(20px)';
+        
+        // Without a background image the page behind is near-black → white text
+        applyTextTheme(false);
+        
+        if (profile.backgroundUrl) {
+            getImageBrightness(profile.backgroundUrl).then((imageBrightness) => {
+                if (token !== cardStyleToken || imageBrightness === null) return;
+                // What you actually see: the image shining through the tinted glass
+                const seen = imageBrightness * (1 - GLASS_ALPHA) + GLASS_BRIGHTNESS * GLASS_ALPHA;
+                applyTextTheme(seen >= 128);
+            });
+        }
+    }
+}
+
 async function viewProfile(id, addToHistory = true) {
     try {
         const profile = await loadProfile(id);
@@ -1013,68 +1133,7 @@ function displayProfile(profile) {
     els.socialLinks.style.display = hasSocialLinks ? 'flex' : 'none';
     
     // Apply card style
-    const profileContainer = document.querySelector('.profile-container');
-    const profileContent = document.getElementById('viewProfileContent');
-    
-    if (profile.cardStyle === 'frosted') {
-        profileContainer.style.background = 'rgba(255, 255, 255, 0.45)';
-        profileContainer.style.backdropFilter = 'blur(20px)';
-        profileContainer.style.webkitBackdropFilter = 'blur(20px)';
-        profileContent.style.background = 'transparent';
-    } else if (profile.cardStyle === 'custom' && profile.cardColor) {
-        if (profile.cardColorGradient) {
-            profileContainer.style.background = `linear-gradient(135deg, ${profile.cardColor} 0%, ${profile.cardColorGradient} 100%)`;
-        } else {
-            profileContainer.style.background = profile.cardColor;
-        }
-        profileContainer.style.backdropFilter = 'none';
-        profileContainer.style.webkitBackdropFilter = 'none';
-        profileContent.style.background = 'transparent';
-        
-        // Use custom font color if provided
-        if (profile.fontColor) {
-            els.viewName.style.color = profile.fontColor;
-            els.viewDescription.style.color = profile.fontColor;
-            els.viewDescription.style.background = 'rgba(0, 0, 0, 0.1)';
-        } else {
-            // Auto-adjust text color based on background brightness.
-            // If there's a gradient, average both stops so we don't pick
-            // a text color that only works for the lighter end.
-            const getBrightness = (hex) => {
-                const rgb = parseInt(hex.slice(1), 16);
-                const r = (rgb >> 16) & 0xff;
-                const g = (rgb >>  8) & 0xff;
-                const b = (rgb >>  0) & 0xff;
-                return (r * 299 + g * 587 + b * 114) / 1000;
-            };
-
-            const startBrightness = getBrightness(profile.cardColor);
-            const brightness = profile.cardColorGradient
-                ? Math.min(startBrightness, getBrightness(profile.cardColorGradient))
-                : startBrightness;
-            
-            if (brightness < 128) {
-                // Dark background - use light text
-                els.viewName.style.color = 'white';
-                els.viewDescription.style.color = 'rgba(255, 255, 255, 0.9)';
-                els.viewDescription.style.background = 'rgba(0, 0, 0, 0.2)';
-            } else {
-                // Light background - use dark text
-                els.viewName.style.color = '#333';
-                els.viewDescription.style.color = '#555';
-                els.viewDescription.style.background = 'rgba(255, 255, 255, 0.3)';
-            }
-        }
-    } else {
-        // Solid white (default)
-        profileContainer.style.background = 'white';
-        profileContainer.style.backdropFilter = 'none';
-        profileContainer.style.webkitBackdropFilter = 'none';
-        profileContent.style.background = 'white';
-        els.viewName.style.color = '#333';
-        els.viewDescription.style.color = '#555';
-        els.viewDescription.style.background = '#f9f9f9';
-    }
+    applyCardStyle(profile);
     
     // Display profile picture
     if (profile.imageUrl) {
