@@ -235,9 +235,11 @@ menu.logout.onclick = () => {
     menu.login.style.display = 'block';
     menu.trigger.classList.remove('logged-in');
     menu.trigger.style.backgroundImage = '';
+    els.editProfileBtn.style.display = 'none';
+    clearLoginSession();
     showPage('browse', null, true);
     loadAllProfiles();
-    
+
     // Also logout from auth manager
     if (typeof authManager !== 'undefined') {
         authManager.logout();
@@ -248,7 +250,7 @@ menu.logout.onclick = () => {
 els.editProfileBtn.onclick = async () => {
     if (currentUser && currentViewingProfileId === currentUser.id) {
         try {
-            const profile = await loadProfile(currentUser.id);
+            const profile = await fetchProfileFromServer(currentUser.id);
             loadProfileForEdit(profile);
             showPage('create', null, true);
             // Render media cards AFTER switching to create page
@@ -260,28 +262,29 @@ els.editProfileBtn.onclick = async () => {
 };
 
 // Registry functions - Now using the proxy!
+// Always hits the server (never the cache). Use this before WRITING the registry,
+// otherwise a stale cached copy could overwrite names other people registered.
+async function fetchRegistryFromServer() {
+    console.log('Fetching registry via proxy...');
+    const response = await fetch(`${API_URL}/registry`);
+    console.log('Registry response status:', response.status);
+
+    if (!response.ok) {
+        throw new Error(`Registry HTTP error! status: ${response.status}`);
+    }
+
+    const gist = await response.json();
+    if (gist.files && gist.files['profile-registry.json']) {
+        return JSON.parse(gist.files['profile-registry.json'].content || '{}') || {};
+    }
+    console.warn('No profile-registry.json found in gist');
+    return {};
+}
+
+// Note: auth-system.js wraps this one with a 1-hour cache (fine for browsing)
 async function loadRegistry() {
     try {
-        console.log('Fetching registry via proxy...');
-        const response = await fetch(`${API_URL}/registry`);
-        console.log('Registry response status:', response.status);
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('API Error:', errorData);
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const gist = await response.json();
-        console.log('Gist loaded:', gist);
-        
-        if (gist.files && gist.files['profile-registry.json']) {
-            registry = JSON.parse(gist.files['profile-registry.json'].content);
-            console.log('Registry parsed:', registry);
-        } else {
-            console.warn('No profile-registry.json found in gist');
-            registry = {};
-        }
+        registry = await fetchRegistryFromServer();
     } catch(e) {
         console.error('Error loading registry:', e);
         registry = {};
@@ -289,8 +292,15 @@ async function loadRegistry() {
     }
 }
 
+// Fresh registry from server + update cache
+async function refreshRegistry() {
+    registry = await fetchRegistryFromServer();
+    if (typeof cacheManager !== 'undefined') cacheManager.set('registry', registry);
+    return registry;
+}
+
 async function saveRegistry() {
-    await fetch(`${API_URL}/registry`, {
+    const response = await fetch(`${API_URL}/registry`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json'
@@ -303,6 +313,58 @@ async function saveRegistry() {
             }
         })
     });
+    if (!response.ok) {
+        throw new Error(`Saving registry failed (HTTP ${response.status})`);
+    }
+    if (typeof cacheManager !== 'undefined') cacheManager.set('registry', registry);
+}
+
+// ==================== SESSION (stays logged in) ====================
+const SESSION_STORAGE_KEY = 'parsona_session';
+
+function saveLoginSession(id, name) {
+    try {
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ id, name, savedAt: Date.now() }));
+    } catch(e) {
+        console.error('Could not save session:', e);
+    }
+}
+
+function readLoginSession() {
+    try {
+        const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+        const data = raw ? JSON.parse(raw) : null;
+        return (data && data.id && data.name) ? data : null;
+    } catch(e) {
+        return null;
+    }
+}
+
+function clearLoginSession() {
+    try {
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+        localStorage.removeItem('currentUser'); // old key
+    } catch(e) {}
+}
+
+// Show the logged-in state in the nav (avatar + menu items)
+function applyLoggedInUI(profile) {
+    menu.myProfile.classList.remove('disabled');
+    menu.logout.style.display = 'block';
+    menu.login.style.display = 'none';
+    menu.trigger.classList.add('logged-in');
+
+    if (profile && profile.imageUrl) {
+        menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
+        const crop = profile.profileCrop;
+        if (crop && crop.width > 0) {
+            menu.trigger.style.backgroundSize = `${(1 / crop.width) * 100}%`;
+            menu.trigger.style.backgroundPosition = `${(crop.x / (1 - crop.width)) * 100}% ${(crop.y / (1 - crop.height)) * 100}%`;
+        } else {
+            menu.trigger.style.backgroundSize = 'cover';
+            menu.trigger.style.backgroundPosition = 'center';
+        }
+    }
 }
 
 // Browse profiles
@@ -1043,27 +1105,32 @@ function displayProfile(profile) {
     currentCustomSocialLinks = profile.customSocialLinks || [];
 }
 
-async function loadProfile(id) {
+// Always hits the server (never the cache). Use for edit / password checks.
+async function fetchProfileFromServer(id) {
     console.log('Fetching profile with ID:', id);
     const response = await fetch(`${API_URL}/profile/${id}`);
     console.log('Profile response status:', response.status);
-    
+
     if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API Error:', errorData);
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const err = new Error(`HTTP error! status: ${response.status}`);
+        err.status = response.status;
+        throw err;
     }
-    
+
     const gist = await response.json();
-    console.log('Profile gist loaded:', gist);
-    
+
     if (!gist.files || !gist.files['profile.json']) {
-        throw new Error('Profile file not found in gist');
+        const err = new Error('Profile file not found in gist');
+        err.status = 404;
+        throw err;
     }
-    
-    const profile = JSON.parse(gist.files['profile.json'].content);
-    console.log('Profile parsed:', profile);
-    return profile;
+
+    return JSON.parse(gist.files['profile.json'].content);
+}
+
+// Note: auth-system.js wraps this one with a 1-hour cache
+async function loadProfile(id) {
+    return fetchProfileFromServer(id);
 }
 
 // Login
@@ -1076,18 +1143,24 @@ els.loginBtn.onclick = async () => {
         return;
     }
     
-    await loadRegistry();
-    
+    try {
+        // Fresh registry so recently renamed / created profiles can log in
+        await refreshRegistry();
+    } catch(e) {
+        showStatus(els.loginStatus, 'error', '❌ Could not reach the server!');
+        return;
+    }
+
     if (!registry[name]) {
         showStatus(els.loginStatus, 'error', '❌ Profile not found!');
         return;
     }
-    
+
     const profileId = registry[name];
-    
+
     try {
         showStatus(els.loginStatus, 'loading', '🔄 Loading profile...');
-        const profile = await loadProfile(profileId);
+        const profile = await fetchProfileFromServer(profileId);
         
         // Check if profile has password protection
         if (!profile.passwordHash) {
@@ -1122,11 +1195,6 @@ els.loginBtn.onclick = async () => {
                 privateData: privateData
             };
             
-            // Save session
-            if (typeof authManager !== 'undefined') {
-                authManager.saveSession(profileId, name);
-            }
-            
         } else {
             // Fallback: simple password check
             if (profile.password !== password) {
@@ -1141,19 +1209,12 @@ els.loginBtn.onclick = async () => {
             };
         }
         
+        // Stay logged in across reloads / browser restarts
+        saveLoginSession(profileId, name);
+
         // Update UI
-        menu.myProfile.classList.remove('disabled');
-        menu.logout.style.display = 'block';
-        menu.login.style.display = 'none';
-        menu.trigger.classList.add('logged-in');
-        
-        // Set profile picture in nav
-        if (profile.imageUrl) {
-            menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
-            menu.trigger.style.backgroundSize = 'cover';
-            menu.trigger.style.backgroundPosition = 'center';
-        }
-        
+        applyLoggedInUI(profile);
+
         showStatus(els.loginStatus, 'success', '✅ Logged in successfully!');
         
         setTimeout(() => {
@@ -1364,54 +1425,41 @@ document.addEventListener('paste', (e) => {
 
 // Restore login state from localStorage
 async function restoreLoginState() {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-        try {
-            const userData = JSON.parse(savedUser);
-            console.log('Restoring login state for:', userData.name);
-            
-            // Load the profile to get full data
-            const profile = await loadProfile(userData.id);
-            
-            // Set current user
-            currentUser = {
-                name: userData.name,
-                id: userData.id
-            };
-            editingProfileId = userData.id;
-            
-            // Update UI
-            if (profile.imageUrl) {
-                if (profile.profileCrop) {
-                    // New format - correct crop display
-                    const crop = profile.profileCrop;
-                    const scale = 1 / crop.width;
-                    const posX = (crop.x / (1 - crop.width)) * 100;
-                    const posY = (crop.y / (1 - crop.height)) * 100;
-                    
-                    menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
-                    menu.trigger.style.backgroundSize = `${scale * 100}%`;
-                    menu.trigger.style.backgroundPosition = `${posX}% ${posY}%`;
-                } else if (profile.cropData) {
-                    // Old format (backwards compatibility)
-                    const scale = profile.cropData.zoom / 100;
-                    const x = profile.cropData.x;
-                    const y = profile.cropData.y;
-                    menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
-                    menu.trigger.style.backgroundSize = `${scale * 100}%`;
-                    menu.trigger.style.backgroundPosition = `${x}% ${y}%`;
-                }
-            }
-            menu.trigger.classList.add('logged-in');
-            menu.myProfile.classList.remove('disabled');
-            menu.login.style.display = 'none';
-            menu.logout.style.display = 'block';
-            
-            console.log('Login state restored successfully');
-        } catch(e) {
-            console.error('Failed to restore login state:', e);
-            // Clear invalid saved data
-            localStorage.removeItem('currentUser');
+    const session = readLoginSession();
+    if (!session) return;
+
+    console.log('Restoring login state for:', session.name);
+
+    // Set synchronously so the "Edit Profile" button works on the first page render
+    currentUser = { id: session.id, name: session.name };
+    applyLoggedInUI(null);
+
+    try {
+        const profile = await fetchProfileFromServer(session.id);
+
+        // Name may have been changed in another browser
+        if (profile.name && profile.name !== currentUser.name) {
+            currentUser.name = profile.name;
+            saveLoginSession(session.id, profile.name);
+        }
+        applyLoggedInUI(profile);
+
+        // If the user's own profile is already open, show the edit button
+        if (currentViewingProfileId === currentUser.id) {
+            els.editProfileBtn.style.display = 'block';
+        }
+        console.log('Login state restored successfully');
+    } catch(e) {
+        console.error('Failed to restore login state:', e);
+        // Only log out if the profile is really gone, not on a network hiccup
+        if (e.status === 404) {
+            clearLoginSession();
+            currentUser = null;
+            menu.myProfile.classList.add('disabled');
+            menu.logout.style.display = 'none';
+            menu.login.style.display = 'block';
+            menu.trigger.classList.remove('logged-in');
+            menu.trigger.style.backgroundImage = '';
         }
     }
 }
@@ -1518,8 +1566,13 @@ els.create.onclick = async () => {
         return;
     }
     
-    // Check if name already exists
-    await loadRegistry();
+    // Check if name already exists (fresh from server, not cache)
+    try {
+        await refreshRegistry();
+    } catch(e) {
+        showStatus(els.createStatus, 'error', '❌ Could not reach the server!');
+        return;
+    }
     if (registry[name]) {
         showStatus(els.createStatus, 'error', 'Name already taken!');
         return;
@@ -1621,29 +1674,22 @@ els.create.onclick = async () => {
         const gist = await response.json();
         const gistId = gist.id;
         
-        // Update registry
+        // Update registry (re-fetch right before writing so we don't drop others' entries)
+        await refreshRegistry();
         registry[name] = gistId;
         await saveRegistry();
-        
+
         // Log in the user
         currentUser = {
             id: gistId,
             name: name,
             password: password
         };
-        
+        saveLoginSession(gistId, name);
+
         // Update UI
-        menu.myProfile.classList.remove('disabled');
-        menu.logout.style.display = 'block';
-        menu.login.style.display = 'none';
-        menu.trigger.classList.add('logged-in');
-        
-        if (imageCrops.profile.url) {
-            menu.trigger.style.backgroundImage = `url(${imageCrops.profile.url})`;
-            menu.trigger.style.backgroundSize = 'cover';
-            menu.trigger.style.backgroundPosition = 'center';
-        }
-        
+        applyLoggedInUI(profileData);
+
         showStatus(els.createStatus, 'success', '✅ Profile created!');
         
         setTimeout(() => {
@@ -1665,7 +1711,8 @@ els.update.onclick = async () => {
     }
     
     const name = els.name.value.trim();
-    const password = els.pass.value.trim();
+    const newPassword = els.pass.value.trim();
+    const currentPasswordInput = (document.getElementById('currentPassword')?.value || '').trim();
     const description = els.description.value.trim(); // Keep line breaks
     const streamUrl = els.stream.value.trim();
     
@@ -1698,16 +1745,7 @@ els.update.onclick = async () => {
         cardColorGradient = els.cardColorGradientHex.value;
         fontColor = els.fontColorHex.value;
     }
-    
-    // Check if name changed and is available
-    if (name !== currentUser.name) {
-        await loadRegistry();
-        if (registry[name]) {
-            showStatus(els.createStatus, 'error', 'Name already taken!');
-            return;
-        }
-    }
-    
+
     // Prepare profile data
     const publicData = {
         name: name,
@@ -1718,7 +1756,7 @@ els.update.onclick = async () => {
         dob: dob,
         mood: mood,
         partnerId: partnerId,
-        signature: getSignature(), // Add signature
+        signature: getSignature(),
         imageUrl: imageCrops.profile.url,
         profileCrop: imageCrops.profile.crop,
         bannerUrl: imageCrops.banner.url,
@@ -1732,88 +1770,98 @@ els.update.onclick = async () => {
         cardColor: cardColor,
         cardColorGradient: cardColorGradient,
         fontColor: fontColor,
-        mediaCards: currentMediaCards,
-        createdAt: currentUser.createdAt || new Date().toISOString()
+        mediaCards: currentMediaCards
     };
-    
-    let profileData;
-    
-    // Use encryption if available
-    if (typeof cryptoHelper !== 'undefined' && typeof authManager !== 'undefined' && password) {
-        showStatus(els.createStatus, 'loading', '🔒 Updating encrypted profile...');
-        
-        // Update password in authManager session
-        if (authManager.currentSession) {
-            authManager.currentSession.password = password;
-        }
-        
-        const privateData = {
-            notes: currentUser.privateData?.notes || ''
-        };
-        
+
+    const nameChanged = name !== currentUser.name;
+
+    showStatus(els.createStatus, 'loading', '🔄 Updating profile...');
+
+    // Always work from the live server copy (not the 1h cache)
+    let existingProfile;
+    try {
+        existingProfile = await fetchProfileFromServer(editingProfileId);
+    } catch(e) {
+        console.error('Could not load existing profile:', e);
+        showStatus(els.createStatus, 'error', '❌ Could not load your profile from the server!');
+        return;
+    }
+
+    // Check if new name is available (fresh registry, not cache)
+    if (nameChanged) {
         try {
-            // User is logged in, we'll keep the existing hash
-            let passwordHash;
-            
-            if (password) {
-                // User provided password, re-encrypt
-                const inputHash = await cryptoHelper.hashPassword(password);
-                
-                // Load existing profile to verify password
-                const existingProfile = await loadProfile(editingProfileId);
-                
-                if (existingProfile.passwordHash !== inputHash) {
-                    showStatus(els.createStatus, 'error', '❌ Wrong password!');
-                    return;
-                }
-                
-                // Password correct, update profile
-                profileData = await authManager.updateAccount(publicData, privateData);
-            } else {
-                // No password provided, keep existing encrypted data
-                const existingProfile = await loadProfile(editingProfileId);
-                profileData = {
-                    ...publicData,
-                    passwordHash: existingProfile.passwordHash,
-                    encryptedData: existingProfile.encryptedData
-                };
-            }
+            await refreshRegistry();
         } catch(e) {
-            console.error('Update failed:', e);
-            showStatus(els.createStatus, 'error', '❌ Update failed!');
+            showStatus(els.createStatus, 'error', '❌ Could not reach the server!');
             return;
         }
-    } else {
-        showStatus(els.createStatus, 'loading', '🔄 Updating profile...');
-        
-        // Load existing profile
-        const existingProfile = await loadProfile(editingProfileId);
-        
-        // Keep existing password hash if no new password provided
-        if (!password) {
-            profileData = {
-                ...publicData,
-                password: existingProfile.password || '',
-                passwordHash: existingProfile.passwordHash
-            };
-        } else {
-            // Only re-hash and re-encrypt if password was provided
-            if (typeof cryptoHelper !== 'undefined') {
-                passwordHash = await cryptoHelper.hashPassword(password);
-                profileData = {
-                    ...publicData,
-                    password: password,
-                    passwordHash: passwordHash
-                };
-            } else {
-                profileData = {
-                    ...publicData,
-                    password: password
-                };
+        if (registry[name] && registry[name] !== editingProfileId) {
+            showStatus(els.createStatus, 'error', 'Name already taken!');
+            return;
+        }
+    }
+
+    // ---- Password handling ----
+    // The password field in edit mode is "New Password" (empty = keep current).
+    let passwordHash = existingProfile.passwordHash;
+    let encryptedData = existingProfile.encryptedData;
+    let legacyPlainPassword = existingProfile.passwordHash ? undefined : existingProfile.password;
+    let newPasswordSet = false;
+
+    if (newPassword && typeof cryptoHelper !== 'undefined') {
+        const newHash = await cryptoHelper.hashPassword(newPassword);
+
+        // Typed the same password again → nothing to change
+        if (newHash !== existingProfile.passwordHash) {
+            if (!currentPasswordInput) {
+                showStatus(els.createStatus, 'error', '⚠️ Enter your current password to set a new one.');
+                return;
+            }
+
+            // Verify current password
+            const currentOk = existingProfile.passwordHash
+                ? (await cryptoHelper.hashPassword(currentPasswordInput)) === existingProfile.passwordHash
+                : existingProfile.password === currentPasswordInput; // very old profiles
+            if (!currentOk) {
+                showStatus(els.createStatus, 'error', '❌ Current password is wrong!');
+                return;
+            }
+
+            try {
+                // Re-encrypt private data with the new password
+                let privateData = {};
+                if (existingProfile.encryptedData) {
+                    try {
+                        privateData = await cryptoHelper.decrypt(currentPasswordInput, existingProfile.encryptedData);
+                    } catch(e) {
+                        console.warn('Could not decrypt old private data, starting fresh:', e);
+                    }
+                }
+                passwordHash = newHash;
+                encryptedData = await cryptoHelper.encrypt(newPassword, privateData);
+                legacyPlainPassword = undefined; // never keep plaintext once hashed
+                newPasswordSet = true;
+            } catch(e) {
+                console.error('Re-encryption failed:', e);
+                showStatus(els.createStatus, 'error', '❌ Update failed: ' + e.message);
+                return;
             }
         }
     }
-    
+
+    // Keep fields the form doesn't manage (createdAt, termsAgreedAt, ...) and overwrite the rest
+    const profileData = {
+        ...existingProfile,
+        ...publicData,
+        createdAt: existingProfile.createdAt || new Date().toISOString(),
+        passwordHash: passwordHash,
+        encryptedData: encryptedData
+    };
+    delete profileData.password;
+    if (legacyPlainPassword !== undefined) profileData.password = legacyPlainPassword;
+    if (!profileData.passwordHash) delete profileData.passwordHash;
+    if (!profileData.encryptedData) delete profileData.encryptedData;
+
     try {
         // Update gist
         const response = await fetch(`${API_URL}/profile/${editingProfileId}`, {
@@ -1829,42 +1877,56 @@ els.update.onclick = async () => {
                 }
             })
         });
-        
+
         if (!response.ok) {
-            const errorData = await response.json();
-            console.error('API Error:', errorData);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
-        // Update registry if name changed
-        if (name !== currentUser.name) {
-            delete registry[currentUser.name];
-            registry[name] = editingProfileId;
-            await saveRegistry();
-        }
-        
-        // Update current user
-        currentUser.name = name;
-        if (password) {
-            currentUser.password = password;
-        }
-        
+
         // Clear cache for this profile
         if (typeof cacheManager !== 'undefined') {
             cacheManager.delete(`profile_${editingProfileId}`);
         }
-        
-        showStatus(els.createStatus, 'success', '✅ Profile updated!');
-        
-        setTimeout(() => {
-            viewProfile(editingProfileId);
-            resetCreateForm();
-        }, 1500);
-        
     } catch(e) {
         console.error('Error updating profile:', e);
-        showStatus(els.createStatus, 'error', '❌ Failed to update profile!');
+        showStatus(els.createStatus, 'error', '❌ Failed to update profile! (' + e.message + ')');
+        return;
     }
+
+    // Update registry if name changed
+    if (nameChanged) {
+        try {
+            await refreshRegistry(); // re-fetch right before writing
+            // Remove every old name pointing to this profile, then add the new one
+            Object.keys(registry).forEach(key => {
+                if (registry[key] === editingProfileId) delete registry[key];
+            });
+            registry[name] = editingProfileId;
+            await saveRegistry();
+        } catch(e) {
+            console.error('Registry update failed:', e);
+            showStatus(els.createStatus, 'error', '⚠️ Profile saved, but the name could not be updated in the registry. Please try saving again.');
+            return;
+        }
+    }
+
+    // Update current user + saved session
+    currentUser.name = name;
+    if (newPasswordSet) {
+        currentUser.password = newPassword;
+        if (typeof authManager !== 'undefined' && authManager.currentSession) {
+            authManager.currentSession.password = newPassword;
+        }
+    }
+    saveLoginSession(editingProfileId, name);
+    applyLoggedInUI(profileData);
+
+    showStatus(els.createStatus, 'success', newPasswordSet ? '✅ Profile updated & password changed!' : '✅ Profile updated!');
+
+    const updatedId = editingProfileId;
+    setTimeout(() => {
+        viewProfile(updatedId);
+        resetCreateForm();
+    }, 1500);
 };
 
 function showStatus(el, type, message) {
@@ -1930,6 +1992,7 @@ function resetCreateForm() {
     els.create.style.display = 'block';
     els.update.style.display = 'none';
     els.createHeader.textContent = 'Create Profile';
+    setPasswordFieldsMode(false);
     
     editingProfileId = null;
     
@@ -1939,6 +2002,18 @@ function resetCreateForm() {
         agreeToTerms.checked = false;
     }
     updateTermsFieldVisibility();
+}
+
+// Create mode: one "Password" field. Edit mode: "New Password" (optional) + "Current Password".
+function setPasswordFieldsMode(isEdit) {
+    const label = document.getElementById('profilePasswordLabel');
+    const currentField = document.getElementById('currentPasswordField');
+    const currentInput = document.getElementById('currentPassword');
+    if (label) label.textContent = isEdit ? 'New Password (leave empty to keep current)' : 'Password (for editing later)';
+    els.pass.placeholder = isEdit ? 'Leave empty to keep your password' : 'Create a password';
+    els.pass.value = '';
+    if (currentField) currentField.style.display = isEdit ? 'block' : 'none';
+    if (currentInput) currentInput.value = '';
 }
 
 function loadProfileForEdit(profile) {
@@ -2055,7 +2130,8 @@ function loadProfileForEdit(profile) {
     els.create.style.display = 'none';
     els.update.style.display = 'block';
     els.createHeader.textContent = 'Edit Profile';
-    
+    setPasswordFieldsMode(true);
+
     editingProfileId = currentUser.id;
     
     // Hide terms checkbox when editing

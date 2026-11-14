@@ -68,8 +68,12 @@
                         <input type="text" id="profileName" placeholder="Your name">
                     </div>
                     <div class="field">
-                        <label>Password (for editing later)</label>
+                        <label id="profilePasswordLabel">Password (for editing later)</label>
                         <input type="password" id="profilePassword" placeholder="Create a password">
+                    </div>
+                    <div class="field" id="currentPasswordField" style="display: none;">
+                        <label>Current Password</label>
+                        <input type="password" id="currentPassword" placeholder="Only needed if you set a new password above">
                     </div>
                     <div class="field">
                         <label>Description</label>
