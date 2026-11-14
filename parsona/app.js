@@ -9,6 +9,15 @@ let igdbAccessToken = null;
 let igdbTokenExpiry = 0;
 
 const REG = '5d51e42426b9f95c110b7c92e4ac7bfe';
+const DEFAULT_PFP = 'none.jpg'; // shown when a profile has no picture set
+
+// Show the default picture on an element (background-image based)
+function applyDefaultPfp(el) {
+    el.style.backgroundImage = `url("${DEFAULT_PFP}")`;
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+    el.style.backgroundRepeat = 'no-repeat';
+}
 let registry = {};
 let currentImageType = 'profile'; // Track which image we're editing
 let imageCrops = {
@@ -356,7 +365,7 @@ function clearLoginSession() {
 // Draw the profile picture in the top-right circle
 function setNavAvatar(imageUrl, crop) {
     if (!imageUrl) {
-        menu.trigger.style.backgroundImage = '';
+        applyDefaultPfp(menu.trigger);
         return;
     }
     // Quoted + escaped so URLs with spaces / brackets / quotes still work
@@ -549,8 +558,10 @@ function createProfileCard(profile, id) {
             img.style.backgroundSize = 'cover';
             img.style.backgroundPosition = 'center';
         }
+    } else {
+        applyDefaultPfp(img);
     }
-    
+
     // Info section with fields
     const info = document.createElement('div');
     info.className = 'profile-card-info';
@@ -1170,7 +1181,7 @@ function displayProfile(profile) {
             els.viewImg.style.backgroundPosition = 'center';
         }
     } else {
-        els.viewImg.style.backgroundImage = '';
+        applyDefaultPfp(els.viewImg);
     }
     
     // Only show stream if it exists
@@ -1523,9 +1534,7 @@ async function restoreLoginState() {
     currentUser = { id: session.id, name: session.name };
     applyLoggedInUI(null);
     // Show the remembered picture right away (no network needed)
-    if (session.avatar) {
-        setNavAvatar(session.avatar.imageUrl, session.avatar.profileCrop);
-    }
+    setNavAvatar(session.avatar ? session.avatar.imageUrl : '', session.avatar ? session.avatar.profileCrop : null);
 
     try {
         // Get the latest profile (picture may have changed in another browser).
