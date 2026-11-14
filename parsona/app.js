@@ -322,9 +322,15 @@ async function saveRegistry() {
 // ==================== SESSION (stays logged in) ====================
 const SESSION_STORAGE_KEY = 'parsona_session';
 
-function saveLoginSession(id, name) {
+// avatar = { imageUrl, profileCrop } - kept in the session so the nav picture
+// shows instantly on page load, even before (or without) a server response
+function saveLoginSession(id, name, avatar) {
     try {
-        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ id, name, savedAt: Date.now() }));
+        const previous = readLoginSession();
+        const keptAvatar = avatar !== undefined
+            ? avatar
+            : (previous && previous.id === id ? previous.avatar : null);
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ id, name, avatar: keptAvatar || null, savedAt: Date.now() }));
     } catch(e) {
         console.error('Could not save session:', e);
     }
@@ -347,22 +353,46 @@ function clearLoginSession() {
     } catch(e) {}
 }
 
-// Show the logged-in state in the nav (avatar + menu items)
+// Draw the profile picture in the top-right circle
+function setNavAvatar(imageUrl, crop) {
+    if (!imageUrl) {
+        menu.trigger.style.backgroundImage = '';
+        return;
+    }
+    // Quoted + escaped so URLs with spaces / brackets / quotes still work
+    const safeUrl = String(imageUrl).trim()
+        .replace(/ /g, '%20').replace(/"/g, '%22').replace(/'/g, '%27')
+        .replace(/\(/g, '%28').replace(/\)/g, '%29');
+    menu.trigger.style.backgroundImage = `url("${safeUrl}")`;
+    menu.trigger.style.backgroundRepeat = 'no-repeat';
+
+    const validCrop = crop && crop.width > 0 && crop.height > 0;
+    if (validCrop) {
+        // A crop as wide/tall as the whole image would divide by zero → center instead
+        const posX = crop.width < 1 ? (crop.x / (1 - crop.width)) * 100 : 50;
+        const posY = crop.height < 1 ? (crop.y / (1 - crop.height)) * 100 : 50;
+        menu.trigger.style.backgroundSize = `${(1 / crop.width) * 100}%`;
+        menu.trigger.style.backgroundPosition = `${posX}% ${posY}%`;
+    } else {
+        menu.trigger.style.backgroundSize = 'cover';
+        menu.trigger.style.backgroundPosition = 'center';
+    }
+}
+
+// Show the logged-in state in the nav (avatar + menu items).
+// Pass a profile to (re)draw the avatar; pass null to only switch the menu.
 function applyLoggedInUI(profile) {
     menu.myProfile.classList.remove('disabled');
     menu.logout.style.display = 'block';
     menu.login.style.display = 'none';
     menu.trigger.classList.add('logged-in');
 
-    if (profile && profile.imageUrl) {
-        menu.trigger.style.backgroundImage = `url(${profile.imageUrl})`;
-        const crop = profile.profileCrop;
-        if (crop && crop.width > 0) {
-            menu.trigger.style.backgroundSize = `${(1 / crop.width) * 100}%`;
-            menu.trigger.style.backgroundPosition = `${(crop.x / (1 - crop.width)) * 100}% ${(crop.y / (1 - crop.height)) * 100}%`;
-        } else {
-            menu.trigger.style.backgroundSize = 'cover';
-            menu.trigger.style.backgroundPosition = 'center';
+    if (profile) {
+        const avatar = { imageUrl: profile.imageUrl || '', profileCrop: profile.profileCrop || null };
+        setNavAvatar(avatar.imageUrl, avatar.profileCrop);
+        // Remember it so it shows immediately on the next page load
+        if (currentUser && currentUser.id) {
+            saveLoginSession(currentUser.id, currentUser.name, avatar);
         }
     }
 }
@@ -987,7 +1017,7 @@ function displayProfile(profile) {
     const profileContent = document.getElementById('viewProfileContent');
     
     if (profile.cardStyle === 'frosted') {
-        profileContainer.style.background = 'rgba(255, 255, 255, 0.7)';
+        profileContainer.style.background = 'rgba(255, 255, 255, 0.45)';
         profileContainer.style.backdropFilter = 'blur(20px)';
         profileContainer.style.webkitBackdropFilter = 'blur(20px)';
         profileContent.style.background = 'transparent';
@@ -1433,9 +1463,30 @@ async function restoreLoginState() {
     // Set synchronously so the "Edit Profile" button works on the first page render
     currentUser = { id: session.id, name: session.name };
     applyLoggedInUI(null);
+    // Show the remembered picture right away (no network needed)
+    if (session.avatar) {
+        setNavAvatar(session.avatar.imageUrl, session.avatar.profileCrop);
+    }
 
     try {
-        const profile = await fetchProfileFromServer(session.id);
+        // Get the latest profile (picture may have changed in another browser).
+        // Retry a few times - this runs while the browse page loads many profiles at once.
+        let profile = null;
+        let lastError = null;
+        for (let attempt = 0; attempt < 3 && !profile; attempt++) {
+            try {
+                profile = await fetchProfileFromServer(session.id);
+            } catch(e) {
+                lastError = e;
+                if (e.status === 404) break;
+                await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+            }
+        }
+        // Last resort: cached copy
+        if (!profile && lastError && lastError.status !== 404) {
+            try { profile = await loadProfile(session.id); } catch(e) {}
+        }
+        if (!profile) throw lastError || new Error('Profile not found');
 
         // Name may have been changed in another browser
         if (profile.name && profile.name !== currentUser.name) {
