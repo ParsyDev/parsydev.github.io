@@ -33,7 +33,7 @@
       --orange:#f07020;
       --gold:  #f0a820;
       --pink:  #e8186c;
-      --light: #ece0c8;
+      --light: #e8e9ee;
       --mid:   #8a8fa8;
       --t:     all 0.2s ease-in-out;
     }
@@ -79,10 +79,6 @@
       mask-image: linear-gradient(to top, black 0%, black 15%, transparent 55%);
     }
 
-    /* ══════════════════════════════════════════════════
-       HEADER
-    ══════════════════════════════════════════════════ */
-
     .header {
       position: static;
       width: 100vw;
@@ -114,8 +110,6 @@
       pointer-events: none;
       z-index: 9999;
     }
-
-    /* ── NAV ── */
 
     nav {
       position: relative;
@@ -172,8 +166,6 @@
       color: var(--navy);
       transform: scale(1.05);
     }
-
-    /* ── HERO BODY ── */
 
     .hero-body {
       position: relative;
@@ -238,7 +230,7 @@
       text-transform: uppercase;
       color: var(--light);
       text-decoration: none;
-      border: 1px solid rgba(236,224,200,0.35);
+      border: 1px solid rgba(232,233,238,0.35);
       padding: 12px 28px;
       width: fit-content;
       transition: var(--t);
@@ -267,8 +259,6 @@
       object-fit: contain;
       filter: drop-shadow(0 0 40px rgba(240,168,32,0.18));
     }
-
-    /* ── LEARN MORE ── */
 
     .learn-more {
       position: relative;
@@ -303,10 +293,6 @@
       animation: bob 2s ease-in-out infinite;
     }
 
-    /* ══════════════════════════════════════════════════
-       GAMES SECTION
-    ══════════════════════════════════════════════════ */
-
     #games {
       position: relative;
       padding: 88px 0 25px;
@@ -338,8 +324,6 @@
       margin-top: 25px;
     }
 
-    /* ── CAROUSEL ── */
-
     .gs-wrap {
       display: flex;
       align-items: center;
@@ -354,6 +338,8 @@
       width: clamp(320px, 28vw, 480px);
       height: clamp(520px, 46vw, 780px);
       perspective: 1400px;
+      touch-action: pan-y;
+      user-select: none;
     }
 
     .gs-card {
@@ -409,7 +395,7 @@
       opacity: 0.5;
       filter: brightness(0.4);
       z-index: 5;
-      pointer-events: none;
+      pointer-events: auto;
     }
 
     .gs-card[data-state="prev"] {
@@ -417,7 +403,7 @@
       opacity: 0.5;
       filter: brightness(0.4);
       z-index: 5;
-      pointer-events: none;
+      pointer-events: auto;
     }
 
     .gs-card[data-state="hidden"] {
@@ -565,10 +551,6 @@
       font-weight: 900;
     }
 
-    /* ══════════════════════════════════════════════════
-       ABOUT SECTION
-    ══════════════════════════════════════════════════ */
-
     #about {
       position: relative;
       padding: 100px 60px 40px;
@@ -611,8 +593,6 @@
       margin: 0 auto 56px;
       text-transform: uppercase;
     }
-
-    /* ── ABOUT: CODE DIFF ── */
 
     .diff-panel {
       max-width: 800px;
@@ -736,8 +716,6 @@
       animation: blink 1.1s step-end infinite;
     }
 
-    /* ── NAME STORY / IDENTITY PANEL ── */
-
     .identity-panel {
       max-width: 800px;
       margin: 0 auto 110px;
@@ -856,8 +834,6 @@
       color: rgba(138,143,168,0.5);
     }
 
-    /* ── TEAM ── */
-
     .team-eyebrow {
       display: block;
       text-align: center;
@@ -911,7 +887,7 @@
       height: 120px;
       object-fit: cover;
       border-radius: 100%;
-      border: 1px solid rgba(236,224,200,0.18);
+      border: 1px solid rgba(232,233,238,0.18);
       transition: transform 0.3s ease, border-color 0.3s ease;
       display: block;
     }
@@ -960,8 +936,6 @@
       letter-spacing: 0.04em;
       color: var(--mid);
     }
-
-    /* ── FOOTER ── */
 
     footer {
       background: linear-gradient(transparent, rgba(0,0,0,0.6));
@@ -1083,8 +1057,6 @@
       font-size: 13px;
     }
 
-    /* ── MOBILE ── */
-
     @media (max-width: 768px) {
 
       nav {
@@ -1108,6 +1080,9 @@
 
       .hero-desc {
         text-align: center;
+        max-width: 260px;
+        margin-inline: auto;
+        text-wrap: balance;
       }
 
       .hero-cta {
@@ -1441,8 +1416,6 @@
 
   <script>
 
-    /* ── NAV ── */
-
     const navLinks = [
 
       { label: "Games", href: "#games", domain: null, cta: false },
@@ -1484,8 +1457,6 @@
       nav.appendChild(a);
 
     });
-
-    /* ── GAMES DATA ── */
 
     const games = [
 
@@ -1562,8 +1533,6 @@
       },
 
     ];
-
-    /* ── SLIDER ── */
 
     const stage = document.getElementById("gs-stage");
     const dotsWrap = document.getElementById("gs-dots");
@@ -1720,23 +1689,45 @@
 
     });
 
-    let tx = 0;
+    let startX = null;
+    let startY = 0;
+    let swiped = false;
 
-    stage.addEventListener("touchstart", (e) => {
-      tx = e.touches[0].clientX;
-    }, { passive: true });
+    stage.addEventListener("pointerdown", (e) => {
+      startX = e.clientX;
+      startY = e.clientY;
+      swiped = false;
+    });
 
-    stage.addEventListener("touchend", (e) => {
+    window.addEventListener("pointerup", (e) => {
 
-      const dx = e.changedTouches[0].clientX - tx;
+      if (startX === null) return;
 
-      if (Math.abs(dx) > 40) {
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      startX = null;
+
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+        swiped = true;
         dx < 0
           ? goTo(current + 1)
           : goTo(current - 1);
       }
 
     });
+
+    stage.addEventListener("pointercancel", () => startX = null);
+
+    stage.addEventListener("click", (e) => {
+      if (swiped) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        swiped = false;
+      }
+    }, true);
+
+    stage.addEventListener("dragstart", (e) => e.preventDefault());
 
     applyStates();
 

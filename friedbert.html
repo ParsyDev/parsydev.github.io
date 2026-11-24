@@ -16,14 +16,23 @@
             font-style: normal;
         }
 
+        html {
+            background-color: rgb(8, 8, 8);
+        }
+
         body {
             margin: 0;
             font-family: 'Lexend', sans-serif;
-            background-color: rgb(8, 8, 8);
-            background-image: url('1_fb.png');
             color: rgb(226, 226, 226);
-            background-color: rgba(0, 0, 0, 0.411);
-            backdrop-filter: blur(50px);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -100px;
+            z-index: -1;
+            background: url('1_fb.png') center / cover;
+            filter: blur(50px);
         }
         header {
             position: static;
